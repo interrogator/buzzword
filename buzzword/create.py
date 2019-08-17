@@ -56,16 +56,16 @@ LION: You're a <meta play-on="cheater">cheetah</meta>! <meta move="punchline" fu
 CHEETAH: You're <meta play-on="lying">lion</meta>! <meta move="punchline" funny=true dialog=true some-schema=4 rating=7.8 />
 """
 
-os.makedirs(NAME)
+os.makedirs(FULLNAME)
 
 for folder in ["csv", "uploads", "example"]:
-    os.makedirs(os.path.join(NAME, folder))
-with open(os.path.join(NAME, ".env"), "w") as fo:
-    fo.write(ENV)
-with open(os.path.join(NAME, "corpora.json"), "w") as fo:
-    fo.write(CORPORA)
+    os.makedirs(os.path.join(FULLNAME, folder))
+with open(os.path.join(FULLNAME, ".env"), "w") as fo:
+    fo.write(ENV.strip() + '\n')
+with open(os.path.join(FULLNAME, "corpora.json"), "w") as fo:
+    fo.write(CORPORA.strip() + '\n')
 with open(os.path.join(CORPUS_PATH, "001-joke-lion-pun.txt"), "w") as fo:
-    fo.write(CORPUS)
+    fo.write(CORPUS.strip() + '\n')
 print("Testing parser: {}->{}-parsed ...".format(CORPUS_PATH, CORPUS_PATH))
 parsed = Corpus(CORPUS_PATH).parse(cons_parser=None)
 
