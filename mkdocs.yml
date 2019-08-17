@@ -4,9 +4,9 @@ theme:
     name: readthedocs
 
 nav:
-    - User guide: buzzword.md
-    - Building corpora: buzzword.md
-    - Writing depgrep queries: buzzword.md
-    - Running your own buzzword: buzzword.md
+    - Home: index.md
+    - User guide: guide.md
+    - Building corpora: building.md
+    - Writing depgrep queries: depgrep.md
+    - Running your own buzzword: run.md
     - About: about.md
-

@@ -26,7 +26,7 @@ setup(
     keywords=[],
     install_requires=[
         "buzz==2.0.5",
-        "python-dotenv",
+        "python-dotenv==0.10.3",
         "flask==1.1.1",
         "dash==1.1.1",
         "dash-daq==0.1.7",
