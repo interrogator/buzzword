@@ -6,11 +6,11 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
 
-from buzzword.parts import explore  # noqa: F401
-from buzzword.parts import about, building, depgrep, guide, start
-from buzzword.parts.main import server  # noqa: F401
-from buzzword.parts.main import CONFIG, CORPORA, CORPUS_META, INITIAL_TABLES, app
-from buzzword.parts.tabs import _make_tabs
+from .parts import explore  # noqa: F401
+from .parts import about, building, depgrep, guide, start
+from .parts.main import server  # noqa: F401
+from .parts.main import CONFIG, CORPORA, CORPUS_META, INITIAL_TABLES, app
+from .parts.tabs import _make_tabs
 
 # where downloadable CSVs get stored
 if not os.path.isdir("csv"):
