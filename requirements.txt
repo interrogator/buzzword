@@ -1,0 +1,14 @@
+buzz==2.0.5
+flask==1.1.1
+dash==1.1.1
+dash-daq==0.1.7
+python-dotenv
+# Tests and CI
+pre-commit
+black
+flake8
+mypy
+codecov
+isort
+bump2version
+# Requirements of the package

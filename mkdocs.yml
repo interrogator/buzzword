@@ -1,0 +1,12 @@
+site_name: buzzword documentation
+
+theme:
+    name: readthedocs
+
+nav:
+    - Building high-quality corpora: buzzword.md
+    - Writing depgrep queries: buzzword.md
+    - User guide: buzzword.md
+    - Running or serving buzzword: buzzword.md
+    - About: about.md
+

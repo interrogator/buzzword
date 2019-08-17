@@ -1,0 +1,23 @@
+dist: xenial
+language: python
+python:
+  - '3.7'
+stages:
+  - build
+  - static-checks
+  - test
+jobs:
+  include:
+    - stage: build
+      script:
+        - python setup.py install
+    - stage: static-checks
+      script:
+        - flake8 buzzword/ tests/ setup.py
+        - mypy buzzword/ tests/ setup.py
+        - black --check .
+    - stage: test
+      script:  # coverage
+        - coverage run -m unittest
+        - coverage report
+        - codecov
