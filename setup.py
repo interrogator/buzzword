@@ -45,4 +45,7 @@ setup(
         "dash-table==4.1.0",
         "dash-daq==0.1.7",
     ],
+    dependency_links=[
+        "git+http://github.com/interrogator/tabview.git#egg=tabview-1.4.5"
+    ],
 )
