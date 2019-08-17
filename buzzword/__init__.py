@@ -1,3 +1,1 @@
-
-if __name__ == "__main__":
-	print('HERE NOW')
+__version__ == "0.0.1"
