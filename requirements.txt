@@ -4,7 +4,7 @@ dash==1.1.1
 dash-core-components==1.1.1
 dash-html-components==1.0.0
 dash-daq==0.1.7
-dash-renderer==1.0.0                
+dash-renderer==1.0.0
 dash-table==4.1.0 
 python-dotenv==0.10.3
 # Tests and CI

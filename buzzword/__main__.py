@@ -1,16 +1,22 @@
+import os
+from collections import OrderedDict
+
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-
-from buzzword.parts.main import app, CORPORA, CONFIG, INITIAL_TABLES, CORPUS_META
-from buzzword.parts import start, guide, about, depgrep, building
-from buzzword.parts.tabs import _make_tabs
 from dash.exceptions import PreventUpdate
-from collections import OrderedDict
-from buzzword.parts import explore  # noqa: F401
-from buzzword.parts.main import server  # noqa: F401
 
-import os
+from buzzword.parts import explore  # noqa: F401
+from buzzword.parts import about, building, depgrep, guide, start
+from buzzword.parts.main import server  # noqa: F401
+from buzzword.parts.main import (
+    CONFIG,
+    CORPORA,
+    CORPUS_META,
+    INITIAL_TABLES,
+    app,
+)
+from buzzword.parts.tabs import _make_tabs
 
 # where downloadable CSVs get stored
 if not os.path.isdir("csv"):

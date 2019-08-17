@@ -4,6 +4,7 @@ Make a workspace for buzzword in the current directory
 
 import os
 import sys
+
 from buzz.corpus import Corpus
 
 NAME = sys.argv[-1]
