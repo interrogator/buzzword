@@ -13,7 +13,7 @@ jobs:
         - python setup.py install
     - stage: static-checks
       script:
-        - black .
+        - echo "Nothing to do yet."
     - stage: test
       script:  # coverage
         - coverage run -m unittest
