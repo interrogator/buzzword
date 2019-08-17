@@ -12,7 +12,7 @@ def read(fname):
 
 setup(
     name="buzzword",
-    version="0.0.1",  # bump2version will edit this automatically!
+    version="0.1.0",  # bump2version will edit this automatically!
     description="Web-app for corpus linguistics",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",

@@ -1,6 +1,6 @@
 # buzzword
 
-> Version 0.0.1
+> Version 0.1.0
 
 [![Build Status](https://travis-ci.org/interrogator/buzzword.svg?branch=master)](https://travis-ci.org/interrogator/buzzword)
 [![readthedocs](https://readthedocs.org/projects/buzzword/badge/?version=latest)](https://buzzword.readthedocs.io/en/latest/)
