@@ -9,7 +9,7 @@ dash-table==4.1.0
 python-dotenv==0.10.3
 # Tests and CI
 pre-commit
-black
+black==19.3b0
 flake8
 mypy
 codecov

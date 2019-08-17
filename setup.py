@@ -33,6 +33,6 @@ setup(
         "dash-html-components==1.0.0",
         "dash-renderer==1.0.0",
         "dash-table==4.1.0",
-        "dash-daq==0.1.7"
+        "dash-daq==0.1.7",
     ],
 )
