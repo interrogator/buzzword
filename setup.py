@@ -30,6 +30,7 @@ setup(
         "flask==1.1.1",
         "dash==1.1.1",
         "dash-daq==0.1.7",
+        "tabview==1.4.5",
     ],
     dependency_links=[
         "git+http://github.com/interrogator/tabview.git#egg=tabview-1.4.5"
