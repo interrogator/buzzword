@@ -13,9 +13,7 @@ jobs:
         - python setup.py install
     - stage: static-checks
       script:
-        - flake8 buzzword/ tests/ setup.py
-        - mypy buzzword/ tests/ setup.py
-        - black --check .
+        - black .
     - stage: test
       script:  # coverage
         - coverage run -m unittest

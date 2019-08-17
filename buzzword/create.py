@@ -11,7 +11,7 @@ NAME = sys.argv[-1]
 FULLNAME = os.path.abspath(NAME)
 CORPUS_PATH = os.path.join(NAME, "example")
 
-print('Making a new workspace at {}'.format(FULLNAME))
+print("Making a new workspace at {}".format(FULLNAME))
 
 ENV = """
 # .env example for deploying buzzword
@@ -40,7 +40,9 @@ CORPORA = """
     "url": "https://en.wikipedia.org/wiki/Joke"
     }}
 }}
-""".format(os.path.abspath(CORPUS_PATH + '-parsed'))
+""".format(
+    os.path.abspath(CORPUS_PATH + "-parsed")
+)
 
 CORPUS = """
 <meta doc-type="joke" rating=6.50 speaker="NARRATOR"/>
@@ -55,15 +57,15 @@ CHEETAH: You're <meta play-on="lying">lion</meta>! <meta move="punchline" funny=
 os.makedirs(NAME)
 
 for folder in ["csv", "uploads", "example"]:
-	os.makedirs(os.path.join(NAME, folder))
+    os.makedirs(os.path.join(NAME, folder))
 with open(os.path.join(NAME, ".env"), "w") as fo:
-	fo.write(ENV)
+    fo.write(ENV)
 with open(os.path.join(NAME, "corpora.json"), "w") as fo:
-	fo.write(CORPORA)
+    fo.write(CORPORA)
 with open(os.path.join(CORPUS_PATH, "001-joke-lion-pun.txt"), "w") as fo:
-	fo.write(CORPUS)
-print('Testing parser: {}->{}-parsed ...'.format(CORPUS_PATH, CORPUS_PATH))
+    fo.write(CORPUS)
+print("Testing parser: {}->{}-parsed ...".format(CORPUS_PATH, CORPUS_PATH))
 parsed = Corpus(CORPUS_PATH).parse(cons_parser=None)
 
-print('Workspace made in {}'.format(FULLNAME))
+print("Workspace made in {}".format(FULLNAME))
 print("Run 'cd {} && python -m buzzword' to start.".format(NAME))
