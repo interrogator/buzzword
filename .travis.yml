@@ -10,6 +10,7 @@ jobs:
   include:
     - stage: build
       script:
+        - pip install git+http://github.com/interrogator/tabview.git#egg=tabview-1.4.5
         - python setup.py install
     - stage: static-checks
       script:
