@@ -27,7 +27,7 @@ setup(
     zip_safe=False,
     packages=["buzzword", "docs", "buzzword/parts"],
     package_dir={'buzzword/parts/assets': 'buzzword/parts/assets', "docs": "docs"},
-    scripts=["bin/buzzword"],
+    scripts=["bin/buzzword", "bin/buzzword-create"],
     package_data={"buzzword/parts": assets, "docs": docs},
     data_files=[("buzzword/parts/assets", assets), ("docs", docs)],
 
@@ -35,7 +35,7 @@ setup(
     license="MIT",
     keywords=[],
     install_requires=[
-        "buzz>=3.0.2",
+        "buzz>=3.0.3",
         "python-dotenv==0.10.3",
         "flask==1.1.1",
         "dash==1.1.1",

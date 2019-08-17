@@ -18,15 +18,16 @@ ENV = """
 # .env example for deploying buzzword
 # comment out keys you are not using
 BUZZWORD_CORPORA_FILE=corpora.json
+BUZZWORD_ROOT={}
 BUZZWORD_LOAD=true
 BUZZWORD_TITLE=buzzword
 BUZZWORD_DEBUG=false
-# BUZZWORD_MAX_DATASET_ROWS=
+# BUZZWORD_MAX_DATASET_ROWS=999999
 BUZZWORD_DROP_COLUMNS=parse,text
 BUZZWORD_PAGE_SIZE=25
 BUZZWORD_TABLE_SIZE=2000,200
 BUZZWORD_ADD_GOVERNOR=false
-"""
+""".format(FULLNAME)
 
 CORPORA = """
 {{

@@ -10,7 +10,7 @@
 
 > Web-app for corpus linguistics; documentation available [via ReadTheDocs](https://buzzword.readthedocs.io/en/latest/)
 
-## Install buzzword
+## Install
 
 ```bash
 pip install buzzword
@@ -18,21 +18,25 @@ pip install buzzword
 
 ## Quickstart
 
+The `buzzword.create` command will create a directory and populate it with the necessary config files and a sample corpus. Here, we name it `workspace` and run buzzword from within it.
+
 ```bash
-python -m buzzword.create workspace
+buzzword-create workspace
+# or: python -m buzzword.create workspace
 cd workspace
 python -m buzzword
 ```
 
 ## Setup
 
+To set things up more more permanently, either modify the directory created with `buzzword-create`, or do the following:
+
 0. [Create and parse corpus](https://buzzword.readthedocs.io/en/latest/building/)
 1. [Configure a `.env` file](https://buzzword.readthedocs.io/en/latest/run/) from `.env.example`
 2. [Configure a `corpora.json`](https://buzzword.readthedocs.io/en/latest/run/) file from `corpora.json.example`
-3. Run the tool with or without command line arguments:
+3. Run the tool with or without [command line arguments](https://buzzword.readthedocs.io/en/latest/run/):
 
 ```bash
 buzzword --debug
-# or
-python -m buzzword --debug
+# or python -m buzzword --debug
 ```
