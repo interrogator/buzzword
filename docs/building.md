@@ -82,7 +82,7 @@ Finally, to complete our annotations, let's also add some span and token level m
 
 ```xml
 <meta doc-type="joke" rating=6.50 speaker="NARRATOR"/>
-<meta ent-type="animal">A lion</meta> and <meta ent-type="animal">a cheetah</meta> decide to race. 
+<meta being="animal">A lion</meta> and <meta being="animal">a cheetah</meta> decide to race. 
 <meta move="setup" dialog=false punchline=false some-schema=9 />
 The cheetah crosses the finish line first. <meta move="setup" dialog=false punchline=false />
 CHEETAH: I win! <meta move="middle" dialog=true some-schema=2 />
@@ -103,11 +103,17 @@ Available metadata formats are:
 
 * XML annotations values can be strings, integers, floats and booleans will all be understood by the tool.
 * Metadata is always inherited, from file, to sentence, to span and token level. The `rating` for the whole file will be replaced for the final sentence with `7.8`.
-* If a field is missing in one of the metadata, it will end up with a value of `None` in the parsed corpus. 
+* If a field is missing in one of the metadata, it will end up with a value of `None` in the parsed corpus.
+* Make sure your metadata names are alphanumeric. Hyphens will be converted to underscores. Do not use any of the following names:
+  * CONLL columns: `w`, `l`, `x`, `p`, `m`, `f`, `g`, `o`, `e`
+  * Index names: `file`, `s`, `i`
+  * NER fields: `ent-type`, `ent_iob`, `ent_id`
+  * Sentiment analysis: `sentiment`
+  * Other names: `_n`, `sent_len`, `sent_id`, `text`, `parse`
 
 Once parsed, the first sentence of the underlying dataset will modelled as something like:
 
-| File     | Sent   | Token   | Word    | Lemma   | Wordclass   | Part of speech   |   Governor index | Dependency role   | e   | dialog   | doc_type   |   ent_id | ent_iob   | ent_type   | funny   | move   | play_on   | punchline   |   rating |   sent_id |   sent_len |   some_schema | Speaker   |
+| File     | Sent   | Token   | Word    | Lemma   | Wordclass   | Part of speech   |   Governor index | Dependency role   | Extra   | dialog   | doc_type   |   ent_id | ent_iob   | being   | funny   | move   | play_on   | punchline   |   rating |   sent_id |   sent_len |   some_schema | Speaker   |
 |------|----|----|---------|---------|-------------|------------------|------------------|-------------------|-----|----------|------------|----------|-----------|------------|---------|--------|-----------|-------------|----------|-----------|------------|---------------|-----------|
 | text |  1 |  1 | A       | a       | DET         | DT               |                2 | det               | _   | False    | joke       |        0 | O         |            | _       | setup  | _         | False       |      6.5 |         1 |          9 |             9 | NARRATOR  |
 | text |  1 |  2 | lion    | lion    | NOUN        | NN               |                6 | nsubj             | _   | False    | joke       |        0 | O         | animal     | _       | setup  | _         | False       |      6.5 |         1 |          9 |             9 | NARRATOR  |

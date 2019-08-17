@@ -44,7 +44,7 @@ CORPORA = """
 
 CORPUS = """
 <meta doc-type="joke" rating=6.50 speaker="NARRATOR"/>
-<meta ent-type="animal">A lion</meta> and <meta ent-type="animal">a cheetah</meta> decide to race. 
+<meta being="animal">A lion</meta> and <meta being="animal">a cheetah</meta> decide to race. 
 <meta move="setup" dialog=false punchline=false some-schema=9 />
 The cheetah crosses the finish line first. <meta move="setup" dialog=false punchline=false />
 CHEETAH: I win! <meta move="middle" dialog=true some-schema=2 />
