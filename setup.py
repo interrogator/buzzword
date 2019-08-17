@@ -35,7 +35,7 @@ setup(
     license="MIT",
     keywords=[],
     install_requires=[
-        "buzz>=3.0.0",
+        "buzz>=3.0.1",
         "python-dotenv==0.10.3",
         "flask==1.1.1",
         "dash==1.1.1",
@@ -44,6 +44,7 @@ setup(
         "dash-renderer==1.0.0",
         "dash-table==4.1.0",
         "dash-daq==0.1.7",
+        "tabview==1.4.5",
     ],
     dependency_links=[
         "git+http://github.com/interrogator/tabview.git#egg=tabview-1.4.5"
