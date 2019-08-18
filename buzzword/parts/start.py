@@ -68,9 +68,9 @@ def _make_upload_parse_space():
         id="upload-data",
         children=html.Div(["Drag-and-drop or ", html.A("select files")]),
         style={
-            "width": "61vw",
-            "height": "60px",
-            "lineHeight": "60px",
+            "width": "1000px",
+            "height": "100px",
+            "lineHeight": "100px",
             "borderWidth": "1px",
             "borderStyle": "dashed",
             "borderRadius": "5px",
@@ -84,22 +84,24 @@ def _make_upload_parse_space():
         id="upload-corpus-name",
         type="text",
         placeholder="Enter a name for your corpus",
-        style={**style.BLOCK, **{"width": "25vw"}},
+        style={**style.BLOCK, **{"width": "550px"}},
     )
     lang = dcc.Dropdown(
         placeholder="Language of corpus",
         id="corpus-language",
         options=[{"value": v, "label": k} for k, v in SPACY_LANGUAGES.items()],
-        style={**style.BLOCK, **{"width": "20vw"}},
+        style={**style.BLOCK, **{"width": "235px"}},
     )
     upload = html.Div(children=[upload, html.Div(id="show-upload-files")])
     dialog = dcc.ConfirmDialog(id="dialog-upload", message="")
     upload_button = html.Button(
         "Upload and parse",
         id="upload-parse-button",
-        style={**style.BLOCK, **{"width": "16vw"}},
+        style={**style.BLOCK, **{"width": "210px"}},
     )
-    toolbar = html.Div([corpus_name, lang, upload_button])
+    bits = [corpus_name, lang, upload_button]
+    sty = {"width": "1000px", **style.VERTICAL_MARGINS, "marginBottom": "20px"}
+    toolbar = html.Div(bits, style=sty)
     return html.Div(
         id="upload-space",
         children=dcc.Loading(type="default", children=[dialog, upload, toolbar]),
@@ -202,7 +204,10 @@ header = html.H2("buzzword: a tool for analysing annotated linguistic data")
 table, is_empty = _make_corpus_table()
 avail = ""
 if not is_empty:
-    demos = html.Div([html.H3("Available corpora"), table])
+    head = html.H3("Available corpora", style=style.VERTICAL_MARGINS)
+    text = "Select your corpus from the list below."
+    text = html.P(text, style=style.VERTICAL_MARGINS)
+    demos = html.Div([head, text, table])
     avail = "Otherwise, you can try out the corpora below."
 
 intro = html.P(
@@ -210,7 +215,7 @@ intro = html.P(
     "If you want to work with your own corpus, simply upload plain text files, "
     "annotated text files, or CONLL-U files." + avail
 )
-uphead = html.H3("Upload data")
+uphead = html.H3("Upload data", style=style.VERTICAL_MARGINS)
 
 upload_text = html.P(
     "You can upload either CONLL-U files, or plaintext with optional annotations. "
