@@ -13,17 +13,14 @@ BLOCK = {
     "paddingLeft": "5px",
     "paddingRight": "5px",
 }
-INLINE = {
-    "display": "inline-block",
-    "paddingLeft": "5px",
-    "paddingRight": "5px",
-}
+INLINE = {"display": "inline-block", "paddingLeft": "5px", "paddingRight": "5px"}
 NAV_HEADER = {
     "display": "inline-block",
     "verticalAlign": "middle",
     "color": "#555555",
-    "text-decoration": "none",
-    "font-size": 32,
+    "textDecoration": "none",
+    "fontSize": 32,
+    "paddingTop": "12px",
 }
 MARGIN_5_MONO = {"marginLeft": 5, "marginRight": 5, "fontFamily": "monospace"}
 BOLD_DARK = {"fontWeight": "bold", "color": "#555555"}

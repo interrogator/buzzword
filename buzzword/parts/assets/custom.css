@@ -18,3 +18,27 @@ p, ul, ol {
 	padding-bottom: 10px !important;
 	padding-top: 10px !important;
 }
+
+@-webkit-keyframes flasher {
+  from { background-color: red; }
+  to { background-color: inherit; }
+}
+@-moz-keyframes flasher {
+  from { background-color: red; }
+  to { background-color: inherit; }
+}
+@-o-keyframes flasher {
+  from { background-color: red; }
+  to { background-color: inherit; }
+}
+@keyframes flasher {
+  from { background-color: red; }
+  to { background-color: inherit; }
+}
+
+.flash {
+  -webkit-animation: flasher 3s infinite; /* Safari 4+ */
+  -moz-animation:    flasher 3s infinite; /* Fx 5+ */
+  -o-animation:      flasher 3s infinite; /* Opera 12+ */
+  animation:         flasher 3s infinite; /* IE 10+ */
+}

@@ -1,5 +1,6 @@
 import base64
 import os
+import traceback
 from datetime import date
 
 import dash_core_components as dcc
@@ -7,26 +8,27 @@ import dash_html_components as html
 from buzz.constants import SPACY_LANGUAGES
 from buzz.corpus import Corpus
 from buzzword.parts.main import app, CORPORA, INITIAL_TABLES, CORPUS_META, CONFIG
-from buzzword.parts.strings import _slug_from_name
+from buzzword.parts.strings import _slug_from_name, _make_description
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 from buzzword.parts.nav import navbar
 from buzzword.parts import style
 
 
-def _make_row(row_data, index=None):
+def _make_row(row_data, index=None, upload=False):
     """
     Make row for corpus table
     """
+    clas = "flash" if upload else "normal-row"
     row = [html.Td(children=index)]
     for j, value in enumerate(row_data):
         if not j:
-            cell = html.Td(html.A(href=row_data[4], children=value))
+            cell = html.Td(html.A(href=row_data[4], children=value, className=clas))
         elif j == 4:
             hyper = html.A(href=value, children="ⓘ", target="_blank")
-            cell = html.Td(className="no-underline", children=hyper)
+            cell = html.Td(children=hyper, className=clas)
         else:
-            cell = html.Td(children=value)
+            cell = html.Td(children=value, className=clas)
         row.append(cell)
     return html.Tr(row)
 
@@ -108,30 +110,43 @@ def _make_upload_parse_space():
     )
 
 
-def _store_corpus(contents, filenames, corpus_name):
+def _store_corpus(contents, filenames, slug):
     """
     From content and filenames, build a corpus and return the path to it
     """
-    extensions = set()
-    if not os.path.isdir("uploads"):
-        os.makedirs("uploads")
-    store_at = os.path.join(CONFIG["root"], "uploads", corpus_name)
+    corpus_size = 0
+    is_parsed = all(i.endswith(("conll", "conllu")) for i in filenames)
+    if is_parsed:
+        slug = slug + "-parsed"
+    store_at = os.path.join(CONFIG["root"], "uploads", slug)
     os.makedirs(store_at)
     for content, filename in zip(contents, filenames):
-        extensions.add(os.path.splitext(filename)[-1])
-        if len(extensions) > 1:
-            break
-        content_type, content_string = content.split(",")
+        content_type, content_string = content.split(",", 1)
         decoded = base64.b64decode(content_string)
+        corpus_size += len(decoded)
         outpath = os.path.join(store_at, filename)
         with open(outpath, "wb") as fo:
             fo.write(decoded)
-    if not len(extensions):
-        raise ValueError("No file extensions provided")
-    elif len(extensions) > 1:
-        raise ValueError("Multiple extensions provided: {}".format(extensions))
-    is_parsed = all(i.endswith(("conll", "conllu")) for i in filenames)
-    return store_at, is_parsed
+    return store_at, is_parsed, corpus_size
+
+
+def _validate_input(contents, names, corpus_name, slug):
+    """
+    Check that uploaded corpus-to-be is valid
+    """
+    endings = set([os.path.splitext(i)[-1] for i in names])
+    if not endings:
+        return "File extension not provided."
+    if len(endings) > 1:
+        return "All uploaded files need to have the same extension."
+    allowed = {".conll", ".conllu", ".txt"}
+    if endings.pop() not in allowed:
+        allowed = ", ".join(allowed)
+        return "Uploaded file extension must be one of: {}".format(allowed)
+    up_dir_exists = os.path.isdir(os.path.join(CONFIG["root"], "uploads", slug))
+    if corpus_name in CORPUS_META or up_dir_exists:
+        return f"A corpus named '{corpus_name}' already exists. Try a different name."
+    return ""
 
 
 @app.callback(
@@ -157,28 +172,37 @@ def _upload_files(n_clicks, contents, names, corpus_lang, corpus_name, table_row
 
     if n_clicks is None:
         raise PreventUpdate
-    msg = ""
-    try:
-        path, is_parsed = _store_corpus(contents, names, corpus_name)
-        corpus = Corpus(path)
-        if not is_parsed:
+
+    slug = _slug_from_name(corpus_name)
+    msg = _validate_input(contents, names, corpus_name, slug)
+
+    if msg:
+        return bool(msg), msg, table_rows
+
+    path, is_parsed, size = _store_corpus(contents, names, slug)
+    corpus = Corpus(path)
+    if not is_parsed:
+        try:
             corpus = corpus.parse(cons_parser=None, language=corpus_lang)
-    except Exception as error:
-        msg = str(error)
-        raise
-    if not msg:
-        slug = _slug_from_name(corpus_name)
-        CORPORA[slug] = corpus.load()
-        CORPUS_META[corpus_name] = dict(slug=slug)
-        INITIAL_TABLES[slug] = CORPORA[slug].table(show="p", subcorpora="file")
+        except Exception as error:
+            msg = f"Problem when parsing the corpus: {str(error)}"
+            traceback.print_exc()
+            return bool(msg), msg, table_rows
+
+    CORPORA[slug] = corpus.load()
+    CORPUS_META[corpus_name] = dict(slug=slug)
+    INITIAL_TABLES[slug] = CORPORA[slug].table(show="p", subcorpora="file")
     slug = _slug_from_name(corpus_name)
     href = "/explore/{}".format(slug)
     index = len(CORPUS_META)
     date = date.today().strftime("%d.%m.%Y")
-    desc = "User-uploaded data"
+    desc = _make_description(names, size)
     toks = len(CORPORA[slug])
-    row_data = [corpus_name, date, corpus_lang, desc, href, toks]
-    row = _make_row(row_data, index=index)
+    # get long name for language
+    long_lang = next(k for k, v in SPACY_LANGUAGES.items() if v == corpus_lang)
+    long_lang = long_lang.capitalize()
+    row_data = [corpus_name, date, long_lang, desc, href, toks]
+    row = _make_row(row_data, index=index, upload=True)
     table_rows.append(row)
     return bool(msg), msg, table_rows
 
@@ -194,7 +218,10 @@ def show_uploaded(contents, filenames):
     """
     if not contents:
         raise PreventUpdate
-    markdown = "* " + "\n* ".join([i for i in filenames])
+    markdown = "* " + "\n* ".join([i for i in filenames[:10]])
+    if len(filenames) > 10:
+        rest = len(filenames) - 10
+        markdown += f"\n* and {rest} more ..."
     return dcc.Markdown(markdown)
 
 
@@ -217,10 +244,12 @@ intro = html.P(
 )
 uphead = html.H3("Upload data", style=style.VERTICAL_MARGINS)
 
-upload_text = html.P(
+link = "https://buzzword.readthedocs.io/en/latest/building/'"
+md = (
     "You can upload either CONLL-U files, or plaintext with optional annotations. "
-    "See 'Creating corpora' for an explanation of possible data formats."
+    "See [`Creating corpora`]({}) for more information.".format(link)
 )
+upload_text = dcc.Markdown(md)
 
 upload = _make_upload_parse_space()
 

@@ -15,6 +15,9 @@ from .parts.tabs import _make_tabs
 # where downloadable CSVs get stored
 if not os.path.isdir("csv"):
     os.makedirs("csv")
+# where uploaded corpora are stored
+if not os.path.isdir("uploads"):
+    os.makedirs("uploads")
 
 
 def _get_layout():
@@ -32,41 +35,66 @@ LAYOUTS = dict()
 
 
 def _make_explore_layout(slug, name):
+    """
+    Simulate globals and generate layout for explore page
+    """
     corpus = CORPORA[slug]
-    SEARCHES = OrderedDict({name: corpus})
-    TABLES = OrderedDict({"initial": INITIAL_TABLES[slug]})
-    return _make_tabs(SEARCHES, TABLES, slug, **CONFIG)
+    searches = OrderedDict({name: corpus})
+    tables = OrderedDict({"initial": INITIAL_TABLES[slug]})
+    return _make_tabs(searches, tables, slug, **CONFIG)
+
+
+def _populate_explore_layouts():
+    """
+    Can be used to create explore page on startup, save loading time
+    """
+    for name, meta in CORPUS_META.items():
+        slug = meta["slug"]
+        LAYOUTS[slug] = _make_explore_layout(slug, name)
+
+
+def _get_explore_layout(slug):
+    """
+    Get (and maybe generate) the explore layout for this slug
+    """
+    gen = (k for k, v in CORPUS_META.items() if v["slug"] == slug)
+    name = next(gen, None)
+    name = name or slug
+    # store the default explore for each corpus in a dict for speed
+    if slug in LAYOUTS:
+        return LAYOUTS[slug]
+    layout = _make_explore_layout(slug, name)
+    LAYOUTS[slug] = layout
+    return layout
 
 
 @app.callback(Output("page-content", "children"), [Input("url", "pathname")])
 def _choose_correct_page(pathname):
+    """
+    When the URL changes, get correct page and populate page-content with it
+    """
+    pages = dict(
+        about=about.layout,
+        guide=guide.layout,
+        building=building.layout,
+        start=start.layout,
+        depgrep=depgrep.layout,
+    )
+    pathname = pathname
     if pathname is None:
         raise PreventUpdate
-    if pathname == "/about":
-        return about.layout
-    if pathname == "/guide":
-        return guide.layout
-    if pathname == "/building":
-        return building.layout
-    if pathname == "/depgrep":
-        return depgrep.layout
-    if pathname.startswith("/explore"):
+    if not pathname:
+        return start.layout
+    if pathname in pages:
+        return pages[pathname]
+    if pathname.startswith("explore"):
         slug = pathname.rstrip("/").split("/")[-1]
+        # if corpus not found, redirect
         if slug not in CORPORA:
-            pathname = "/"
-        else:
-            gen = (k for k, v in CORPUS_META.items() if v["slug"] == slug)
-            name = next(gen, None)
-            name = name or slug
-            if slug in LAYOUTS:
-                layout = LAYOUTS[slug]
-            else:
-                layout = _make_explore_layout(slug, name)
-                LAYOUTS[slug] = layout
-            # app.title = "buzzword: {}".format(name)
-            return layout
-    if pathname in {"", "/", "/start"}:
-        # app.title = "buzzword: home"
+            return start.layout
+        # find corpus name by slug
+        return _get_explore_layout(slug)
+    if pathname in {"", "/"}:
         return start.layout
     else:
         return "404"

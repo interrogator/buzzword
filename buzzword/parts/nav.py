@@ -9,22 +9,13 @@ LINKS = [
     ("About", "https://buzzword.readthedocs.io/en/latest/about/"),
 ]
 
+hrefs = [html.Li([html.A(name, target="_blank", href=url)]) for name, url in LINKS]
+
 navbar = html.Div(
     [
-        html.Img(
-            src="../assets/bolt.jpg", height=42, width=38, style=style.BLOCK_MIDDLE_35
-        ),
+        html.Img(src="../assets/bolt.jpg", height=42, width=38, style=style.NAV_HEADER),
         dcc.Link("buzzword", href="/", style=style.NAV_HEADER),
-        html.Div(
-            html.Ul(
-                [
-                    html.Li([html.A(name, target="_blank", href=url)])
-                    for name, url in LINKS
-                ],
-                className="nav navbar-nav",
-            ),
-            className="pull-right",
-        ),
+        html.Div(html.Ul(hrefs, className="nav navbar-nav"), className="pull-right"),
     ],
     className="navbar navbar-default navbar-static-top",
 )

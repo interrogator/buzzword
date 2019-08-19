@@ -7,6 +7,18 @@ buzz webapp: making human-readable strings from data
 from buzz.constants import SHORT_TO_LONG_NAME
 
 
+def _make_description(names, size):
+    """
+    Describe a user-uploaded corpus
+    """
+    desc = "User-uploaded data, {}. {} file{}: {}"
+    form_names = ", ".join(names[:3])
+    if len(names) > 3:
+        form_names += "..."
+    plu = "s" if len(names) != 1 else ""
+    return desc.format(_format_size(size), len(names), plu, form_names)
+
+
 def _make_table_name(history):
     """
     Generate a table name from its history
@@ -31,6 +43,18 @@ def _make_table_name(history):
     if not parent:
         return basic
     return f"{basic} -- from search #{parent}"
+
+
+def _format_size(size):
+    """
+    Format size in bytes, kb, or mb
+    """
+    if size < 1000:
+        return f"{size} bytes"
+    if size >= 1000000:
+        return f"{size/1000000:.2f} MB"
+    if size >= 1000:
+        return f"{size/1000:.2f} kB"
 
 
 def _make_search_name(history, size):
