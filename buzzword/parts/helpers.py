@@ -30,7 +30,7 @@ def _get_from_corpus(from_number, corpora, dataset, slug=None, tables_extra=None
         return slug, corpora[slug]
     specs, corpus = list(dataset.items())[from_number - 1]
     # tables are dataframes, conll searches are just (multi)index
-    if not isinstance(corpus, pd.DataFrame):
+    if not isinstance(corpus, (pd.DataFrame, Corpus)):
         corpus = corpora[slug].iloc[corpus]
     return specs, corpus
 
@@ -53,6 +53,8 @@ def _drop_cols_for_datatable(df, add_governor):
     - underscored
     - governor attributes if loaded
     """
+    if not isinstance(df, pd.DataFrame):
+        return df
     drops = ["parse", "text", "e", "sent_id", "sent_len"]
     drops += [i for i in df.columns if i.startswith("_")]
     if add_governor:
@@ -70,16 +72,20 @@ def _get_cols(corpus, add_governor):
     # normal good features to show
     col_order = ["w", "l", "p", "x", "f", "g", "file", "s", "i"]
     # speaker is kind of privileged by convention
-    if "speaker" in corpus.columns:
+    is_df = isinstance(corpus, pd.DataFrame)
+    index_names = list(corpus.index.names) if is_df else ["file", "s", "i"]
+    columns = list(corpus.columns) if is_df else list(corpus.files[0].load().columns)
+
+    if "speaker" in columns:
         col_order.append("speaker")
     # next is all the governor bits if loaded
     if add_governor:
         col_order += ["gw", "gl", "gp", "gx", "gf", "gg"]
     # never show underscored, and never show parse, text, etc.
-    under = [i for i in corpus.columns if i.startswith("_")]
+    under = [i for i in columns if i.startswith("_")]
     noshow = ["e", "o", "text", "sent_len", "sent_id", "parse"] + under
     # get only items that are actually in dataset
-    possible = list(corpus.index.names) + list(corpus.columns)
+    possible = index_names + columns
     # add anything in dataset not already added (i.e. random metadata)
     col_order += [i for i in possible if i not in col_order + noshow]
     # do the formatting of name and id and return it

@@ -41,7 +41,8 @@ def _make_explore_layout(slug, name):
     corpus = CORPORA[slug]
     searches = OrderedDict({name: corpus})
     tables = OrderedDict({"initial": INITIAL_TABLES[slug]})
-    return _make_tabs(searches, tables, slug, **CONFIG)
+    size = CORPUS_META[name]["len"]
+    return _make_tabs(searches, tables, slug, name, corpus_size=size, **CONFIG)
 
 
 def _populate_explore_layouts():
@@ -80,9 +81,9 @@ def _choose_correct_page(pathname):
         start=start.layout,
         depgrep=depgrep.layout,
     )
-    pathname = pathname
     if pathname is None:
         raise PreventUpdate
+    pathname = pathname.lstrip("/")
     if not pathname:
         return start.layout
     if pathname in pages:

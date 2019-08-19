@@ -22,7 +22,6 @@ from buzzword.parts.strings import (
     _table_error,
     _downloadable_name,
 )
-from buzzword.parts.tabs import _make_tabs
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 

@@ -10,6 +10,7 @@ import dash_html_components as html
 import dash_table
 
 from buzz.constants import SHORT_TO_COL_NAME
+from buzz.corpus import Corpus
 from buzz.dashview import CHART_TYPES, _df_to_figure
 from buzzword.parts.helpers import (
     _get_cols,
@@ -28,6 +29,8 @@ def _build_dataset_space(df, rows, **kwargs):
     """
     Build the search interface and the conll display
     """
+    if isinstance(df, Corpus):
+        df = df.files[0].load()
     cols = _get_cols(df, kwargs["add_governor"])
     cols = [dict(label="Dependencies", value="d")] + cols
     df = _drop_cols_for_datatable(df, kwargs["add_governor"])
@@ -201,8 +204,9 @@ def _build_concordance_space(df, rows, **kwargs):
     """
     Div representing the concordance tab
     """
+    if isinstance(df, Corpus):
+        df = df.files[0].load()
     cols = _get_cols(df, kwargs["add_governor"])
-
     show_check = dcc.Dropdown(
         multi=True,
         placeholder="Features to show",
@@ -368,7 +372,7 @@ def _build_chart_space(tables, rows, **kwargs):
     return html.Div(charts)
 
 
-def _make_tabs(searches, tables, corpus_slug, title=None, page_size=25, **kwargs):
+def _make_tabs(searches, tables, corpus_slug, corpus_name, title=None, page_size=25, **kwargs):
     """
     Generate initial layout div
     """
@@ -379,11 +383,8 @@ def _make_tabs(searches, tables, corpus_slug, title=None, page_size=25, **kwargs
     )
     chart = _build_chart_space(tables, page_size, **kwargs)
     concordance = _build_concordance_space(corpus, page_size, **kwargs)
-
-    search_from = [
-        dict(value=i, label=_make_search_name(h, len(corpus)))
-        for i, h in enumerate(searches)
-    ]
+    label = _make_search_name(corpus_name, kwargs['corpus_size'])
+    search_from = [dict(value=0, label=label)]
     clear = html.Button("Clear history", id="clear-history", style=style.MARGIN_5_MONO)
     dropdown = dcc.Dropdown(
         id="search-from", options=search_from, value=0, disabled=True

@@ -22,13 +22,12 @@ def _get_corpus_config(local_conf, global_conf):
     """
     get some configs, from json, backup from global, or none
     """
-    max_ds = global_conf.get("max_dataset_rows", None)
-    max_ds = local_conf.get("max_dataset_rows", max_ds)
-    drop_col = global_conf.get("drop_columns", None)
-    drop_col = local_conf.get("drop_columns", drop_col)
-    add_gov = global_conf.get("add_governor", None)
-    add_gov = local_conf.get("add_governor", add_gov)
-    return dict(max_dataset_rows=max_ds, drop_columns=drop_col, add_governor=add_gov)
+    conf = dict()
+    settings = {"max_dataset_rows", "drop_columns", "add_governor", "load"}
+    for setting in settings:
+        from_global = global_conf.get(setting)
+        conf[setting] = local_conf.get(setting, from_global)
+    return conf
 
 
 def _get_corpora(corpus_meta):
@@ -43,9 +42,12 @@ def _get_corpora(corpus_meta):
             continue
         corpus = Corpus(metadata["path"])
         conf = _get_corpus_config(metadata, CONFIG)
-        print("Loading corpus into memory: {} ...".format(corpus_name))
-        corpus = corpus.load(add_governor=conf["add_governor"])
-        corpus = _preprocess_corpus(corpus, **conf)
+        if conf["load"]:
+            print("Loading corpus into memory: {} ...".format(corpus_name))
+            corpus = corpus.load(add_governor=conf["add_governor"])
+            corpus = _preprocess_corpus(corpus, **conf)
+        else:
+            print("NOT loading corpus into memory: {} ...".format(corpus_name))
         initial_table = corpus.table(show="p", subcorpora="file")
         corpora[metadata["slug"]] = corpus
         tables[metadata["slug"]] = initial_table
