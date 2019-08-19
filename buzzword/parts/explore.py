@@ -243,7 +243,7 @@ def _new_search(
 
     this_search = tuple(this_search + [new_value, len(df)])
     if found_results:
-        SEARCHES[this_search] = df.index
+        SEARCHES[this_search] = df["_n"]
         corpus = CORPORA[slug]
         df = df.iloc[:max_row, :max_col]
         current_cols, current_data = _update_datatable(
