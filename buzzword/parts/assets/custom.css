@@ -19,26 +19,19 @@ p, ul, ol {
 	padding-top: 10px !important;
 }
 
-@-webkit-keyframes flasher {
-  from { background-color: red; }
-  to { background-color: inherit; }
+@-webkit-keyframes demo {
+    0% {
+        background-color: #d1f5c1;
+        opacity:1;
+    }
+    100% {
+        background-color: white;
+    }
 }
-@-moz-keyframes flasher {
-  from { background-color: red; }
-  to { background-color: inherit; }
-}
-@-o-keyframes flasher {
-  from { background-color: red; }
-  to { background-color: inherit; }
-}
-@keyframes flasher {
-  from { background-color: red; }
-  to { background-color: inherit; }
-}
-
+    
 .flash {
-  -webkit-animation: flasher 3s infinite; /* Safari 4+ */
-  -moz-animation:    flasher 3s infinite; /* Fx 5+ */
-  -o-animation:      flasher 3s infinite; /* Opera 12+ */
-  animation:         flasher 3s infinite; /* IE 10+ */
-}
+    -webkit-animation-name: demo;
+    -webkit-animation-duration: 3s;
+    -webkit-animation-iteration-count: 1;
+    -webkit-animation-timing-function: ease-in-out;
+}    

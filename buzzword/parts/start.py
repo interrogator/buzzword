@@ -1,7 +1,7 @@
 import base64
 import os
 import traceback
-from datetime import date
+from collections import OrderedDict
 
 import dash_core_components as dcc
 import dash_html_components as html
@@ -20,13 +20,21 @@ def _make_row(row_data, index=None, upload=False):
     Make row for corpus table
     """
     clas = "flash" if upload else "normal-row"
-    row = [html.Td(children=index)]
-    for j, value in enumerate(row_data):
-        if not j:
-            cell = html.Td(html.A(href=row_data[4], children=value, className=clas))
-        elif j == 4:
-            hyper = html.A(href=value, children="ⓘ", target="_blank")
-            cell = html.Td(children=hyper, className=clas)
+    row = [html.Td(children=index, className=clas)]
+    for key, value in row_data.items():
+        if key == "link":
+            continue
+        if key == "id":
+            cell = html.Td(html.A(href=row_data["link"], children=value, className=clas))
+        elif key == "title":
+            a = html.A(href=row_data["link"], children=value, className=clas)
+            cell = html.Td(a, className=clas)
+        elif key == "url":
+            if value:
+                hyper = html.A(href=value, children="ⓘ", target="_blank", className=clas)
+                cell = html.Td(children=hyper, className=clas)
+            else:
+                cell = html.Td(children="", className=clas)
         else:
             cell = html.Td(children=value, className=clas)
         row.append(cell)
@@ -53,8 +61,17 @@ def _make_corpus_table():
         lang = metadata.get("language", "unknown").capitalize()
         tokens = "{:n}".format(metadata["len"])
         url = metadata.get("url", "none")
-        row_data = [corpus, adate, lang, metadata["desc"], url, tokens]
-        rows.append(_make_row(row_data, i))
+        desc = metadata["desc"]
+        tups = [
+            ("title", corpus),
+            ("date", adate),
+            ("language", lang),
+            ("description", desc),
+            ("url", url),
+            ("tokens", tokens),
+            ("link", link),
+        ]
+        rows.append(_make_row(OrderedDict(tups), i))
         is_empty = False
     style = {"width": "1000px"}
     data = columns + rows
@@ -86,20 +103,20 @@ def _make_upload_parse_space():
         id="upload-corpus-name",
         type="text",
         placeholder="Enter a name for your corpus",
-        style={**style.BLOCK, **{"width": "550px"}},
+        style={**style.BLOCK, **{"width": "550px", "fontFamily": "monospace"}},
     )
     lang = dcc.Dropdown(
         placeholder="Language of corpus",
         id="corpus-language",
         options=[{"value": v, "label": k} for k, v in SPACY_LANGUAGES.items()],
-        style={**style.BLOCK, **{"width": "235px"}},
+        style={**style.BLOCK, **{"width": "230px", "marginRight": "5px", "fontFamily": "monospace"}},
     )
     upload = html.Div(children=[upload, html.Div(id="show-upload-files")])
     dialog = dcc.ConfirmDialog(id="dialog-upload", message="")
     upload_button = html.Button(
         "Upload and parse",
         id="upload-parse-button",
-        style={**style.BLOCK, **{"width": "210px"}},
+        style={**style.BLOCK, **{"width": "205px", "marginLeft": "5px", "fontFamily": "monospace"}},
     )
     bits = [corpus_name, lang, upload_button]
     sty = {"width": "1000px", **style.VERTICAL_MARGINS, "marginBottom": "20px"}
@@ -195,15 +212,22 @@ def _upload_files(n_clicks, contents, names, corpus_lang, corpus_name, table_row
     slug = _slug_from_name(corpus_name)
     href = "/explore/{}".format(slug)
     index = len(CORPUS_META)
-    date = date.today().strftime("%d.%m.%Y")
+    adate = date.today().strftime("%d.%m.%Y")
     desc = _make_description(names, size)
     toks = len(CORPORA[slug])
     # get long name for language
     long_lang = next(k for k, v in SPACY_LANGUAGES.items() if v == corpus_lang)
     long_lang = long_lang.capitalize()
-    row_data = [corpus_name, date, long_lang, desc, href, toks]
-    row = _make_row(row_data, index=index, upload=True)
-    table_rows.append(row)
+    tups = [
+        ("title", corpus_name),
+        ("date", adate),
+        ("language", long_lang),
+        ("description", desc),
+        ("url", None),
+        ("tokens", toks),
+        ("link", href),
+    ]
+    table_rows.append(_make_row(OrderedDict(tups), index, upload=True))
     return bool(msg), msg, table_rows
 
 
