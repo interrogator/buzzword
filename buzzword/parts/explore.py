@@ -5,12 +5,9 @@ from collections import OrderedDict
 import os
 import pandas as pd
 
-import dash
-from buzz.corpus import Corpus
 from buzz.dashview import _df_to_figure
 from buzzword.parts.helpers import (
     _get_from_corpus,
-    _preprocess_corpus,
     _translate_relative,
     _update_datatable,
     _make_csv,
@@ -20,15 +17,13 @@ from buzzword.parts.strings import (
     _make_table_name,
     _search_error,
     _table_error,
-    _downloadable_name,
 )
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
 import flask
-from flask import send_file, Response
 
-from buzzword.parts.main import app, CONFIG, CORPORA, INITIAL_TABLES, CORPUS_META
+from buzzword.parts.main import app, CONFIG, CORPORA, CORPUS_META
 
 ###########
 # STORAGE #

@@ -214,7 +214,7 @@ def _upload_files(n_clicks, contents, names, corpus_lang, corpus_name, table_row
     index = len(CORPUS_META)
     adate = date.today().strftime("%d.%m.%Y")
     desc = _make_description(names, size)
-    toks = len(CORPORA[slug])
+    toks = "{:n}".format(len(CORPORA[slug]))
     # get long name for language
     long_lang = next(k for k, v in SPACY_LANGUAGES.items() if v == corpus_lang)
     long_lang = long_lang.capitalize()

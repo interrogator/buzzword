@@ -372,7 +372,9 @@ def _build_chart_space(tables, rows, **kwargs):
     return html.Div(charts)
 
 
-def _make_tabs(searches, tables, corpus_slug, corpus_name, title=None, page_size=25, **kwargs):
+def _make_tabs(
+    searches, tables, corpus_slug, corpus_name, title=None, page_size=25, **kwargs
+):
     """
     Generate initial layout div
     """
@@ -383,14 +385,13 @@ def _make_tabs(searches, tables, corpus_slug, corpus_name, title=None, page_size
     )
     chart = _build_chart_space(tables, page_size, **kwargs)
     concordance = _build_concordance_space(corpus, page_size, **kwargs)
-    label = _make_search_name(corpus_name, kwargs['corpus_size'])
+    label = _make_search_name(corpus_name, kwargs["corpus_size"])
     search_from = [dict(value=0, label=label)]
     clear = html.Button("Clear history", id="clear-history", style=style.MARGIN_5_MONO)
     dropdown = dcc.Dropdown(
         id="search-from", options=search_from, value=0, disabled=True
     )
 
-    pad_block = {**style.HORIZONTAL_PAD_5, **style.BLOCK_MIDDLE_35}
     drop_style = {
         "fontFamily": "monospace",
         "width": "60%",
