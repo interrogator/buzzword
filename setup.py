@@ -19,7 +19,7 @@ docs = [os.path.join(DOCS, i) for i in os.listdir(DOCS)]
 
 setup(
     name="buzzword",
-    version="1.2.1",  # bump2version will edit this automatically!
+    version="1.2.2",  # bump2version will edit this automatically!
     description="Web-app for corpus linguistics",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
