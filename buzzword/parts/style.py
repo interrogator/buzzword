@@ -22,8 +22,16 @@ NAV_HEADER = {
     "fontSize": 32,
     "paddingTop": "12px",
 }
+TSTYLE = {**CELL_MIDDLE_35, **{"width": "25%", "display": "inline-block"}}
 MARGIN_5_MONO = {"marginLeft": 5, "marginRight": 5, "fontFamily": "monospace"}
 BOLD_DARK = {"fontWeight": "bold", "color": "#555555"}
+CHART_SUMMARY = {
+    "fontWeight": "bold",
+    "fontSize": "11pt",
+    "paddingBottom": "10px",
+    "paddingTop": "10px",
+    **BOLD_DARK,
+}
 STRIPES = [{"if": {"row_index": "odd"}, "backgroundColor": "rgb(248, 248, 248)"}]
 LEFT_ALIGN = [
     {"if": {"column_id": c}, "textAlign": "left", "paddingLeft": "5px"}
