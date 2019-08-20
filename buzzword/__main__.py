@@ -44,10 +44,9 @@ def _make_explore_layout(slug, name):
     Simulate globals and generate layout for explore page
     """
     corpus = CORPORA[slug]
-    searches = OrderedDict({name: corpus})
-    tables = OrderedDict({"initial": INITIAL_TABLES[slug]})
-    size = CORPUS_META[name]["len"]
-    return _make_tabs(searches, tables, slug, name, corpus_size=size, **CONFIG)
+    size = CORPUS_META[name].get("len", len(corpus))
+    args = [CORPORA[slug], INITIAL_TABLES[slug], slug, name]
+    return _make_tabs(*args, corpus_size=size, **CONFIG)
 
 
 def _populate_explore_layouts():
