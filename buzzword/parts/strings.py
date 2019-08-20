@@ -123,8 +123,8 @@ def _downloadable_name(name):
     """
     name = name.lower().split("-- from ")[0]
     name = name.replace(" ", "-")
-    for c in [".", ",", "/", "#"]:
-        name = name.replace(c, "")
+    ok = {"-", "_"}
+    name = "".join([i for i in name if i.isalnum() or i in ok])
     return name.strip("- ")
 
 
