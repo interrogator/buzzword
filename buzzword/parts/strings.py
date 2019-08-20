@@ -121,8 +121,11 @@ def _downloadable_name(name):
     """
     Make a safe filename for CSV download. todo: url safe?
     """
-    name = name.strip(".,/#").split("-- from ")[0]
-    return name.replace(" ", "-").strip("- ").lower()
+    name = name.lower().split("-- from ")[0]
+    name = name.replace(" ", "-")
+    for c in [".", ",", "/", "#"]:
+        name = name.replace(c, "")
+    return name.strip("- ")
 
 
 def _slug_from_name(name):

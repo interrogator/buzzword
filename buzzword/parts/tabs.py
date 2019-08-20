@@ -398,12 +398,14 @@ def _make_tabs(
         **style.HORIZONTAL_PAD_5,
         **style.BLOCK_MIDDLE_35,
     }
+    # remove the paddingTop, which is not needed in explore view
+    nav = {k: v for k, v in style.NAV_HEADER.items() if k != "paddingTop"}
 
     top_bit = [
         html.Img(
             src="../assets/bolt.jpg", height=42, width=38, style=style.BLOCK_MIDDLE_35
         ),
-        dcc.Link("buzzword", href="/", style=style.NAV_HEADER),
+        dcc.Link("buzzword", href="/", style=nav),
         # these spaces are used to flash messages to the user if something is wrong
         dcc.ConfirmDialog(id="dialog-search", message=""),
         dcc.ConfirmDialog(id="dialog-table", message=""),

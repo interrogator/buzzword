@@ -23,7 +23,7 @@ from dash.exceptions import PreventUpdate
 
 import flask
 
-from buzzword.parts.main import app, CONFIG, CORPORA, CORPUS_META
+from buzzword.parts.main import app, CONFIG, CORPORA, CORPUS_META, INITIAL_TABLES
 
 ###########
 # STORAGE #
@@ -376,7 +376,10 @@ def _new_table(
         table = TABLES[exists]
     # if there was a validation problem, juse use last table (?)
     elif msg:
-        table = list(TABLES.values())[-1]
+        if TABLES:
+            table = list(TABLES.values())[-1]
+        else:
+            table = INITIAL_TABLES[slug]
     else:
         # generate table
         table = corpus.table(
@@ -414,7 +417,7 @@ def _new_table(
     table_name = _make_table_name(this_table)
 
     # todo: slow to do this every time!
-    csv_path = _make_csv(table, table_name)
+    csv_path = "todo"  # _make_csv(table, table_name)
 
     tfo = table_from_options
     if not msg and not updating:
@@ -481,8 +484,14 @@ def _new_conc(n_clicks, show, search_from, current_cols, current_data, slug):
     specs, corpus = _get_from_corpus(
         search_from, CORPORA, SEARCHES, slug=slug, tables_extra=TABLES
     )
+    met = ["file", "s", "i"]
+
+    # corpus may not be loaded. then how to know what metadata there is?
+    if isinstance(corpus, pd.DataFrame) and "speaker" in corpus.columns:
+        met.append("speaker")
+
     conc = corpus.conc(
-        show=show, metadata=["file", "s", "i", "speaker"], window=(100, 100)
+        show=show, metadata=met, window=(100, 100)
     )
     max_row, max_col = CONFIG["table_size"]
     cols, data = _update_datatable(
