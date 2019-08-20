@@ -259,7 +259,7 @@ if not is_empty:
     text = "Select your corpus from the list below."
     text = html.P(text, style=style.VERTICAL_MARGINS)
     demos = html.Div([head, text, table])
-    avail = "Otherwise, you can try out the corpora below."
+    avail = " Otherwise, you can try out the corpora below."
 
 intro = html.P(
     "Here you can create and explore parsed and annotated corpora. "
