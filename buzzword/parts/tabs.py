@@ -25,7 +25,7 @@ from buzzword.parts.strings import (
 from buzzword.parts import style
 
 
-def _build_dataset_space(df, rows, **kwargs):
+def _build_dataset_space(df, **kwargs):
     """
     Build the search interface and the conll display
     """
@@ -90,16 +90,18 @@ def _build_dataset_space(df, rows, **kwargs):
         selected_rows=[],
         page_action="native",
         page_current=0,
-        page_size=rows,
+        page_size=kwargs["page_size"],
         # style_as_list_view=True,
         style_header=style.BOLD_DARK,
         style_cell_conditional=style.LEFT_ALIGN,
         style_data_conditional=style.INDEX + style.STRIPES,
     )
-    return html.Div(id="dataset-container", children=[search_space, conll_table])
+
+    div = html.Div(id="dataset-container", children=[search_space, conll_table])
+    return html.Div(id="display-dataset", children=[div])
 
 
-def _build_frequencies_space(corpus, table, rows, **kwargs):
+def _build_frequencies_space(corpus, table, **kwargs):
     """
     Build stuff related to the frequency table
     """
@@ -112,12 +114,14 @@ def _build_frequencies_space(corpus, table, rows, **kwargs):
         value=[],
         style=style.MARGIN_5_MONO,
     )
+    show_check = html.Div(show_check, style=style.TSTYLE)
     subcorpora_drop = dcc.Dropdown(
         id="subcorpora-for-table",
         options=cols,
         placeholder="Feature for index",
         style=style.MARGIN_5_MONO,
     )
+    subcorpora_drop = html.Div(subcorpora_drop, style=style.TSTYLE)
     relative_drop = dcc.Dropdown(
         id="relative-for-table",
         style=style.MARGIN_5_MONO,
@@ -130,6 +134,7 @@ def _build_frequencies_space(corpus, table, rows, **kwargs):
         ],
         placeholder="Relative/keyness calculation",
     )
+    relative_drop = html.Div(relative_drop, style=style.TSTYLE)
     sort_drop = dcc.Dropdown(
         id="sort-for-table",
         style=style.MARGIN_5_MONO,
@@ -144,6 +149,7 @@ def _build_frequencies_space(corpus, table, rows, **kwargs):
         ],
         placeholder="Sort columns by...",
     )
+    sort_drop = html.Div(sort_drop, style=style.TSTYLE)
     max_row, max_col = kwargs["table_size"]
     table = table.iloc[:max_row, :max_col]
     columns, data = _update_datatable(corpus, table, conll=False, deletable=False)
@@ -167,7 +173,7 @@ def _build_frequencies_space(corpus, table, rows, **kwargs):
                 selected_rows=[],
                 page_action="native",
                 page_current=0,
-                page_size=rows,
+                page_size=kwargs["page_size"],
                 style_header=style.BOLD_DARK,
                 style_cell_conditional=style.LEFT_ALIGN,
                 style_data_conditional=[style_index] + style.STRIPES,
@@ -181,26 +187,18 @@ def _build_frequencies_space(corpus, table, rows, **kwargs):
             ),
         ],
     )
-    tstyle = {**style.CELL_MIDDLE_35, **{"width": "25%", "display": "inline-block"}}
-    left = html.Div(
-        [html.Div(show_check, style=tstyle), html.Div(subcorpora_drop, style=tstyle)]
-    )
-    right = html.Div(
-        [
-            html.Div(sort_drop, style=tstyle),
-            html.Div(relative_drop, style=tstyle),
-            html.Button(
-                "Generate table",
-                id="table-button",
-                style={"width": "20%", **style.CELL_MIDDLE_35, **style.MARGIN_5_MONO},
-            ),
-        ]
-    )
+
+    left = html.Div([show_check, subcorpora_drop])
+    right = html.Div([sort_drop, relative_drop])
+    gen = "Generate table"
+    sty = {"width": "20%", **style.CELL_MIDDLE_35, **style.MARGIN_5_MONO}
+    generate = html.Button(gen, id="table-button", style=sty)
     toolbar = html.Div([left, right], style=style.VERTICAL_MARGINS)
-    return html.Div([toolbar, freq_table])
+    div = html.Div([toolbar, freq_table])
+    return html.Div(id="display-frequencies", children=[div])
 
 
-def _build_concordance_space(df, rows, **kwargs):
+def _build_concordance_space(df, **kwargs):
     """
     Div representing the concordance tab
     """
@@ -260,7 +258,7 @@ def _build_concordance_space(df, rows, **kwargs):
                 selected_rows=[],
                 page_action="native",
                 page_current=0,
-                page_size=rows,
+                page_size=kwargs["page_size"],
                 # style_as_list_view=True,
                 style_header=style.BOLD_DARK,
                 style_cell_conditional=style.LEFT_ALIGN_CONC,
@@ -269,10 +267,11 @@ def _build_concordance_space(df, rows, **kwargs):
         ],
     )
 
-    return html.Div([conc_space, conc])
+    div = html.Div([conc_space, conc])
+    return html.Div(id="display-concordance", children=[div])
 
 
-def _build_chart_space(tables, rows, **kwargs):
+def _build_chart_space(table, **kwargs):
     """
     Div representing the chart tab
     """
@@ -285,9 +284,7 @@ def _build_chart_space(tables, rows, **kwargs):
         (5, "bar"),
     ]:
 
-        table_from = [
-            dict(value=i, label=_make_table_name(h)) for i, h in enumerate(tables)
-        ]
+        table_from = [dict(value=0, label=_make_table_name("initial"))]
         dropdown = dcc.Dropdown(
             id=f"chart-from-{chart_num}",
             options=table_from,
@@ -342,8 +339,7 @@ def _build_chart_space(tables, rows, **kwargs):
                 div.title = "Number of entries to display"
             tools.append(div)
         toolbar = html.Div(tools, style=style.VERTICAL_MARGINS)
-        df = tables["initial"]
-        figure = _df_to_figure(df, kind=kind)
+        figure = _df_to_figure(table, kind=kind)
         chart_data = dict(
             id=f"chart-{chart_num}",
             figure=figure,
@@ -351,41 +347,24 @@ def _build_chart_space(tables, rows, **kwargs):
         )
         chart = dcc.Graph(**chart_data)
         chart_space = html.Div([toolbar, chart])
-        collapse = html.Details(
-            [
-                html.Summary(
-                    f"Chart #{chart_num}",
-                    style={
-                        "fontWeight": "bold",
-                        "fontSize": "11pt",
-                        "paddingBottom": "10px",
-                        "paddingTop": "10px",
-                        **style.BOLD_DARK,
-                    },
-                ),
-                html.Div(chart_space),
-            ],
-            open=chart_num == 1,
-            # style={"borderStyle": "groove"}
-        )
+        name = f"Chart #{chart_num}"
+        summary = html.Summary(name, style=style.CHART_SUMMARY)
+        drop = [summary, html.Div(chart_space)]
+        collapse = html.Details(drop, open=chart_num == 1)
         charts.append(collapse)
-    return html.Div(charts)
+    div = html.Div(charts)
+    return html.Div(id="display-chart", children=[div])
 
 
-def _make_tabs(
-    searches, tables, corpus_slug, corpus_name, title=None, page_size=25, **kwargs
-):
+def _make_tabs(corpus, table, slug, name, **kwargs):
     """
     Generate initial layout div
     """
-    corpus = next(iter(searches.values()))
-    dataset = _build_dataset_space(corpus, page_size, **kwargs)
-    frequencies = _build_frequencies_space(
-        corpus, tables["initial"], page_size, **kwargs
-    )
-    chart = _build_chart_space(tables, page_size, **kwargs)
-    concordance = _build_concordance_space(corpus, page_size, **kwargs)
-    label = _make_search_name(corpus_name, kwargs["corpus_size"])
+    dataset = _build_dataset_space(corpus, **kwargs)
+    frequencies = _build_frequencies_space(corpus, table, **kwargs)
+    chart = _build_chart_space(table, **kwargs)
+    concordance = _build_concordance_space(corpus, **kwargs)
+    label = _make_search_name(name, kwargs["corpus_size"])
     search_from = [dict(value=0, label=label)]
     clear = html.Button("Clear history", id="clear-history", style=style.MARGIN_5_MONO)
     dropdown = dcc.Dropdown(
@@ -433,53 +412,29 @@ def _make_tabs(
             dcc.Tab(label="CONCORDANCE", value="concordance"),
         ],
     )
+    blk = {"display": "block"}
+    conll_display = html.Div(id="display-dataset", children=[dataset])
+    conll_tab = html.Div(id="tab-dataset", style=blk, children=[conll_display])
+    main_load_and_dataset = dcc.Loading(
+        type="default",
+        id="loading-main",
+        fullscreen=True,
+        className="loading-main",
+        children=[conll_tab],
+    )
+    hide = {"display": "none"}
 
     tab_contents = [
         html.Div(
             children=[
-                dcc.Loading(
-                    type="default",
-                    id="loading-main",
-                    fullscreen=True,
-                    className="loading-main",
-                    children=[
-                        html.Div(
-                            id="tab-dataset",
-                            style={"display": "block"},
-                            children=[
-                                html.Div(id="display-dataset", children=[dataset])
-                            ],
-                        )
-                    ],
-                ),
-                html.Div(
-                    id="tab-frequencies",
-                    style={"display": "none"},
-                    children=[
-                        html.Div(id="display-frequencies", children=[frequencies])
-                    ],
-                ),
-                html.Div(
-                    id="tab-chart",
-                    style={"display": "none"},
-                    children=[html.Div(id="display-chart", children=[chart])],
-                ),
-                html.Div(
-                    id="tab-concordance",
-                    style={"display": "none"},
-                    children=[
-                        html.Div(id="display-concordance", children=[concordance])
-                    ],
-                ),
+                main_load_and_dataset,
+                html.Div(id="tab-frequencies", style=hide, children=[frequencies]),
+                html.Div(id="tab-chart", style=hide, children=[chart]),
+                html.Div(id="tab-concordance", style=hide, children=[concordance]),
             ]
         )
     ]
     tab_contents = html.Div(id="tab-contents", children=tab_contents)
-
-    hidden_corpus_name = html.Div(
-        id="corpus-slug", children=corpus_slug, style={"display": "none"}
-    )
-    return html.Div(
-        id="everything",
-        children=[top_bit, tab_headers, tab_contents, hidden_corpus_name],
-    )
+    hidden_corpus_name = html.Div(id="corpus-slug", children=slug, style=hide)
+    children = [top_bit, tab_headers, tab_contents, hidden_corpus_name]
+    return html.Div(id="everything", children=children)
