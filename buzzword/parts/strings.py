@@ -25,7 +25,7 @@ def _make_table_name(history):
     """
     if history == "initial":
         return "Wordclasses by file"
-    specs, show, subcorpora, relative, keyness, sort, n, updates = history
+    specs, show, subcorpora, relative, keyness, sort, n, updates, _ = history
     subcorpora = (
         SHORT_TO_LONG_NAME.get(subcorpora, subcorpora).lower().replace("_", " ")
     )
@@ -125,11 +125,13 @@ def _downloadable_name(name):
     name = name.replace(" ", "-")
     ok = {"-", "_"}
     name = "".join([i for i in name if i.isalnum() or i in ok])
-    return name.strip("- ")
+    return name.strip("- ").lower()
 
 
 def _slug_from_name(name):
     """
     Make a slug from an (uploaded) corpus name
     """
-    return name.replace("/", "-").replace(".", "-").replace(" ", "-")
+    for repl in ["/", ".", " "]:
+        name = name.replace(repl, "-")
+    return name.lower()
