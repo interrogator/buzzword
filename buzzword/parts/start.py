@@ -227,7 +227,9 @@ def _upload_files(n_clicks, contents, names, corpus_lang, corpus_name, table_row
         ("tokens", toks),
         ("link", href),
     ]
-    table_rows.append(_make_row(OrderedDict(tups), index, upload=True))
+    # put it at start of table :)
+    row = _make_row(OrderedDict(tups), 0, upload=True)
+    table_rows = [table_rows[0], row] + table_rows[1:]
     return bool(msg), msg, table_rows
 
 
