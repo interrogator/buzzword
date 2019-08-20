@@ -6,8 +6,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
 
-from .parts import explore  # noqa: F401
-from .parts import about, building, depgrep, guide, start
+from .parts import start, explore  # noqa: F401
 from .parts.main import server  # noqa: F401
 from .parts.main import CONFIG, CORPORA, CORPUS_META, INITIAL_TABLES, app
 from .parts.tabs import _make_tabs
@@ -78,28 +77,16 @@ def _choose_correct_page(pathname):
     """
     When the URL changes, get correct page and populate page-content with it
     """
-    pages = dict(
-        about=about.layout,
-        guide=guide.layout,
-        building=building.layout,
-        start=start.layout,
-        depgrep=depgrep.layout,
-    )
     if pathname is None:
         raise PreventUpdate
     pathname = pathname.lstrip("/")
-    if not pathname:
-        return start.layout
-    if pathname in pages:
-        return pages[pathname]
     if pathname.startswith("explore"):
         slug = pathname.rstrip("/").split("/")[-1]
         # if corpus not found, redirect
         if slug not in CORPORA:
-            return start.layout
-        # find corpus name by slug
+            pathname = ""
         return _get_explore_layout(slug)
-    if pathname in {"", "/"}:
+    if not pathname:
         return start.layout
     else:
         return "404"
