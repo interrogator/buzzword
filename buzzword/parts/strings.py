@@ -66,11 +66,11 @@ def _make_search_name(history, size):
     locale.setlocale(locale.LC_ALL, "")
     if isinstance(history, str):
         return f"Search entire corpus: {history} ({size:n} tokens)"
-    previous, col, skip, search_string, n, n_results = history
+    previous, col, skip, search_string, n, n_results, _ = history
     no = "not " if skip else ""
     col = SHORT_TO_LONG_NAME.get(col, col)
     relative_corpus = n_results * 100 / size
-    prev_total = previous[-1] if isinstance(previous, tuple) else None
+    prev_total = previous[-1] if isinstance(previous, list) else None
     rel_last = ""
     if prev_total is not None:
         rel_last = n_results * 100 / prev_total
@@ -78,7 +78,7 @@ def _make_search_name(history, size):
     freq = f"(n={n_results:n}{rel_last}/{relative_corpus:.2f}%)"
     basic = f"{col} {no}matching '{search_string}' {freq}"
     hyphen = ""
-    while isinstance(previous, tuple):
+    while isinstance(previous, list):
         hyphen += "──"
         previous = previous[0]
     if hyphen:

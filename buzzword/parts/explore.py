@@ -7,10 +7,11 @@ import pandas as pd
 
 from buzz.dashview import _df_to_figure
 from buzzword.parts.helpers import (
-    _get_from_corpus,
+    _get_specs_and_corpus,
     _translate_relative,
     _update_datatable,
     _make_csv,
+    _get_table_for_chart,
 )
 from buzzword.parts.strings import (
     _make_search_name,
@@ -24,15 +25,6 @@ from dash.exceptions import PreventUpdate
 import flask
 
 from buzzword.parts.main import app, CONFIG, CORPORA, CORPUS_META, INITIAL_TABLES
-
-###########
-# STORAGE #
-###########
-#
-SEARCHES = OrderedDict({})
-TABLES = OrderedDict()
-# CLICKS is a hack for clear history. move eventually to hidden div
-CLICKS = dict(clear=-1, table=-1)
 
 #############
 # CALLBACKS #
@@ -84,9 +76,10 @@ for i in range(1, 6):
             State(f"chart-type-{i}", "value"),
             State(f"chart-top-n-{i}", "value"),
             State(f"chart-transpose-{i}", "on"),
+            State("session-tables", "data"),
         ],
     )
-    def _new_chart(n_clicks, table_from, chart_type, top_n, transpose):
+    def _new_chart(n_clicks, table_from, chart_type, top_n, transpose, session_tables):
         """
         Make new chart by kind. Do it 5 times, once for each chart space
         """
@@ -94,7 +87,7 @@ for i in range(1, 6):
         if n_clicks is None:
             raise PreventUpdate
         # get correct dataset to chart
-        specs, df = _get_from_corpus(table_from, None, dataset=TABLES)
+        df = _get_table_for_chart(table_from, session_tables)
         # transpose and cut down items to plot
         if transpose:
             df = df.T
@@ -125,6 +118,8 @@ def _on_load_callback(n_clicks):
         Output("dialog-search", "displayed"),
         Output("dialog-search", "message"),
         Output("conll-view", "row_deletable"),
+        Output("session-search", "data"),
+        Output("session-clicks-clear", "data"),
     ],
     [Input("search-button", "n_clicks"), Input("clear-history", "n_clicks")],
     [
@@ -136,6 +131,8 @@ def _on_load_callback(n_clicks):
         State("conll-view", "columns"),
         State("conll-view", "data"),
         State("corpus-slug", "children"),
+        State("session-search", "data"),
+        State("session-clicks-clear", "data"),
     ],
 )
 def _new_search(
@@ -149,6 +146,8 @@ def _new_search(
     current_cols,
     current_data,
     slug,
+    session_search,
+    session_clicks_clear,
 ):
     """
     Callback when a new search is submitted
@@ -157,6 +156,8 @@ def _new_search(
     """
     # the first callback, before anything is loaded
     if n_clicks is None:
+        raise PreventUpdate
+        # can i delete the below?
         return (
             current_cols,
             current_data,
@@ -166,14 +167,14 @@ def _new_search(
             False,
             "",
             False,
+            session_search,
+            session_clicks_clear,
         )
 
     add_governor = CONFIG["add_governor"]
     max_row, max_col = CONFIG["table_size"]
 
-    specs, corpus = _get_from_corpus(
-        search_from, CORPORA, SEARCHES, slug=slug, tables_extra=TABLES
-    )
+    specs, corpus = _get_specs_and_corpus(search_from, session_search, CORPORA, slug)
 
     msg = _search_error(col, search_string)
     if msg:
@@ -186,31 +187,44 @@ def _new_search(
             True,
             msg,
             False,
+            session_search,
+            session_clicks_clear,
         )
 
-    new_value = len(SEARCHES) + 1
+    new_value = len(session_search) + 1
     this_search = [specs, col, skip, search_string]
 
-    exists = next((i for i in SEARCHES if this_search == list(i)[:4]), False)
+    exists = next(
+        (i for i in session_search.values() if this_search == list(i)[:4]), False
+    )
     if exists:
         msg = "Table already exists. Switching to that one to save memory."
-        df = corpus.loc[SEARCHES[exists]]
+        df = corpus.iloc[exists[-1]]
 
     # if the user has done clear history
-    if cleared and cleared != CLICKS["clear"]:
-        # clear searches
-        SEARCHES.clear()
-        name = next(k for k, v in CORPUS_META.items() if v["slug"] == slug)
-        SEARCHES[name] = corpus
+    if cleared and cleared != session_clicks_clear:
+        session_search.clear()
+        corpus = CORPORA[slug]
         corpus = corpus.iloc[:max_row, :max_col]
         cols, data = _update_datatable(corpus, corpus, drop_govs=add_governor)
         search_from = [
             dict(value=i, label=_make_search_name(h, len(corpus)))
-            for i, h in enumerate(SEARCHES)
+            for i, h in enumerate(session_search)
         ]
         # set number of clicks at last moment
-        CLICKS["clear"] = cleared
-        return (cols, data, search_from, 0, True, False, "", False)
+        session_clicks_clear = cleared
+        return (
+            cols,
+            data,
+            search_from,
+            0,
+            True,
+            False,
+            "",
+            False,
+            session_search,
+            session_clicks_clear,
+        )
 
     found_results = True
 
@@ -235,9 +249,10 @@ def _new_search(
             found_results = False
             msg = "No results found, sorry."
 
-    this_search = tuple(this_search + [new_value, len(df)])
+    this_search += [new_value, len(df), list(df["_n"])]
+    print("STORING", new_value, this_search)
     if found_results:
-        SEARCHES[this_search] = df["_n"]
+        session_search[new_value] = this_search
         corpus = CORPORA[slug]
         df = df.iloc[:max_row, :max_col]
         current_cols, current_data = _update_datatable(
@@ -248,7 +263,7 @@ def _new_search(
         option = dict(value=new_value, label=name)
         search_from_options.append(option)
     elif exists:
-        new_value = exists[-1]
+        new_value = exists[-3]
     else:
         new_value = search_from
     return (
@@ -260,32 +275,27 @@ def _new_search(
         bool(msg),
         msg,
         True,
+        session_search,
+        session_clicks_clear,
     )
-
-
-opts = [Output(f"chart-from-{i}", "options") for i in range(1, 6)]
-vals = [Output(f"chart-from-{i}", "values") for i in range(1, 6)]
-stat = [State(f"chart-from-{i}", "value") for i in range(1, 6)]
 
 
 @app.callback(
     [
         Output("freq-table", "columns"),
         Output("freq-table", "data"),
-        Output("chart-from-1", "options"),
         Output("chart-from-1", "value"),
+        Output("chart-from-1", "options"),
         Output("chart-from-2", "options"),
-        Output("chart-from-2", "value"),
         Output("chart-from-3", "options"),
-        Output("chart-from-3", "value"),
         Output("chart-from-4", "options"),
-        Output("chart-from-4", "value"),
         Output("chart-from-5", "options"),
-        Output("chart-from-5", "value"),
         Output("dialog-table", "displayed"),
         Output("dialog-table", "message"),
         Output("freq-table", "row_deletable"),
         Output("download-link", "href"),
+        Output("session-tables", "data"),
+        Output("session-clicks-table", "data"),
     ],
     [
         Input("table-button", "n_clicks"),
@@ -302,11 +312,10 @@ stat = [State(f"chart-from-{i}", "value") for i in range(1, 6)]
         State("sort-for-table", "value"),
         State("chart-from-1", "options"),
         State("chart-from-1", "value"),
-        State("chart-from-2", "value"),
-        State("chart-from-3", "value"),
-        State("chart-from-4", "value"),
-        State("chart-from-5", "value"),
         State("corpus-slug", "children"),
+        State("session-search", "data"),
+        State("session-tables", "data"),
+        State("session-clicks-table", "data"),
     ],
 )
 def _new_table(
@@ -322,11 +331,10 @@ def _new_table(
     sort,
     table_from_options,
     nv1,
-    nv2,
-    nv3,
-    nv4,
-    nv5,
     slug,
+    session_search,
+    session_tables,
+    session_click_table,
 ):
     """
     Callback when a new freq table is generated. Same logic as new_search.
@@ -338,46 +346,52 @@ def _new_table(
     # because no option below can return initial table, rows can now be deleted
     row_deletable = True
 
-    # parse options and get correct data
-    specs, corpus = _get_from_corpus(
-        search_from, CORPORA, SEARCHES, slug=slug, tables_extra=TABLES
-    )
+    specs, corpus = _get_specs_and_corpus(search_from, session_search, CORPORA, slug)
+
     if not sort:
         sort = "total"
+
     relative, keyness = _translate_relative(relkey, CORPORA[slug])
 
     # check if there are any validation problems
-    if CLICKS["table"] != n_clicks:
+    if session_click_table != n_clicks:
         updating = False
-        CLICKS["table"] = n_clicks
+        session_click_table = n_clicks
     else:
         updating = prev_data is not None and (
             len(prev_data) != len(current_data)
             or len(prev_data[0]) != len(current_data[0])
         )
     msg = _table_error(show, subcorpora, updating)
-    nv = len(TABLES) + 1
-    this_table = (specs, tuple(show), subcorpora, relative, keyness, sort, nv, 0)
+    nv = len(session_tables) + 1
+    this_table = [specs, show, subcorpora, relative, keyness, sort, nv, 0]
 
     # if table already made, use that one
-    exists = next((i for i in TABLES if list(this_table)[:6] == list(i)[:6]), False)
+    key, exists = next(
+        ((k, v) for v in session_tables.items() if this_table[:6] == v[:6]),
+        (False, False),
+    )
 
     # if we are updating the table:
     if updating:
-        table = TABLES[exists]
-        times_updated = exists[-1] + 1
-        exists = tuple(list(exists)[:-1] + [times_updated])
+        got = session_tables[key]
+        table = pd.DataFrame(got[-1])
+        times_updated = got[-2] + 1
+        exists = got[:-2] + [times_updated, table]
         this_table = exists
         table = table[[i["id"] for i in current_cols[1:]]]
         table = table.loc[[i["_" + table.index.name] for i in current_data]]
-        TABLES[exists] = table
+        session_tables[key] = exists
     elif exists:
         msg = "Table already exists. Switching to that one to save memory."
-        table = TABLES[exists]
+        got = session_tables[key]
+        table = pd.DataFrame(got[-1])
     # if there was a validation problem, juse use last table (?)
     elif msg:
-        if TABLES:
-            table = list(TABLES.values())[-1]
+        if session_tables:
+            key, value = list(session_tables.items())[-1]
+            table = pd.DataFrame(value[-1])
+            # todo: more here
         else:
             table = INITIAL_TABLES[slug]
     else:
@@ -398,7 +412,7 @@ def _new_table(
             relative = None
 
         # store the search information and the result
-        TABLES[this_table] = table
+        session_tables[nv] = this_table
 
     # format various outputs for display.
     # nv numbers are what we update the chart-from dropdowns.
@@ -410,9 +424,8 @@ def _new_table(
         cols, data = current_cols, current_data
     else:
         max_row, max_col = CONFIG["table_size"]
-        cols, data = _update_datatable(
-            CORPORA[slug], table.iloc[:max_row, :max_col], conll=False
-        )
+        tab = table.iloc[:max_row, :max_col]
+        cols, data = _update_datatable(CORPORA[slug], tab, conll=False)
 
     table_name = _make_table_name(this_table)
 
@@ -423,33 +436,22 @@ def _new_table(
     if not msg and not updating:
         option = dict(value=nv, label=table_name)
         tfo.append(option)
-        nv1, nv2, nv3, nv4, nv5 = nv, nv, nv, nv, nv
     elif exists or updating:
-        nv1, nv2, nv3, nv4, nv5 = (
-            exists[-1],
-            exists[-1],
-            exists[-1],
-            exists[-1],
-            exists[-1],
-        )
-
+        nv = exists[-1]
     return (
         cols,
         data,
+        nv,
         tfo,
-        nv1,
         tfo,
-        nv2,
         tfo,
-        nv3,
         tfo,
-        nv4,
         tfo,
-        nv5,
         bool(msg),
         msg,
         row_deletable,
         csv_path,
+        session_click_table,
     )
 
 
@@ -467,9 +469,10 @@ def _new_table(
         State("conc-table", "columns"),
         State("conc-table", "data"),
         State("corpus-slug", "children"),
+        State("session-search", "data"),
     ],
 )
-def _new_conc(n_clicks, show, search_from, current_cols, current_data, slug):
+def _new_conc(n_clicks, show, search_from, cols, data, slug, session_search):
     """
     Callback for concordance. We just pick what to show and where from...
     """
@@ -479,24 +482,20 @@ def _new_conc(n_clicks, show, search_from, current_cols, current_data, slug):
     # easy validation!
     msg = "" if show else "No choice made for match formatting."
     if not show:
-        return current_cols, current_data, True, msg
+        return cols, data, True, msg
 
-    specs, corpus = _get_from_corpus(
-        search_from, CORPORA, SEARCHES, slug=slug, tables_extra=TABLES
-    )
+    specs, corpus = _get_specs_and_corpus(search_from, session_search, CORPORA, slug)
+
     met = ["file", "s", "i"]
 
     # corpus may not be loaded. then how to know what metadata there is?
     if isinstance(corpus, pd.DataFrame) and "speaker" in corpus.columns:
         met.append("speaker")
 
-    conc = corpus.conc(
-        show=show, metadata=met, window=(100, 100)
-    )
+    conc = corpus.conc(show=show, metadata=met, window=(100, 100))
     max_row, max_col = CONFIG["table_size"]
-    cols, data = _update_datatable(
-        CORPORA[slug], conc.iloc[:max_row, :max_col], conc=True
-    )
+    short = conc.iloc[:max_row, :max_col]
+    cols, data = _update_datatable(CORPORA[slug], short, conc=True)
     return cols, data, bool(msg), msg
 
 

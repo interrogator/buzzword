@@ -12,27 +12,30 @@ from buzz.constants import SHORT_TO_COL_NAME, SHORT_TO_LONG_NAME
 from buzzword.parts.strings import _capitalize_first, _downloadable_name
 
 
-def _get_from_corpus(from_number, corpora, dataset, slug=None, tables_extra=None):
+def _get_specs_and_corpus(search_from, searches, corpora, slug):
     """
-    Get the correct dataset from number stored in the dropdown for search_from
+    Get the correct corpus based on search_from
     """
     from buzzword.parts.main import CONFIG
-
-    # handle uploaded corpora
-    if slug and slug not in corpora:
+    # if corpus not loaded into corpora, it is an upload. fix now
+    if not corpora:
         upload = os.path.join(CONFIG["root"], "uploads", slug + "-parsed")
         loaded = Corpus(upload).load()
         corpora[slug] = loaded
-        # also add to tables
-        tables_extra["initial"] = loaded.table(show="p", subcorpora="file")
-    # if we want the whole corpus, return that
-    if not from_number and corpora:
+    # if the user wants the corpus, return that
+    if not search_from:
         return slug, corpora[slug]
-    specs, corpus = list(dataset.items())[from_number - 1]
-    # tables are dataframes, conll searches are just (multi)index
-    if not isinstance(corpus, (pd.DataFrame, Corpus)):
-        corpus = corpora[slug].iloc[corpus]
-    return specs, corpus
+    # otherwise, get the search result (i.e. _n col) and make corpus
+    exists = searches[str(search_from)]
+    specs, ix = exists[0], exists[-1]
+    return specs, corpora[slug].iloc[ix]
+
+
+def _get_table_for_chart(table_from, tables):
+    """
+    Get the table that needs to be charted
+    """
+    return list(tables.values())[table_from-1]
 
 
 def _translate_relative(inp, corpus):
