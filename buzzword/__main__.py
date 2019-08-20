@@ -25,8 +25,13 @@ def _get_layout():
     Function for layout. Could be helpful in future to do it this way.
     """
     loc = dcc.Location(id="url", refresh=False)
+    search_store = dcc.Store(id='session-search', storage_type='session')
+    tables_store = dcc.Store(id='session-tables', storage_type='session')
+    click_clear = dcc.Store(id='session-click-clear', storage_type='session')
+    click_table = dcc.Store(id='session-click-table', storage_type='session')
     content = html.Div(id="page-content")
-    return html.Div([loc, content])
+    stores = [search_store, tables_store, click_clear, click_table]
+    return html.Div([loc] + stores + [content])
 
 
 app.layout = _get_layout
