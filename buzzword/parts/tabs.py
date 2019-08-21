@@ -94,7 +94,14 @@ def _build_dataset_space(df, **kwargs):
         style_cell_conditional=style.LEFT_ALIGN,
         style_data_conditional=style.INDEX + style.STRIPES,
     )
-
+    # add loading
+    conll_table = dcc.Loading(
+        type="default",
+        id="loading-main",
+        fullscreen=True,
+        className="loading-main",
+        children=[conll_table],
+    )
     div = html.Div(id="dataset-container", children=[search_space, conll_table])
     return html.Div(id="display-dataset", children=[div])
 
@@ -411,20 +418,12 @@ def _make_tabs(corpus, table, slug, name, **kwargs):
     )
     blk = {"display": "block"}
     conll_display = html.Div(id="display-dataset", children=[dataset])
-    conll_tab = html.Div(id="tab-dataset", style=blk, children=[conll_display])
-    main_load_and_dataset = dcc.Loading(
-        type="default",
-        id="loading-main",
-        fullscreen=True,
-        className="loading-main",
-        children=[conll_tab],
-    )
     hide = {"display": "none"}
 
     tab_contents = [
         html.Div(
             children=[
-                main_load_and_dataset,
+                html.Div(id="tab-dataset", style=blk, children=[conll_display]),
                 html.Div(id="tab-frequencies", style=hide, children=[frequencies]),
                 html.Div(id="tab-chart", style=hide, children=[chart]),
                 html.Div(id="tab-concordance", style=hide, children=[concordance]),
