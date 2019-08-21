@@ -23,7 +23,7 @@ from dash.exceptions import PreventUpdate
 
 import flask
 
-from buzzword.parts.main import app, CORPORA, INITIAL_TABLES, CORPORA_CONFIGS
+from buzzword.parts.main import app, CORPORA, INITIAL_TABLES
 
 # we can't keep tables in dcc.store, they are too big. so we keep all here with
 # a tuple that can identify them (ideally, even dealing with user sessions)
@@ -137,7 +137,7 @@ def _on_load_callback(n_clicks):
         State("search-from", "options"),
         State("conll-view", "columns"),
         State("conll-view", "data"),
-        State("corpus-slug", "children"),
+        State("corpus-config", "children"),
         State("session-search", "data"),
         State("session-clicks-clear", "data"),
     ],
@@ -152,7 +152,7 @@ def _new_search(
     search_from_options,
     current_cols,
     current_data,
-    slug,
+    conf,
     session_search,
     session_clicks_clear,
 ):
@@ -178,7 +178,7 @@ def _new_search(
             session_clicks_clear,
         )
 
-    conf = CORPORA_CONFIGS[slug]
+    slug = conf["slug"]
     add_governor = conf["add_governor"]
     max_row, max_col = conf["table_size"]
 
@@ -319,7 +319,7 @@ def _new_search(
         State("sort-for-table", "value"),
         State("chart-from-1", "options"),
         State("chart-from-1", "value"),
-        State("corpus-slug", "children"),
+        State("corpus-config", "children"),
         State("session-search", "data"),
         State("session-tables", "data"),
         State("session-clicks-table", "data"),
@@ -338,7 +338,7 @@ def _new_table(
     sort,
     table_from_options,
     nv1,
-    slug,
+    conf,
     session_search,
     session_tables,
     session_click_table,
@@ -350,7 +350,7 @@ def _new_table(
     if n_clicks is None:
         raise PreventUpdate
 
-    conf = CORPORA_CONFIGS[slug]
+    slug = conf["slug"]
 
     # because no option below can return initial table, rows can now be deleted
     row_deletable = True
@@ -475,16 +475,18 @@ def _new_table(
         State("search-from", "value"),
         State("conc-table", "columns"),
         State("conc-table", "data"),
-        State("corpus-slug", "children"),
+        State("corpus-config", "children"),
         State("session-search", "data"),
     ],
 )
-def _new_conc(n_clicks, show, search_from, cols, data, slug, session_search):
+def _new_conc(n_clicks, show, search_from, cols, data, conf, session_search):
     """
     Callback for concordance. We just pick what to show and where from...
     """
     if n_clicks is None:
         raise PreventUpdate
+
+    slug = conf["slug"]
 
     # easy validation!
     msg = "" if show else "No choice made for match formatting."
@@ -499,7 +501,6 @@ def _new_conc(n_clicks, show, search_from, cols, data, slug, session_search):
         met.append("speaker")
 
     conc = corpus.conc(show=show, metadata=met, window=(100, 100))
-    conf = CORPORA_CONFIGS[slug]
     max_row, max_col = conf["table_size"]
     short = conc.iloc[:max_row, :max_col]
     cols, data = _update_datatable(CORPORA[slug], short, conc=True)

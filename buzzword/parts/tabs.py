@@ -432,6 +432,6 @@ def _make_tabs(corpus, table, config):
         )
     ]
     tab_contents = html.Div(id="tab-contents", children=tab_contents)
-    hidden_corpus_name = html.Div(id="corpus-slug", children=slug, style=hide)
+    hidden_corpus_name = html.Div(id="corpus-config", children=config, style=hide)
     children = [top_bit, tab_headers, tab_contents, hidden_corpus_name]
     return html.Div(id="everything", children=children)
