@@ -354,8 +354,7 @@ def _new_table(
 
     specs, corpus = _get_specs_and_corpus(search_from, session_search, CORPORA, slug)
 
-    if not sort:
-        sort = "total"
+    sort = sort or "total"
 
     relative, keyness = _translate_relative(relkey, CORPORA[slug])
 
@@ -492,8 +491,7 @@ def _new_conc(n_clicks, show, search_from, cols, data, slug, session_search):
     specs, corpus = _get_specs_and_corpus(search_from, session_search, CORPORA, slug)
 
     met = ["file", "s", "i"]
-
-    # corpus may not be loaded. then how to know what metadata there is?
+    # todo: corpus may not be loaded. then how to know what metadata there is?
     if isinstance(corpus, pd.DataFrame) and "speaker" in corpus.columns:
         met.append("speaker")
 
