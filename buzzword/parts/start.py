@@ -1,3 +1,7 @@
+"""
+buzzword: main page and its callbacks; loading corpus table
+"""
+
 import base64
 import os
 import traceback

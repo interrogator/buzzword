@@ -1,7 +1,5 @@
-# flake8: noqa
-
 """
-buzz webapp: everything needed to populate app tabs initially
+buzzword: building tab layout and populating with initial data
 """
 
 import dash_core_components as dcc
@@ -187,12 +185,11 @@ def _build_frequencies_space(corpus, table, **kwargs):
             ),
         ],
     )
-
-    left = html.Div([show_check, subcorpora_drop])
-    right = html.Div([sort_drop, relative_drop])
     gen = "Generate table"
     sty = {"width": "20%", **style.CELL_MIDDLE_35, **style.MARGIN_5_MONO}
     generate = html.Button(gen, id="table-button", style=sty)
+    left = html.Div([show_check, subcorpora_drop])
+    right = html.Div([sort_drop, relative_drop, generate])
     toolbar = html.Div([left, right], style=style.VERTICAL_MARGINS)
     div = html.Div([toolbar, freq_table])
     return html.Div(id="display-frequencies", children=[div])

@@ -1,6 +1,6 @@
-# flake8: noqa
-
-from collections import OrderedDict
+"""
+buzzword: callbacks for explore page
+"""
 
 import os
 import pandas as pd
@@ -10,7 +10,6 @@ from buzzword.parts.helpers import (
     _get_specs_and_corpus,
     _translate_relative,
     _update_datatable,
-    _make_csv,
     _get_table_for_chart,
 )
 from buzzword.parts.strings import (
@@ -24,7 +23,11 @@ from dash.exceptions import PreventUpdate
 
 import flask
 
-from buzzword.parts.main import app, CONFIG, CORPORA, CORPUS_META, INITIAL_TABLES
+from buzzword.parts.main import app, CONFIG, CORPORA, INITIAL_TABLES
+
+# we can't keep tables in dcc.store, they are too big. so we keep all here with
+# a tuple that can identify them
+FULL_TABLES = dict()
 
 #############
 # CALLBACKS #
@@ -357,41 +360,44 @@ def _new_table(
     if session_click_table != n_clicks:
         updating = False
         session_click_table = n_clicks
-    else:
-        updating = prev_data is not None and (
-            len(prev_data) != len(current_data)
-            or len(prev_data[0]) != len(current_data[0])
-        )
+    elif prev_data is not None:
+        # if number of rows has changed
+        if len(prev_data) != len(current_data):
+            updating = True
+        # if number of columns has changed
+        if len(prev_data[0]) != len(current_data[0]):
+            updating = True
+
     msg = _table_error(show, subcorpora, updating)
-    nv = len(session_tables) + 1
-    this_table = [specs, show, subcorpora, relative, keyness, sort, nv, 0]
+    idx = len(session_tables) + 1
+    this_table = [specs, show, subcorpora, relative, keyness, sort, idx, 0]
 
     # if table already made, use that one
     key, exists = next(
-        ((k, v) for v in session_tables.items() if this_table[:6] == v[:6]),
+        ((k, v) for k, v in session_tables.items() if this_table[:6] == v[:6]),
         (False, False),
     )
 
     # if we are updating the table:
     if updating:
-        got = session_tables[key]
-        table = pd.DataFrame(got[-1])
-        times_updated = got[-2] + 1
-        exists = got[:-2] + [times_updated, table]
-        this_table = exists
+        table = FULL_TABLES[tuple(exists[:6])]
+        exists[-1] += 1
+        # fix rows and columns
         table = table[[i["id"] for i in current_cols[1:]]]
         table = table.loc[[i["_" + table.index.name] for i in current_data]]
+        # store again
         session_tables[key] = exists
+        FULL_TABLES[tuple(exists[:6])] = table
     elif exists:
         msg = "Table already exists. Switching to that one to save memory."
-        got = session_tables[key]
-        table = pd.DataFrame(got[-1])
+        table = FULL_TABLES[tuple(exists[:6])]
     # if there was a validation problem, juse use last table (?)
     elif msg:
         if session_tables:
+            # todo: figure this out...use current table instead?
             key, value = list(session_tables.items())[-1]
-            table = pd.DataFrame(value[-1])
-            # todo: more here
+            table = FULL_TABLES[tuple(value[:6])]
+            # todo: more here?
         else:
             table = INITIAL_TABLES[slug]
     else:
@@ -411,15 +417,10 @@ def _new_table(
         if isinstance(relative, pd.DataFrame):
             relative = None
 
-        # store the search information and the result
-        session_tables[nv] = this_table
+        # make show a tuple, then store the search information
+        this_table[1] = tuple(this_table[1])
+        session_tables[idx] = this_table
 
-    # format various outputs for display.
-    # nv numbers are what we update the chart-from dropdowns.
-    # if successful table, update all to latest
-    # if table existed, update all to that one
-    # if error, keep as they are (ths is why we need many states)
-    # if updating, we reuse the current data
     if updating:
         cols, data = current_cols, current_data
     else:
@@ -427,30 +428,28 @@ def _new_table(
         tab = table.iloc[:max_row, :max_col]
         cols, data = _update_datatable(CORPORA[slug], tab, conll=False)
 
-    table_name = _make_table_name(this_table)
+    csv_path = "todo"
 
-    # todo: slow to do this every time!
-    csv_path = "todo"  # _make_csv(table, table_name)
-
-    tfo = table_from_options
     if not msg and not updating:
-        option = dict(value=nv, label=table_name)
-        tfo.append(option)
+        table_name = _make_table_name(this_table)
+        option = dict(value=idx, label=table_name)
+        table_from_options.append(option)
     elif exists or updating:
-        nv = exists[-1]
+        idx = key
     return (
         cols,
         data,
-        nv,
-        tfo,
-        tfo,
-        tfo,
-        tfo,
-        tfo,
+        idx,
+        table_from_options,
+        table_from_options,
+        table_from_options,
+        table_from_options,
+        table_from_options,
         bool(msg),
         msg,
         row_deletable,
         csv_path,
+        session_tables,
         session_click_table,
     )
 

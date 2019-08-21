@@ -1,5 +1,11 @@
 """
-Make a workspace for buzzword in the current directory
+buzzword: make a workspace for buzzword in the current directory
+
+Usage: python -m buzzword.create <name>
+
+Once a workspace is defined, you can cd in there and run buzzword.
+
+You can modify the various config and data files as you see fit.
 """
 
 import os
@@ -50,8 +56,7 @@ CORPORA = """
 
 CORPUS = """
 <meta doc-type="joke" rating=6.50 speaker="NARRATOR"/>
-<meta being="animal">A lion</meta> and <meta being="animal">a cheetah</meta> decide to race. 
-<meta move="setup" dialog=false punchline=false some-schema=9 />
+<meta being="animal">A lion</meta> and <meta being="animal">a cheetah</meta> decide to race. <meta move="setup" dialog=false punchline=false some-schema=9 />
 The cheetah crosses the finish line first. <meta move="setup" dialog=false punchline=false />
 CHEETAH: I win! <meta move="middle" dialog=true some-schema=2 />
 LION: You're a <meta play-on="cheater">cheetah</meta>! <meta move="punchline" funny=true dialog=true some-schema=3 />

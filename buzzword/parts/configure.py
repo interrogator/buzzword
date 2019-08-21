@@ -1,7 +1,5 @@
-# flake8: noqa
-
 """
-buzz webapp: command-line and .env processing
+buzzword: command-line and .env processing
 """
 
 import argparse

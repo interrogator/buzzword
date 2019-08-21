@@ -1,5 +1,12 @@
+"""
+buzzword: main file.
+
+Get the needed data from .parts.main, and provide the callback for URL bar.
+
+By calling it __main__.py, we can start the app with `python -m buzzword`
+"""
+
 import os
-from collections import OrderedDict
 
 import dash_core_components as dcc
 import dash_html_components as html

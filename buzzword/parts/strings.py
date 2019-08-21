@@ -1,7 +1,5 @@
-# flake8: noqa
-
 """
-buzz webapp: making human-readable strings from data
+buzzword: making human-readable strings from data
 """
 
 from buzz.constants import SHORT_TO_LONG_NAME
@@ -24,8 +22,8 @@ def _make_table_name(history):
     Generate a table name from its history
     """
     if history == "initial":
-        return "Wordclasses by file"
-    specs, show, subcorpora, relative, keyness, sort, n, updates, _ = history
+        return "Part of speech tags by filename"
+    specs, show, subcorpora, relative, keyness, sort, n, updates = history
     subcorpora = (
         SHORT_TO_LONG_NAME.get(subcorpora, subcorpora).lower().replace("_", " ")
     )
@@ -39,7 +37,7 @@ def _make_table_name(history):
     basic = f"{show} by {subcorpora}{relkey}, sorting by {sort}"
     if updates:
         basic += f", {updates} edits"
-    parent = specs[-2] if isinstance(specs, tuple) else 0
+    parent = specs[-2] if isinstance(specs, (tuple, list)) else 0
     if not parent:
         return basic
     return f"{basic} -- from search #{parent}"
@@ -70,7 +68,7 @@ def _make_search_name(history, size):
     no = "not " if skip else ""
     col = SHORT_TO_LONG_NAME.get(col, col)
     relative_corpus = n_results * 100 / size
-    prev_total = previous[-1] if isinstance(previous, list) else None
+    prev_total = previous[-1] if isinstance(previous, (tuple, list)) else None
     rel_last = ""
     if prev_total is not None:
         rel_last = n_results * 100 / prev_total
@@ -78,7 +76,7 @@ def _make_search_name(history, size):
     freq = f"(n={n_results:n}{rel_last}/{relative_corpus:.2f}%)"
     basic = f"{col} {no}matching '{search_string}' {freq}"
     hyphen = ""
-    while isinstance(previous, list):
+    while isinstance(previous, (tuple, list)):
         hyphen += "──"
         previous = previous[0]
     if hyphen:

@@ -1,7 +1,5 @@
-# flake8: noqa
-
 """
-buzz webapp: helpers and utilities
+buzzword: helpers and utilities
 """
 
 import os
@@ -31,11 +29,12 @@ def _get_specs_and_corpus(search_from, searches, corpora, slug):
     return specs, corpora[slug].iloc[ix]
 
 
-def _get_table_for_chart(table_from, tables):
+def _get_table_for_chart(table_from, tables, full_tables):
     """
     Get the table that needs to be charted
     """
-    return list(tables.values())[table_from-1]
+    exists = tables[str(table_from)]
+    return pd.DataFrame(exists)
 
 
 def _translate_relative(inp, corpus):

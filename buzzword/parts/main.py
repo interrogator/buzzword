@@ -1,3 +1,6 @@
+"""
+buzzword: run on startup, corpus loading and app initialisation
+"""
 import dash
 from buzz.corpus import Corpus
 import json
