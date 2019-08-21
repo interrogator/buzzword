@@ -14,9 +14,10 @@ from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
 
 from .parts import start, explore  # noqa: F401
-from .parts.main import server  # noqa: F401
-from .parts.main import CONFIG, CORPORA, CORPUS_META, app
+from .parts.main import app, server  # noqa: F401
+from .parts.main import ROOT, CORPORA, CORPUS_META, CORPORA_CONFIGS
 from .parts.tabs import _make_tabs
+from .parts.helpers import _get_corpus, _get_initial_table
 
 # where downloadable CSVs/corpora get stored
 for path in {"csv", "uploads"}:
@@ -30,10 +31,10 @@ def _get_layout():
     """
     loc = dcc.Location(id="url", refresh=False)
     # user storage for searches, tables, and click counts
-    search_store = dcc.Store(id='session-search', data=dict())
-    tables_store = dcc.Store(id='session-tables', data=dict())
-    click_clear = dcc.Store(id='session-clicks-clear', data=-1)
-    click_table = dcc.Store(id='session-clicks-table', data=-1)
+    search_store = dcc.Store(id="session-search", data=dict())
+    tables_store = dcc.Store(id="session-tables", data=dict())
+    click_clear = dcc.Store(id="session-clicks-clear", data=-1)
+    click_table = dcc.Store(id="session-clicks-table", data=-1)
     content = html.Div(id="page-content")
     stores = [search_store, tables_store, click_clear, click_table]
     return html.Div([loc] + stores + [content])
@@ -44,37 +45,43 @@ app.layout = _get_layout
 LAYOUTS = dict()
 
 
-def _make_explore_layout(slug, name):
+def _make_explore_layout(slug, conf):
     """
     Simulate globals and generate layout for explore page
     """
-    from .parts.start import CORPORA, CORPUS_META, INITIAL_TABLES
+    from buzzword.parts.start import CORPORA, INITIAL_TABLES, CORPORA_CONFIGS
 
-    corpus = CORPORA[slug]
-    size = CORPUS_META[name].get("len", len(corpus))
-    args = [CORPORA[slug], INITIAL_TABLES[slug], slug, name]
-    return _make_tabs(*args, corpus_size=size, **CONFIG)
+    corpus = _get_corpus(slug)
+    table = _get_initial_table(slug)
+    size = conf.get("len", len(corpus))
+    conf["slug"] = slug  # can i delete this?
+    return _make_tabs(corpus, table, conf)
 
 
 def _populate_explore_layouts():
     """
     Can be used to create explore page on startup, save loading time
+
+    broken right now, unused
     """
     for name, meta in CORPUS_META.items():
         slug = meta["slug"]
-        LAYOUTS[slug] = _make_explore_layout(slug, name)
+        LAYOUTS[slug] = _make_explore_layout(slug, meta)
 
 
 def _get_explore_layout(slug):
     """
     Get (and maybe generate) the explore layout for this slug
     """
-    gen = (k for k, v in CORPUS_META.items() if v["slug"] == slug)
-    name = next(gen, slug)
+    from buzzword.parts.start import CORPORA_CONFIGS
+    if slug not in CORPORA_CONFIGS:
+        return
+    conf = CORPORA_CONFIGS[slug]
+    name = conf["corpus_name"]
     # store the default explore for each corpus in a dict for speed
     if slug in LAYOUTS:
         return LAYOUTS[slug]
-    layout = _make_explore_layout(slug, name)
+    layout = _make_explore_layout(slug, conf)
     LAYOUTS[slug] = layout
     return layout
 
@@ -92,7 +99,10 @@ def _choose_correct_page(pathname):
         # if corpus not found, redirect
         if slug not in CORPORA:
             pathname = ""
-        return _get_explore_layout(slug)
+        layout = _get_explore_layout(slug)
+        if layout:
+            return layout
+        pathname = ""
     if not pathname:
         return start.layout
     else:

@@ -14,11 +14,11 @@ def _get_specs_and_corpus(search_from, searches, corpora, slug):
     """
     Get the correct corpus based on search_from
     """
-    from buzzword.parts.main import CONFIG
+    from buzzword.parts.main import ROOT
 
     # if corpus not loaded into corpora, it is an upload. fix now
     if not corpora:
-        upload = os.path.join(CONFIG["root"], "uploads", slug + "-parsed")
+        upload = os.path.join(ROOT, "uploads", slug + "-parsed")
         loaded = Corpus(upload).load()
         corpora[slug] = loaded
     # if the user wants the corpus, return that
@@ -175,3 +175,29 @@ def _make_csv(table, long_name):
     with open(fpath, "w") as fo:
         fo.write(df.to_csv())
     return fpath
+
+
+def _get_corpus(slug):
+    """
+    Get corpus from slug, loading from uploads dir if need be
+    """
+    from buzzword.parts.start import CORPORA, INITIAL_TABLES
+    from buzzword.parts.main import ROOT
+
+    if slug in CORPORA:
+        return CORPORA[slug]
+    upload = os.path.join(ROOT, "uploads", slug + "-parsed")
+    corpus = Corpus(upload).load()
+    CORPORA[slug] = corpus
+    return corpus
+
+
+def _get_initial_table(slug):
+    """
+    Get or create the initial table for this slug
+    """
+    from buzzword.parts.start import INITIAL_TABLES
+    if slug in INITIAL_TABLES:
+        return INITIAL_TABLES[slug]
+    corpus = _get_corpus(slug)
+    return corpus.table(show="p", subcorpora="file")

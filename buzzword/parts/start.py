@@ -11,7 +11,15 @@ import dash_core_components as dcc
 import dash_html_components as html
 from buzz.constants import SPACY_LANGUAGES
 from buzz.corpus import Corpus
-from buzzword.parts.main import app, CORPORA, INITIAL_TABLES, CORPUS_META, CONFIG
+from buzzword.parts.main import (
+    app,
+    CORPORA,
+    INITIAL_TABLES,
+    CORPUS_META,
+    ROOT,
+    CORPORA_CONFIGS,
+    GLOBAL_CONFIG,
+)
 from buzzword.parts.strings import _slug_from_name, _make_description
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
@@ -29,13 +37,17 @@ def _make_row(row_data, index=None, upload=False):
         if key == "link":
             continue
         if key == "id":
-            cell = html.Td(html.A(href=row_data["link"], children=value, className=clas))
+            cell = html.Td(
+                html.A(href=row_data["link"], children=value, className=clas)
+            )
         elif key == "title":
             a = html.A(href=row_data["link"], children=value, className=clas)
             cell = html.Td(a, className=clas)
         elif key == "url":
             if value:
-                hyper = html.A(href=value, children="ⓘ", target="_blank", className=clas)
+                hyper = html.A(
+                    href=value, children="ⓘ", target="_blank", className=clas
+                )
                 cell = html.Td(children=hyper, className=clas)
             else:
                 cell = html.Td(children="", className=clas)
@@ -113,14 +125,20 @@ def _make_upload_parse_space():
         placeholder="Language of corpus",
         id="corpus-language",
         options=[{"value": v, "label": k} for k, v in SPACY_LANGUAGES.items()],
-        style={**style.BLOCK, **{"width": "230px", "marginRight": "5px", "fontFamily": "monospace"}},
+        style={
+            **style.BLOCK,
+            **{"width": "230px", "marginRight": "5px", "fontFamily": "monospace"},
+        },
     )
     upload = html.Div(children=[upload, html.Div(id="show-upload-files")])
     dialog = dcc.ConfirmDialog(id="dialog-upload", message="")
     upload_button = html.Button(
         "Upload and parse",
         id="upload-parse-button",
-        style={**style.BLOCK, **{"width": "205px", "marginLeft": "5px", "fontFamily": "monospace"}},
+        style={
+            **style.BLOCK,
+            **{"width": "205px", "marginLeft": "5px", "fontFamily": "monospace"},
+        },
     )
     bits = [corpus_name, lang, upload_button]
     sty = {"width": "1000px", **style.VERTICAL_MARGINS, "marginBottom": "20px"}
@@ -139,7 +157,7 @@ def _store_corpus(contents, filenames, slug):
     is_parsed = all(i.endswith(("conll", "conllu")) for i in filenames)
     if is_parsed:
         slug = slug + "-parsed"
-    store_at = os.path.join(CONFIG["root"], "uploads", slug)
+    store_at = os.path.join(ROOT, "uploads", slug)
     os.makedirs(store_at)
     for content, filename in zip(contents, filenames):
         content_type, content_string = content.split(",", 1)
@@ -164,7 +182,7 @@ def _validate_input(contents, names, corpus_name, slug):
     if endings.pop() not in allowed:
         allowed = ", ".join(allowed)
         return "Uploaded file extension must be one of: {}".format(allowed)
-    up_dir_exists = os.path.isdir(os.path.join(CONFIG["root"], "uploads", slug))
+    up_dir_exists = os.path.isdir(os.path.join(ROOT, "uploads", slug))
     if corpus_name in CORPUS_META or up_dir_exists:
         return f"A corpus named '{corpus_name}' already exists. Try a different name."
     return ""
@@ -210,8 +228,18 @@ def _upload_files(n_clicks, contents, names, corpus_lang, corpus_name, table_row
             traceback.print_exc()
             return bool(msg), msg, table_rows
 
-    CORPORA[slug] = corpus.load()
-    CORPUS_META[corpus_name] = dict(slug=slug)
+    corpus = corpus.load()
+
+    CORPORA[slug] = corpus
+    conf = dict(
+        **GLOBAL_CONFIG,
+        slug=slug,
+        len=len(corpus),
+        corpus_name=corpus_name,
+        corpus_size=len(corpus),
+    )
+    CORPUS_META[corpus_name] = conf
+    CORPORA_CONFIGS[slug] = conf
     INITIAL_TABLES[slug] = CORPORA[slug].table(show="p", subcorpora="file")
 
     href = "/explore/{}".format(slug)

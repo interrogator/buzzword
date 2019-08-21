@@ -19,7 +19,9 @@ app.config.suppress_callback_exceptions = True
 app.title = "buzzword"
 server = app.server
 
-CONFIG = _configure_buzzword(__name__)
+GLOBAL_CONFIG = _configure_buzzword(__name__)
+
+ROOT = GLOBAL_CONFIG["root"]
 
 
 def _get_corpus_config(local_conf, global_conf, name):
@@ -44,12 +46,14 @@ def _get_corpora(corpus_meta):
     """
     corpora = dict()
     tables = dict()
+    corpora_config = dict()
     for i, (corpus_name, metadata) in enumerate(corpus_meta.items(), start=1):
         if metadata.get("disabled"):
             print("Skipping corpus because it is disabled: {}".format(corpus_name))
             continue
+        slug = metadata["slug"]
         corpus = Corpus(metadata["path"])
-        conf = _get_corpus_config(metadata, CONFIG, corpus_name)
+        conf = _get_corpus_config(metadata, GLOBAL_CONFIG, corpus_name)
         if conf["load"]:
             print("Loading corpus into memory: {} ...".format(corpus_name))
             corpus = corpus.load(add_governor=conf["add_governor"])
@@ -57,16 +61,16 @@ def _get_corpora(corpus_meta):
         else:
             print("NOT loading corpus into memory: {} ...".format(corpus_name))
         initial_table = corpus.table(show="p", subcorpora="file")
-        corpora[metadata["slug"]] = corpus
-        tables[metadata["slug"]] = initial_table
-    return corpora, tables
+        corpora[slug] = corpus
+        tables[slug] = initial_table
+        corpora_config[slug] = conf
+    return corpora, tables, corpora_config
 
 
-def _get_corpora_meta(config):
+def _get_corpora_meta(corpora_file):
     """
     Get the contents of corpora.json, or an empty dict
     """
-    corpora_file = config.get("corpora_file")
     exists = os.path.isfile(corpora_file)
     if not exists:
         print("Corpora file not found at {}!".format(corpora_file))
@@ -75,6 +79,6 @@ def _get_corpora_meta(config):
         return json.loads(fo.read())
 
 
-CORPUS_META = _get_corpora_meta(CONFIG)
+CORPUS_META = _get_corpora_meta(GLOBAL_CONFIG.get("corpora_file"))
 
-CORPORA, INITIAL_TABLES = _get_corpora(CORPUS_META)
+CORPORA, INITIAL_TABLES, CORPORA_CONFIGS = _get_corpora(CORPUS_META)

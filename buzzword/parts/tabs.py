@@ -23,17 +23,18 @@ from buzzword.parts.strings import (
 from buzzword.parts import style
 
 
-def _build_dataset_space(df, **kwargs):
+def _build_dataset_space(df, config):
     """
     Build the search interface and the conll display
     """
     if isinstance(df, Corpus):
         df = df.files[0].load()
-    cols = _get_cols(df, kwargs["add_governor"])
+    print('CONFY', config)
+    cols = _get_cols(df, config["add_governor"])
     cols = [dict(label="Dependencies", value="d")] + cols
-    df = _drop_cols_for_datatable(df, kwargs["add_governor"])
+    df = _drop_cols_for_datatable(df, config["add_governor"])
     df = df.reset_index()
-    max_row, max_col = kwargs["table_size"]
+    max_row, max_col = config["table_size"]
     df = df.iloc[:max_row, :max_col]
     pieces = [
         dcc.Dropdown(
@@ -88,7 +89,7 @@ def _build_dataset_space(df, **kwargs):
         selected_rows=[],
         page_action="native",
         page_current=0,
-        page_size=kwargs["page_size"],
+        page_size=config["page_size"],
         # style_as_list_view=True,
         style_header=style.BOLD_DARK,
         style_cell_conditional=style.LEFT_ALIGN,
@@ -106,11 +107,11 @@ def _build_dataset_space(df, **kwargs):
     return html.Div(id="display-dataset", children=[div])
 
 
-def _build_frequencies_space(corpus, table, **kwargs):
+def _build_frequencies_space(corpus, table, config):
     """
     Build stuff related to the frequency table
     """
-    cols = _get_cols(corpus, kwargs["add_governor"])
+    cols = _get_cols(corpus, config["add_governor"])
     show_check = dcc.Dropdown(
         placeholder="Features to show",
         multi=True,
@@ -155,7 +156,7 @@ def _build_frequencies_space(corpus, table, **kwargs):
         placeholder="Sort columns by...",
     )
     sort_drop = html.Div(sort_drop, style=style.TSTYLE)
-    max_row, max_col = kwargs["table_size"]
+    max_row, max_col = config["table_size"]
     table = table.iloc[:max_row, :max_col]
     columns, data = _update_datatable(corpus, table, conll=False, deletable=False)
 
@@ -178,7 +179,7 @@ def _build_frequencies_space(corpus, table, **kwargs):
                 selected_rows=[],
                 page_action="native",
                 page_current=0,
-                page_size=kwargs["page_size"],
+                page_size=config["page_size"],
                 style_header=style.BOLD_DARK,
                 style_cell_conditional=style.LEFT_ALIGN,
                 style_data_conditional=[style_index] + style.STRIPES,
@@ -202,13 +203,14 @@ def _build_frequencies_space(corpus, table, **kwargs):
     return html.Div(id="display-frequencies", children=[div])
 
 
-def _build_concordance_space(df, **kwargs):
+def _build_concordance_space(df, config):
     """
     Div representing the concordance tab
     """
     if isinstance(df, Corpus):
         df = df.files[0].load()
-    cols = _get_cols(df, kwargs["add_governor"])
+    print('CONFY', config)
+    cols = _get_cols(df, config["add_governor"])
     show_check = dcc.Dropdown(
         multi=True,
         placeholder="Features to show",
@@ -221,7 +223,7 @@ def _build_concordance_space(df, **kwargs):
     toolbar = [html.Div(i, style=tstyle) for i in [show_check, update]]
     conc_space = html.Div(toolbar, style=style.VERTICAL_MARGINS)
 
-    max_row, max_col = kwargs["table_size"]
+    max_row, max_col = config["table_size"]
     df = df.iloc[:max_row, :max_col]
 
     meta = ["file", "s", "i"]
@@ -262,7 +264,7 @@ def _build_concordance_space(df, **kwargs):
                 selected_rows=[],
                 page_action="native",
                 page_current=0,
-                page_size=kwargs["page_size"],
+                page_size=config["page_size"],
                 # style_as_list_view=True,
                 style_header=style.BOLD_DARK,
                 style_cell_conditional=style.LEFT_ALIGN_CONC,
@@ -275,7 +277,7 @@ def _build_concordance_space(df, **kwargs):
     return html.Div(id="display-concordance", children=[div])
 
 
-def _build_chart_space(table, **kwargs):
+def _build_chart_space(table, config):
     """
     Div representing the chart tab
     """
@@ -360,15 +362,16 @@ def _build_chart_space(table, **kwargs):
     return html.Div(id="display-chart", children=[div])
 
 
-def _make_tabs(corpus, table, slug, name, **kwargs):
+def _make_tabs(corpus, table, config):
     """
     Generate initial layout div
     """
-    dataset = _build_dataset_space(corpus, **kwargs)
-    frequencies = _build_frequencies_space(corpus, table, **kwargs)
-    chart = _build_chart_space(table, **kwargs)
-    concordance = _build_concordance_space(corpus, **kwargs)
-    label = _make_search_name(name, kwargs["corpus_size"])
+    slug = config["slug"]
+    dataset = _build_dataset_space(corpus, config)
+    frequencies = _build_frequencies_space(corpus, table, config)
+    chart = _build_chart_space(table, config)
+    concordance = _build_concordance_space(corpus, config)
+    label = _make_search_name(config["corpus_name"], config["corpus_size"])
     search_from = [dict(value=0, label=label)]
     clear = html.Button("Clear history", id="clear-history", style=style.MARGIN_5_MONO)
     dropdown = dcc.Dropdown(

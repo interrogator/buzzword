@@ -23,7 +23,7 @@ from dash.exceptions import PreventUpdate
 
 import flask
 
-from buzzword.parts.main import app, CONFIG, CORPORA, INITIAL_TABLES
+from buzzword.parts.main import app, CORPORA, INITIAL_TABLES, CORPORA_CONFIGS
 
 # we can't keep tables in dcc.store, they are too big. so we keep all here with
 # a tuple that can identify them (ideally, even dealing with user sessions)
@@ -178,8 +178,9 @@ def _new_search(
             session_clicks_clear,
         )
 
-    add_governor = CONFIG["add_governor"]
-    max_row, max_col = CONFIG["table_size"]
+    conf = CORPORA_CONFIGS[slug]
+    add_governor = conf["add_governor"]
+    max_row, max_col = conf["table_size"]
 
     specs, corpus = _get_specs_and_corpus(search_from, session_search, CORPORA, slug)
 
@@ -216,7 +217,7 @@ def _new_search(
         corpus = CORPORA[slug]
         corpus = corpus.iloc[:max_row, :max_col]
         cols, data = _update_datatable(corpus, corpus, drop_govs=add_governor)
-        name = _make_search_name(CONFIG["corpus_name"], len(corpus))
+        name = _make_search_name(conf["corpus_name"], len(corpus))
         search_from = [dict(value=0, label=name)]
         # set number of clicks at last moment
         session_clicks_clear = cleared
@@ -349,6 +350,8 @@ def _new_table(
     if n_clicks is None:
         raise PreventUpdate
 
+    conf = CORPORA_CONFIGS[slug]
+
     # because no option below can return initial table, rows can now be deleted
     row_deletable = True
 
@@ -382,7 +385,7 @@ def _new_table(
     if exists is not False:
         exists_as_tuple = _tuple_or_list(exists, tuple)
 
-    # if we are updating the table:
+    # if we are updating the table:table_size
     if updating:
         table = FREQUENCY_TABLES[exists_as_tuple]
         exists[-1] += 1
@@ -423,13 +426,13 @@ def _new_table(
             relative = None
 
         # then store the search information in store/freq table spaces
-        session_tables[idx] = _tuple_or_list(this_table, list)
-        FREQUENCY_TABLES[_tuple_or_list(this_table, tuple)] = table
+        session_tables[idx] = _tuple_or_list(this_table[:6], list)
+        FREQUENCY_TABLES[_tuple_or_list(this_table[:6], tuple)] = table
 
     if updating:
         cols, data = current_cols, current_data
     else:
-        max_row, max_col = CONFIG["table_size"]
+        max_row, max_col = conf["table_size"]
         tab = table.iloc[:max_row, :max_col]
         cols, data = _update_datatable(CORPORA[slug], tab, conll=False)
 
@@ -496,7 +499,8 @@ def _new_conc(n_clicks, show, search_from, cols, data, slug, session_search):
         met.append("speaker")
 
     conc = corpus.conc(show=show, metadata=met, window=(100, 100))
-    max_row, max_col = CONFIG["table_size"]
+    conf = CORPORA_CONFIGS[slug]
+    max_row, max_col = conf["table_size"]
     short = conc.iloc[:max_row, :max_col]
     cols, data = _update_datatable(CORPORA[slug], short, conc=True)
     return cols, data, bool(msg), msg
