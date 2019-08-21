@@ -1,6 +1,7 @@
 """
 buzzword: making human-readable strings from data
 """
+import urllib.parse
 
 from buzz.constants import SHORT_TO_LONG_NAME
 
@@ -68,7 +69,7 @@ def _make_search_name(history, size):
     no = "not " if skip else ""
     col = SHORT_TO_LONG_NAME.get(col, col)
     relative_corpus = n_results * 100 / size
-    prev_total = previous[-1] if isinstance(previous, (tuple, list)) else None
+    prev_total = previous[-2] if isinstance(previous, (tuple, list)) else None
     rel_last = ""
     if prev_total is not None:
         rel_last = n_results * 100 / prev_total
@@ -76,6 +77,7 @@ def _make_search_name(history, size):
     freq = f"(n={n_results:n}{rel_last}/{relative_corpus:.2f}%)"
     basic = f"{col} {no}matching '{search_string}' {freq}"
     hyphen = ""
+    print('PREVY', previous, type(previous))
     while isinstance(previous, (tuple, list)):
         hyphen += "──"
         previous = previous[0]
@@ -130,6 +132,5 @@ def _slug_from_name(name):
     """
     Make a slug from an (uploaded) corpus name
     """
-    for repl in ["/", ".", " "]:
-        name = name.replace(repl, "-")
-    return name.lower()
+    name = name.replace(" ", "-").lower()
+    return urllib.parse.quote_plus(name)

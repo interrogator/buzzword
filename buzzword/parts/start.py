@@ -213,9 +213,9 @@ def _upload_files(n_clicks, contents, names, corpus_lang, corpus_name, table_row
     CORPORA[slug] = corpus.load()
     CORPUS_META[corpus_name] = dict(slug=slug)
     INITIAL_TABLES[slug] = CORPORA[slug].table(show="p", subcorpora="file")
+
     slug = _slug_from_name(corpus_name)
     href = "/explore/{}".format(slug)
-    index = len(CORPUS_META)
     adate = date.today().strftime("%d.%m.%Y")
     desc = _make_description(names, size)
     toks = "{:n}".format(len(CORPORA[slug]))

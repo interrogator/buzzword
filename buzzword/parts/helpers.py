@@ -15,26 +15,26 @@ def _get_specs_and_corpus(search_from, searches, corpora, slug):
     Get the correct corpus based on search_from
     """
     from buzzword.parts.main import CONFIG
+
     # if corpus not loaded into corpora, it is an upload. fix now
     if not corpora:
         upload = os.path.join(CONFIG["root"], "uploads", slug + "-parsed")
         loaded = Corpus(upload).load()
         corpora[slug] = loaded
     # if the user wants the corpus, return that
-    if not search_from:
+    if not int(search_from):
         return slug, corpora[slug]
     # otherwise, get the search result (i.e. _n col) and make corpus
     exists = searches[str(search_from)]
-    specs, ix = exists[0], exists[-1]
-    return specs, corpora[slug].iloc[ix]
+    return exists, corpora[slug].iloc[exists[-1]]
 
 
-def _get_table_for_chart(table_from, tables, full_tables):
+def _get_table_for_chart(table_from, tables, freq_tables):
     """
     Get the table that needs to be charted
     """
-    exists = tables[str(table_from)]
-    return pd.DataFrame(exists)
+    this_table = tables[str(table_from)]
+    return freq_tables[tuple(this_table[:6])]
 
 
 def _translate_relative(inp, corpus):
@@ -115,7 +115,8 @@ def _update_datatable(
             col_order.append("speaker")
     # for frequency table: rename index in case 'file' appears in columns
     else:
-        df.index.names = [f"_{x}" for x in df.index.names]
+        names = ["_" + str(x) for x in df.index.names]
+        df.index.names = names
         col_order = list(df.index.names) + list(df.columns)
     # concordance doesn't need resetting, because index is unhelpful
     if not conc:
@@ -133,7 +134,12 @@ def _update_datatable(
         ]
     else:
         columns = [
-            {"name": i.lstrip("_"), "id": i, "deletable": deletable} for i in df.columns
+            {
+                "name": i.lstrip("_"),
+                "id": i,
+                "deletable": deletable and "_" + i not in names,
+            }
+            for i in df.columns
         ]
     return columns, df.to_dict("rows")
 

@@ -26,8 +26,8 @@ import flask
 from buzzword.parts.main import app, CONFIG, CORPORA, INITIAL_TABLES
 
 # we can't keep tables in dcc.store, they are too big. so we keep all here with
-# a tuple that can identify them
-FULL_TABLES = dict()
+# a tuple that can identify them (ideally, even dealing with user sessions)
+FREQUENCY_TABLES = dict()
 
 #############
 # CALLBACKS #
@@ -90,7 +90,7 @@ for i in range(1, 6):
         if n_clicks is None:
             raise PreventUpdate
         # get correct dataset to chart
-        df = _get_table_for_chart(table_from, session_tables)
+        df = _get_table_for_chart(table_from, session_tables, FREQUENCY_TABLES)
         # transpose and cut down items to plot
         if transpose:
             df = df.T
@@ -195,6 +195,8 @@ def _new_search(
         )
 
     new_value = len(session_search) + 1
+
+    # on first search, spec is slug name, so it goes here.
     this_search = [specs, col, skip, search_string]
 
     exists = next(
@@ -210,10 +212,8 @@ def _new_search(
         corpus = CORPORA[slug]
         corpus = corpus.iloc[:max_row, :max_col]
         cols, data = _update_datatable(corpus, corpus, drop_govs=add_governor)
-        search_from = [
-            dict(value=i, label=_make_search_name(h, len(corpus)))
-            for i, h in enumerate(session_search)
-        ]
+        name = _make_search_name(CONFIG["corpus_name"], len(corpus))
+        search_from = [dict(value=0, label=name)]
         # set number of clicks at last moment
         session_clicks_clear = cleared
         return (
@@ -253,7 +253,6 @@ def _new_search(
             msg = "No results found, sorry."
 
     this_search += [new_value, len(df), list(df["_n"])]
-    print("STORING", new_value, this_search)
     if found_results:
         session_search[new_value] = this_search
         corpus = CORPORA[slug]
@@ -380,23 +379,23 @@ def _new_table(
 
     # if we are updating the table:
     if updating:
-        table = FULL_TABLES[tuple(exists[:6])]
+        table = FREQUENCY_TABLES[tuple(exists[:6])]
         exists[-1] += 1
         # fix rows and columns
         table = table[[i["id"] for i in current_cols[1:]]]
         table = table.loc[[i["_" + table.index.name] for i in current_data]]
         # store again
         session_tables[key] = exists
-        FULL_TABLES[tuple(exists[:6])] = table
+        FREQUENCY_TABLES[tuple(exists[:6])] = table
     elif exists:
         msg = "Table already exists. Switching to that one to save memory."
-        table = FULL_TABLES[tuple(exists[:6])]
+        table = FREQUENCY_TABLES[tuple(exists[:6])]
     # if there was a validation problem, juse use last table (?)
     elif msg:
         if session_tables:
             # todo: figure this out...use current table instead?
             key, value = list(session_tables.items())[-1]
-            table = FULL_TABLES[tuple(value[:6])]
+            table = FREQUENCY_TABLES[tuple(value[:6])]
             # todo: more here?
         else:
             table = INITIAL_TABLES[slug]
@@ -505,7 +504,3 @@ def serve_static(path):
     """
     root_dir = os.path.join(os.getcwd(), "csv")
     return flask.send_from_directory(root_dir, path)
-
-
-if __name__ == "__main__":
-    app.run_server(port=8050, debug=CONFIG["debug"], threaded=True)

@@ -1,6 +1,7 @@
 """
 buzzword: run on startup, corpus loading and app initialisation
 """
+
 import dash
 from buzz.corpus import Corpus
 import json
@@ -21,7 +22,7 @@ server = app.server
 CONFIG = _configure_buzzword(__name__)
 
 
-def _get_corpus_config(local_conf, global_conf):
+def _get_corpus_config(local_conf, global_conf, name):
     """
     Return global conf plus individual settings for corpus
     """
@@ -31,6 +32,7 @@ def _get_corpus_config(local_conf, global_conf):
         loc = local_conf.get(setting)
         if loc is not None:
             conf[setting] = loc
+    conf["corpus_name"] = name
     return conf
 
 
@@ -47,7 +49,7 @@ def _get_corpora(corpus_meta):
             print("Skipping corpus because it is disabled: {}".format(corpus_name))
             continue
         corpus = Corpus(metadata["path"])
-        conf = _get_corpus_config(metadata, CONFIG)
+        conf = _get_corpus_config(metadata, CONFIG, corpus_name)
         if conf["load"]:
             print("Loading corpus into memory: {} ...".format(corpus_name))
             corpus = corpus.load(add_governor=conf["add_governor"])
