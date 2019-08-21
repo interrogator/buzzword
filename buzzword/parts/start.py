@@ -193,6 +193,7 @@ def _validate_input(contents, names, corpus_name, slug):
         Output("dialog-upload", "displayed"),
         Output("dialog-upload", "message"),
         Output("corpus-table", "children"),
+        Output("uploaded-configs", "data"),
     ],
     [Input("upload-parse-button", "n_clicks")],
     [
@@ -201,9 +202,10 @@ def _validate_input(contents, names, corpus_name, slug):
         State("corpus-language", "value"),
         State("upload-corpus-name", "value"),
         State("corpus-table", "children"),
+        State("uploaded-configs", "data"),
     ],
 )
-def _upload_files(n_clicks, contents, names, corpus_lang, corpus_name, table_rows):
+def _upload_files(n_clicks, contents, names, corpus_lang, corpus_name, table_rows, uploaded_configs):
     """
     Callback when the user clicks 'upload and parse'
     """
@@ -216,7 +218,7 @@ def _upload_files(n_clicks, contents, names, corpus_lang, corpus_name, table_row
     msg = _validate_input(contents, names, corpus_name, slug)
 
     if msg:
-        return bool(msg), msg, table_rows
+        return bool(msg), msg, table_rows, uploaded_configs
 
     path, is_parsed, size = _store_corpus(contents, names, slug)
     corpus = Corpus(path)
@@ -226,7 +228,7 @@ def _upload_files(n_clicks, contents, names, corpus_lang, corpus_name, table_row
         except Exception as error:
             msg = f"Problem when parsing the corpus: {str(error)}"
             traceback.print_exc()
-            return bool(msg), msg, table_rows
+            return bool(msg), msg, table_rows, uploaded_configs
 
     corpus = corpus.load()
 
@@ -261,7 +263,8 @@ def _upload_files(n_clicks, contents, names, corpus_lang, corpus_name, table_row
     # put it at start of table :)
     row = _make_row(OrderedDict(tups), 0, upload=True)
     table_rows = [table_rows[0], row] + table_rows[1:]
-    return bool(msg), msg, table_rows
+    uploaded_configs[slug] = conf
+    return bool(msg), msg, table_rows, uploaded_configs
 
 
 @app.callback(
@@ -280,7 +283,6 @@ def show_uploaded(contents, filenames):
         rest = len(filenames) - 10
         markdown += f"\n* and {rest} more ..."
     return dcc.Markdown(markdown)
-
 
 header = html.H2("buzzword: a tool for analysing annotated linguistic data")
 
@@ -309,6 +311,8 @@ md = (
 upload_text = dcc.Markdown(md)
 
 upload = _make_upload_parse_space()
+
+hide = {"display": "none"}
 
 content = [header, intro, uphead, upload_text, upload]
 if not is_empty:

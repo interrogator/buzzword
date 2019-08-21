@@ -10,7 +10,7 @@ import os
 
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
 from .parts import start, explore  # noqa: F401
@@ -35,8 +35,9 @@ def _get_layout():
     tables_store = dcc.Store(id="session-tables", data=dict())
     click_clear = dcc.Store(id="session-clicks-clear", data=-1)
     click_table = dcc.Store(id="session-clicks-table", data=-1)
+    configs = dcc.Store(id="uploaded-configs", data=dict())
     content = html.Div(id="page-content")
-    stores = [search_store, tables_store, click_clear, click_table]
+    stores = [search_store, tables_store, click_clear, click_table, configs]
     return html.Div([loc] + stores + [content])
 
 
@@ -69,15 +70,15 @@ def _populate_explore_layouts():
         LAYOUTS[slug] = _make_explore_layout(slug, meta)
 
 
-def _get_explore_layout(slug):
+def _get_explore_layout(slug, uploaded_configs):
     """
     Get (and maybe generate) the explore layout for this slug
     """
     from buzzword.parts.start import CORPORA_CONFIGS
-    if slug not in CORPORA_CONFIGS:
+    upped = uploaded_configs.get(slug)
+    conf = CORPORA_CONFIGS.get(slug, upped)
+    if not conf:
         return
-    conf = CORPORA_CONFIGS[slug]
-    name = conf["corpus_name"]
     # store the default explore for each corpus in a dict for speed
     if slug in LAYOUTS:
         return LAYOUTS[slug]
@@ -86,8 +87,8 @@ def _get_explore_layout(slug):
     return layout
 
 
-@app.callback(Output("page-content", "children"), [Input("url", "pathname")])
-def _choose_correct_page(pathname):
+@app.callback(Output("page-content", "children"), [Input("url", "pathname")], [State("uploaded-configs", "data")])
+def _choose_correct_page(pathname, configs):
     """
     When the URL changes, get correct page and populate page-content with it
     """
@@ -99,7 +100,7 @@ def _choose_correct_page(pathname):
         # if corpus not found, redirect
         if slug not in CORPORA:
             pathname = ""
-        layout = _get_explore_layout(slug)
+        layout = _get_explore_layout(slug, configs)
         if layout:
             return layout
         print("LAYOUT ERROR: ", slug, list(CORPORA.keys()))
