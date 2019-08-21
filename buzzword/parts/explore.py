@@ -10,7 +10,7 @@ from buzzword.parts.helpers import (
     _get_specs_and_corpus,
     _translate_relative,
     _update_datatable,
-    _get_table_for_chart,
+    _tuple_or_list,
 )
 from buzzword.parts.strings import (
     _make_search_name,
@@ -90,7 +90,11 @@ for i in range(1, 6):
         if n_clicks is None:
             raise PreventUpdate
         # get correct dataset to chart
-        df = _get_table_for_chart(table_from, session_tables, FREQUENCY_TABLES)
+
+        this_table = session_tables[str(table_from)]
+        this_table = _tuple_or_list(this_table, tuple)
+        df = FREQUENCY_TABLES[_tuple_or_list(this_table[:6], tuple)]
+
         # transpose and cut down items to plot
         if transpose:
             df = df.T
@@ -254,7 +258,7 @@ def _new_search(
 
     this_search += [new_value, len(df), list(df["_n"])]
     if found_results:
-        session_search[new_value] = this_search
+        session_search[new_value] = _tuple_or_list(this_search, list)
         corpus = CORPORA[slug]
         df = df.iloc[:max_row, :max_col]
         current_cols, current_data = _update_datatable(
@@ -376,26 +380,29 @@ def _new_table(
         ((k, v) for k, v in session_tables.items() if this_table[:6] == v[:6]),
         (False, False),
     )
+    if exists is not False:
+        exists_as_tuple = _tuple_or_list(exists, tuple)
 
     # if we are updating the table:
     if updating:
-        table = FREQUENCY_TABLES[tuple(exists[:6])]
+        table = FREQUENCY_TABLES[exists_as_tuple]
         exists[-1] += 1
         # fix rows and columns
         table = table[[i["id"] for i in current_cols[1:]]]
         table = table.loc[[i["_" + table.index.name] for i in current_data]]
         # store again
+        exists = _tuple_or_list(exists, list)
         session_tables[key] = exists
-        FREQUENCY_TABLES[tuple(exists[:6])] = table
+        FREQUENCY_TABLES[exists_as_tuple] = table
     elif exists:
         msg = "Table already exists. Switching to that one to save memory."
-        table = FREQUENCY_TABLES[tuple(exists[:6])]
+        table = FREQUENCY_TABLES[exists_as_tuple]
     # if there was a validation problem, juse use last table (?)
     elif msg:
         if session_tables:
             # todo: figure this out...use current table instead?
             key, value = list(session_tables.items())[-1]
-            table = FREQUENCY_TABLES[tuple(value[:6])]
+            table = FREQUENCY_TABLES[_tuple_or_list(value[:6], tuple)]
             # todo: more here?
         else:
             table = INITIAL_TABLES[slug]
@@ -416,9 +423,9 @@ def _new_table(
         if isinstance(relative, pd.DataFrame):
             relative = None
 
-        # make show a tuple, then store the search information
-        this_table[1] = tuple(this_table[1])
-        session_tables[idx] = this_table
+        # then store the search information in store/freq table spaces
+        session_tables[idx] = _tuple_or_list(this_table, list)
+        FREQUENCY_TABLES[_tuple_or_list(this_table, tuple)] = table
 
     if updating:
         cols, data = current_cols, current_data

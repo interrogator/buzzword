@@ -29,12 +29,19 @@ def _get_specs_and_corpus(search_from, searches, corpora, slug):
     return exists, corpora[slug].iloc[exists[-1]]
 
 
-def _get_table_for_chart(table_from, tables, freq_tables):
+def _tuple_or_list(this_identifier, typ):
     """
-    Get the table that needs to be charted
+    Turn all lists to tuple/list so this becomes hashable/dcc.storable
     """
-    this_table = tables[str(table_from)]
-    return freq_tables[tuple(this_table[:6])]
+    opposite = tuple if typ == list else list
+    out = []
+    for i in this_identifier:
+        if isinstance(i, opposite):
+            i = _tuple_or_list(i, typ)
+            out.append(typ(i))
+        else:
+            out.append(i)
+    return typ(out)
 
 
 def _translate_relative(inp, corpus):
