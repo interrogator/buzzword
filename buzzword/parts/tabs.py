@@ -29,7 +29,6 @@ def _build_dataset_space(df, config):
     """
     if isinstance(df, Corpus):
         df = df.files[0].load()
-    print('CONFY', config)
     cols = _get_cols(df, config["add_governor"])
     cols = [dict(label="Dependencies", value="d")] + cols
     df = _drop_cols_for_datatable(df, config["add_governor"])
@@ -209,7 +208,6 @@ def _build_concordance_space(df, config):
     """
     if isinstance(df, Corpus):
         df = df.files[0].load()
-    print('CONFY', config)
     cols = _get_cols(df, config["add_governor"])
     show_check = dcc.Dropdown(
         multi=True,
