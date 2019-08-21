@@ -15,7 +15,7 @@ from dash.exceptions import PreventUpdate
 
 from .parts import start, explore  # noqa: F401
 from .parts.main import server  # noqa: F401
-from .parts.main import CONFIG, CORPORA, CORPUS_META, INITIAL_TABLES, app
+from .parts.main import CONFIG, CORPORA, CORPUS_META, app
 from .parts.tabs import _make_tabs
 
 # where downloadable CSVs/corpora get stored
@@ -48,6 +48,8 @@ def _make_explore_layout(slug, name):
     """
     Simulate globals and generate layout for explore page
     """
+    from .parts.start import CORPORA, CORPUS_META, INITIAL_TABLES
+
     corpus = CORPORA[slug]
     size = CORPUS_META[name].get("len", len(corpus))
     args = [CORPORA[slug], INITIAL_TABLES[slug], slug, name]
