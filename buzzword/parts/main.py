@@ -20,19 +20,22 @@ CONFIG = _configure_buzzword(__name__)
 
 def _get_corpus_config(local_conf, global_conf):
     """
-    get some configs, from json, backup from global, or none
+    Return global conf plus individual settings for corpus
     """
-    conf = dict()
+    conf = {**global_conf}
     settings = {"max_dataset_rows", "drop_columns", "add_governor", "load"}
     for setting in settings:
-        from_global = global_conf.get(setting)
-        conf[setting] = local_conf.get(setting, from_global)
+        loc = local_conf.get(setting)
+        if loc is not None:
+            conf[setting] = loc
     return conf
 
 
 def _get_corpora(corpus_meta):
     """
     Load in all available corpora and make their initial tables
+
+    This is run when the app starts up
     """
     corpora = dict()
     tables = dict()

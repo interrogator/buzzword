@@ -11,12 +11,10 @@ from .parts.main import server  # noqa: F401
 from .parts.main import CONFIG, CORPORA, CORPUS_META, INITIAL_TABLES, app
 from .parts.tabs import _make_tabs
 
-# where downloadable CSVs get stored
-if not os.path.isdir("csv"):
-    os.makedirs("csv")
-# where uploaded corpora are stored
-if not os.path.isdir("uploads"):
-    os.makedirs("uploads")
+# where downloadable CSVs/corpora get stored
+for path in {"csv", "uploads"}:
+    if not os.path.isdir(path):
+        os.makedirs("csv")
 
 
 def _get_layout():
@@ -24,10 +22,11 @@ def _get_layout():
     Function for layout. Could be helpful in future to do it this way.
     """
     loc = dcc.Location(id="url", refresh=False)
+    # user storage for searches, tables, and click counts
     search_store = dcc.Store(id='session-search', data=dict())
     tables_store = dcc.Store(id='session-tables', data=dict())
-    click_clear = dcc.Store(id='session-clicks-clear')
-    click_table = dcc.Store(id='session-clicks-table')
+    click_clear = dcc.Store(id='session-clicks-clear', data=-1)
+    click_table = dcc.Store(id='session-clicks-table', data=-1)
     content = html.Div(id="page-content")
     stores = [search_store, tables_store, click_clear, click_table]
     return html.Div([loc] + stores + [content])
@@ -62,8 +61,7 @@ def _get_explore_layout(slug):
     Get (and maybe generate) the explore layout for this slug
     """
     gen = (k for k, v in CORPUS_META.items() if v["slug"] == slug)
-    name = next(gen, None)
-    name = name or slug
+    name = next(gen, slug)
     # store the default explore for each corpus in a dict for speed
     if slug in LAYOUTS:
         return LAYOUTS[slug]
@@ -89,7 +87,7 @@ def _choose_correct_page(pathname):
     if not pathname:
         return start.layout
     else:
-        return "404"
+        return "404. Page not found: {}".format(pathname)
 
 
 if __name__ == "__main__":
