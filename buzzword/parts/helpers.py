@@ -23,10 +23,10 @@ def _get_specs_and_corpus(search_from, searches, corpora, slug):
         corpora[slug] = loaded
     # if the user wants the corpus, return that
     if not int(search_from):
-        return slug, corpora[slug]
+        return slug, _get_corpus(slug)
     # otherwise, get the search result (i.e. _n col) and make corpus
     exists = searches[str(search_from)]
-    return exists, corpora[slug].iloc[exists[-1]]
+    return exists, _get_corpus(slug).iloc[exists[-1]]
 
 
 def _tuple_or_list(this_identifier, typ):

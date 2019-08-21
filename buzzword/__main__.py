@@ -102,7 +102,7 @@ def _choose_correct_page(pathname):
         layout = _get_explore_layout(slug)
         if layout:
             return layout
-        pathname = ""
+        print("LAYOUT ERROR: ", slug, list(CORPORA.keys()))
     if not pathname:
         return start.layout
     else:
