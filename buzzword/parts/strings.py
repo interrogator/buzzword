@@ -38,7 +38,7 @@ def _make_table_name(history):
     basic = f"{show} by {subcorpora}{relkey}, sorting by {sort}"
     if updates:
         basic += f", {updates} edits"
-    parent = specs[-2] if isinstance(specs, (tuple, list)) else 0
+    parent = specs[-3] if isinstance(specs, (tuple, list)) else 0
     if not parent:
         return basic
     return f"{basic} -- from search #{parent}"
@@ -77,7 +77,6 @@ def _make_search_name(history, size):
     freq = f"(n={n_results:n}{rel_last}/{relative_corpus:.2f}%)"
     basic = f"{col} {no}matching '{search_string}' {freq}"
     hyphen = ""
-    print('PREVY', previous, type(previous))
     while isinstance(previous, (tuple, list)):
         hyphen += "──"
         previous = previous[0]
