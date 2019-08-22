@@ -392,7 +392,7 @@ def _new_table(
 
     # if we are updating the table:table_size
     if updating:
-        table = FREQUENCY_TABLES[exists_as_tuple]
+        table = FREQUENCY_TABLES[exists_as_tuple[:6]]
         exists[-1] += 1
         # fix rows and columns
         table = table[[i["id"] for i in current_cols[1:]]]
@@ -400,10 +400,10 @@ def _new_table(
         # store again
         exists = _tuple_or_list(exists, list)
         session_tables[key] = exists
-        FREQUENCY_TABLES[exists_as_tuple] = table
+        FREQUENCY_TABLES[exists_as_tuple[:6]] = table
     elif exists:
         msg = "Table already exists. Switching to that one to save memory."
-        table = FREQUENCY_TABLES[exists_as_tuple]
+        table = FREQUENCY_TABLES[exists_as_tuple[:6]]
     # if there was a validation problem, juse use last table (?)
     elif msg:
         if session_tables:
