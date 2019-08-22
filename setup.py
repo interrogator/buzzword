@@ -45,4 +45,9 @@ setup(
         "dash-table==4.1.0",
         "dash-daq==0.1.7",
     ],
+    classifiers=[
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+    ]
 )

@@ -305,12 +305,10 @@ def _build_chart_space(table, config):
             value=kind,
             style=style.MARGIN_5_MONO,
         )
-        transpose = (
-            daq.BooleanSwitch(
-                id=f"chart-transpose-{chart_num}",
-                on=False,
-                style={"verticalAlign": "middle"},
-            ),
+        transpose = daq.BooleanSwitch(
+            id=f"chart-transpose-{chart_num}",
+            on=False,
+            style={"verticalAlign": "middle"},
         )
         top_n = dcc.Input(
             id=f"chart-top-n-{chart_num}",
@@ -326,16 +324,16 @@ def _build_chart_space(table, config):
         toolbar = [dropdown, chart_type, top_n, transpose, update]
         tstyle = dict(display="inline-block", verticalAlign="middle")
         widths = {
-            dropdown: "50%",
+            dropdown: "65%",
             chart_type: "25%",
-            top_n: "10%",
-            transpose: "5%",
-            update: "10%",
+            top_n: "3%",
+            transpose: "4%",
+            update: "13%",
         }
         tools = list()
         for component in toolbar:
             width = widths.get(component, "10%")
-            nstyle = {**tstyle, **{"width": width}}
+            nstyle = {**style.CELL_MIDDLE_35, **{"width": width}}
             div = html.Div(component, style=nstyle)
             if component == transpose:
                 div.title = "Transpose axes"
@@ -409,6 +407,8 @@ def _make_tabs(corpus, table, config):
             "font": "12px Arial",
             "fontWeight": 600,
             "color": "#555555",
+            "paddingLeft": "10px",
+            "paddingRight": "10px",
         },
         children=[
             dcc.Tab(label="DATASET", value="dataset"),
@@ -417,7 +417,7 @@ def _make_tabs(corpus, table, config):
             dcc.Tab(label="CONCORDANCE", value="concordance"),
         ],
     )
-    blk = {"display": "block"}
+    blk = {"display": "block", **style.HORIZONTAL_PAD_5}
     conll_display = html.Div(id="display-dataset", children=[dataset])
     hide = {"display": "none"}
 
@@ -431,6 +431,7 @@ def _make_tabs(corpus, table, config):
             ]
         )
     ]
+    pad = {"paddingLeft": "10px", "paddingRight": "10px"}
     tab_contents = html.Div(id="tab-contents", children=tab_contents)
     children = [top_bit, tab_headers, tab_contents]
-    return html.Div(id="everything", children=children)
+    return html.Div(id="everything", children=children, style=pad)
