@@ -8,6 +8,7 @@ import json
 import os
 from buzzword.parts.helpers import _preprocess_corpus
 from buzzword.parts.configure import _configure_buzzword
+from buzzword.parts.strings import _slug_from_name
 
 external_stylesheets = [
     "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css",
@@ -29,11 +30,14 @@ def _get_corpus_config(local_conf, global_conf, name):
     Return global conf plus individual settings for corpus
     """
     conf = {**global_conf}
-    settings = {"max_dataset_rows", "drop_columns", "add_governor", "load"}
+    settings = {"max_dataset_rows", "drop_columns", "add_governor", "load", "slug"}
     for setting in settings:
         loc = local_conf.get(setting)
         if loc is not None:
             conf[setting] = loc
+        else:
+            if setting == "slug":
+                conf[setting] = _slug_from_name(name)
     conf["corpus_name"] = name
     return conf
 
@@ -51,7 +55,7 @@ def _get_corpora(corpus_meta):
         if metadata.get("disabled"):
             print("Skipping corpus because it is disabled: {}".format(corpus_name))
             continue
-        slug = metadata["slug"]
+        slug = metadata.get("slug", _slug_from_name(corpus_name))
         corpus = Corpus(metadata["path"])
         conf = _get_corpus_config(metadata, GLOBAL_CONFIG, corpus_name)
         if conf["load"]:

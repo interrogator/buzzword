@@ -369,7 +369,7 @@ def _make_tabs(corpus, table, config):
     frequencies = _build_frequencies_space(corpus, table, config)
     chart = _build_chart_space(table, config)
     concordance = _build_concordance_space(corpus, config)
-    label = _make_search_name(config["corpus_name"], config["corpus_size"])
+    label = _make_search_name(config["corpus_name"], config["len"])
     search_from = [dict(value=0, label=label)]
     clear = html.Button("Clear history", id="clear-history", style=style.MARGIN_5_MONO)
     dropdown = dcc.Dropdown(
@@ -432,6 +432,5 @@ def _make_tabs(corpus, table, config):
         )
     ]
     tab_contents = html.Div(id="tab-contents", children=tab_contents)
-    hidden_corpus_name = html.Div(id="corpus-config", children=config, style=hide)
-    children = [top_bit, tab_headers, tab_contents, hidden_corpus_name]
+    children = [top_bit, tab_headers, tab_contents]
     return html.Div(id="everything", children=children)

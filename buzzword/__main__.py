@@ -35,7 +35,7 @@ def _get_layout():
     tables_store = dcc.Store(id="session-tables", data=dict())
     click_clear = dcc.Store(id="session-clicks-clear", data=-1)
     click_table = dcc.Store(id="session-clicks-table", data=-1)
-    configs = dcc.Store(id="uploaded-configs", data=dict())
+    configs = dcc.Store(id="session-configs", data=CORPORA_CONFIGS)
     content = html.Div(id="page-content")
     stores = [search_store, tables_store, click_clear, click_table, configs]
     return html.Div([loc] + stores + [content])
@@ -54,7 +54,7 @@ def _make_explore_layout(slug, conf):
 
     corpus = _get_corpus(slug)
     table = _get_initial_table(slug)
-    size = conf.get("len", len(corpus))
+    conf["len"] = conf.get("len", len(corpus))
     conf["slug"] = slug  # can i delete this?
     return _make_tabs(corpus, table, conf)
 
@@ -70,13 +70,11 @@ def _populate_explore_layouts():
         LAYOUTS[slug] = _make_explore_layout(slug, meta)
 
 
-def _get_explore_layout(slug, uploaded_configs):
+def _get_explore_layout(slug, all_configs):
     """
     Get (and maybe generate) the explore layout for this slug
     """
-    from buzzword.parts.start import CORPORA_CONFIGS
-    upped = uploaded_configs.get(slug)
-    conf = CORPORA_CONFIGS.get(slug, upped)
+    conf = all_configs.get(slug)
     if not conf:
         return
     # store the default explore for each corpus in a dict for speed
@@ -87,7 +85,7 @@ def _get_explore_layout(slug, uploaded_configs):
     return layout
 
 
-@app.callback(Output("page-content", "children"), [Input("url", "pathname")], [State("uploaded-configs", "data")])
+@app.callback(Output("page-content", "children"), [Input("url", "pathname")], [State("session-configs", "data")])
 def _choose_correct_page(pathname, configs):
     """
     When the URL changes, get correct page and populate page-content with it

@@ -193,7 +193,7 @@ def _validate_input(contents, names, corpus_name, slug):
         Output("dialog-upload", "displayed"),
         Output("dialog-upload", "message"),
         Output("corpus-table", "children"),
-        Output("uploaded-configs", "data"),
+        Output("session-configs", "data"),
     ],
     [Input("upload-parse-button", "n_clicks")],
     [
@@ -202,10 +202,10 @@ def _validate_input(contents, names, corpus_name, slug):
         State("corpus-language", "value"),
         State("upload-corpus-name", "value"),
         State("corpus-table", "children"),
-        State("uploaded-configs", "data"),
+        State("session-configs", "data"),
     ],
 )
-def _upload_files(n_clicks, contents, names, corpus_lang, corpus_name, table_rows, uploaded_configs):
+def _upload_files(n_clicks, contents, names, corpus_lang, corpus_name, table_rows, session_configs):
     """
     Callback when the user clicks 'upload and parse'
     """
@@ -218,7 +218,7 @@ def _upload_files(n_clicks, contents, names, corpus_lang, corpus_name, table_row
     msg = _validate_input(contents, names, corpus_name, slug)
 
     if msg:
-        return bool(msg), msg, table_rows, uploaded_configs
+        return bool(msg), msg, table_rows, session_configs
 
     path, is_parsed, size = _store_corpus(contents, names, slug)
     corpus = Corpus(path)
@@ -228,7 +228,7 @@ def _upload_files(n_clicks, contents, names, corpus_lang, corpus_name, table_row
         except Exception as error:
             msg = f"Problem when parsing the corpus: {str(error)}"
             traceback.print_exc()
-            return bool(msg), msg, table_rows, uploaded_configs
+            return bool(msg), msg, table_rows, session_configs
 
     corpus = corpus.load()
 
@@ -238,7 +238,6 @@ def _upload_files(n_clicks, contents, names, corpus_lang, corpus_name, table_row
         slug=slug,
         len=len(corpus),
         corpus_name=corpus_name,
-        corpus_size=len(corpus),
     )
     CORPUS_META[corpus_name] = conf
     CORPORA_CONFIGS[slug] = conf
@@ -263,8 +262,8 @@ def _upload_files(n_clicks, contents, names, corpus_lang, corpus_name, table_row
     # put it at start of table :)
     row = _make_row(OrderedDict(tups), 0, upload=True)
     table_rows = [table_rows[0], row] + table_rows[1:]
-    uploaded_configs[slug] = conf
-    return bool(msg), msg, table_rows, uploaded_configs
+    session_configs[slug] = conf
+    return bool(msg), msg, table_rows, session_configs
 
 
 @app.callback(
