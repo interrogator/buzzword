@@ -159,8 +159,8 @@ def _from_env(env_path):
     if table_size:
         table_size = [int(i) for i in table_size.split(",")]
     max_dataset_rows = os.getenv("BUZZWORD_MAX_DATASET_ROWS")
-    if max_dataset_rows.strip():
-        max_dataset_rows = int(max_dataset_rows)
+    if max_dataset_rows and max_dataset_rows.strip():
+        max_dataset_rows = int(max_dataset_rows.strip())
 
     return dict(
         corpora_file=os.getenv("BUZZWORD_CORPORA_FILE", "corpora.json"),
