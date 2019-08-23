@@ -38,7 +38,7 @@ def _make_table_name(history):
     basic = f"{show} by {subcorpora}{relkey}, sorting by {sort}"
     if updates:
         basic += f", {updates} edits"
-    parent = specs[-3] if isinstance(specs, (tuple, list)) else 0
+    parent = specs[4] if isinstance(specs, (tuple, list)) else 0
     if not parent:
         return basic
     return f"{basic} -- from search #{parent}"

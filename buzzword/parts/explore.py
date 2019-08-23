@@ -92,7 +92,6 @@ for i in range(1, 6):
         # get correct dataset to chart
 
         this_table = session_tables[str(table_from)]
-        this_table = _tuple_or_list(this_table, tuple)
         df = FREQUENCY_TABLES[_tuple_or_list(this_table[:6], tuple)]
 
         # transpose and cut down items to plot
@@ -362,6 +361,10 @@ def _new_table(
 
     specs, corpus = _get_specs_and_corpus(search_from, session_search, CORPORA, slug)
 
+    # do not store the df._n in store EVER
+    if isinstance(specs, (list, tuple)):
+        specs = specs[:-1]
+
     sort = sort or "total"
 
     relative, keyness = _translate_relative(relkey, CORPORA[slug])
@@ -390,17 +393,21 @@ def _new_table(
     if exists is not False:
         exists_as_tuple = _tuple_or_list(exists, tuple)
 
-    # if we are updating the table:table_size
+    # if we are updating the table:
     if updating:
+        # get the whole table from master dict of them
         table = FREQUENCY_TABLES[exists_as_tuple[:6]]
-        exists[-1] += 1
+        # increment the last number, shows number of edits
+        exists_as_list = _tuple_or_list(exists, list)
+        exists_as_list[-1] += 1
+        # re-store it with the correct number of edits
+        session_tables[key] = exists_as_list
         # fix rows and columns
+        old_dim = table.shape
         table = table[[i["id"] for i in current_cols[1:]]]
         table = table.loc[[i["_" + table.index.name] for i in current_data]]
-        # store again
-        exists = _tuple_or_list(exists, list)
-        session_tables[key] = exists
-        FREQUENCY_TABLES[exists_as_tuple[:6]] = table
+        # store table again with same key
+        FREQUENCY_TABLES[_tuple_or_list(exists_as_list[:6], tuple)] = table
     elif exists:
         msg = "Table already exists. Switching to that one to save memory."
         table = FREQUENCY_TABLES[exists_as_tuple[:6]]
@@ -431,7 +438,7 @@ def _new_table(
             relative = None
 
         # then store the search information in store/freq table spaces
-        session_tables[idx] = _tuple_or_list(this_table[:6], list)
+        session_tables[idx] = _tuple_or_list(this_table, list)
         FREQUENCY_TABLES[_tuple_or_list(this_table[:6], tuple)] = table
 
     if updating:
