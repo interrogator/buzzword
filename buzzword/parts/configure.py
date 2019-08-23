@@ -96,12 +96,12 @@ def _from_cmdline():
     )
 
     parser.add_argument(
-        "-e",
-        "--env",
-        nargs="?",
-        type=str,
+        "-ne",
+        "--no-env",
+        default=False,
+        action="store_true",
         required=False,
-        help="Use .env file to load config, rather than command line",
+        help="Ignore config taken from .env file.",
     )
 
     parser.add_argument(
@@ -111,6 +111,16 @@ def _from_cmdline():
         type=str,
         nargs="?",
         help="Path to corpora.json",
+    )
+
+    parser.add_argument(
+        "-e",
+        "--env",
+        nargs="?",
+        type=str,
+        required=False,
+        default=".env",
+        help="Path to .env file",
     )
 
     kwargs = vars(parser.parse_args())
@@ -127,13 +137,12 @@ def _configure_buzzword(name):
     If the user wants to use dotenv (--env flag), load from that.
     If not from main, use dotenv only.
     """
-    env_path = os.path.join(os.getcwd(), ".env")
-    config = _from_cmdline()
-    if not config["env"]:
+    cmd_config = _from_cmdline()
+    if not os.path.isfile(config['env']) or config['no_env']:
         return config
-    else:
-        env_path = config["env"]
-    return _from_env(env_path)
+    env_conf = _from_env(env_path)
+    # todo: add in cmd line arguments that were explicit
+    return env_conf
 
 
 def _from_env(env_path):
