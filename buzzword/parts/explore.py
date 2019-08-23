@@ -92,7 +92,7 @@ for i in range(1, 6):
         # get correct dataset to chart
 
         this_table = session_tables[str(table_from)]
-        df = FREQUENCY_TABLES[_tuple_or_list(this_table[:6], tuple)]
+        df = FREQUENCY_TABLES[_tuple_or_list(this_table, tuple)]
 
         # transpose and cut down items to plot
         if transpose:
@@ -218,7 +218,7 @@ def _new_search(
         corpus = CORPORA[slug]
         corpus = corpus.iloc[:max_row, :max_col]
         cols, data = _update_datatable(corpus, corpus, drop_govs=add_governor)
-        name = _make_search_name(conf["corpus_name"], len(corpus))
+        name = _make_search_name(conf["corpus_name"], len(corpus), session_search)
         search_from = [dict(value=0, label=name)]
         # set number of clicks at last moment
         session_clicks_clear = cleared
@@ -267,7 +267,7 @@ def _new_search(
             corpus, df, drop_govs=add_governor, deletable=True
         )
     if not msg:
-        name = _make_search_name(this_search, len(corpus))
+        name = _make_search_name(this_search, len(corpus), session_search)
         option = dict(value=new_value, label=name)
         search_from_options.append(option)
     elif exists:
@@ -361,10 +361,6 @@ def _new_table(
 
     specs, corpus = _get_specs_and_corpus(search_from, session_search, CORPORA, slug)
 
-    # do not store the df._n in store EVER
-    if isinstance(specs, (list, tuple)):
-        specs = specs[:-1]
-
     sort = sort or "total"
 
     relative, keyness = _translate_relative(relkey, CORPORA[slug])
@@ -382,41 +378,31 @@ def _new_table(
             updating = True
 
     msg = _table_error(show, subcorpora, updating)
-    idx = len(session_tables) + 1
-    this_table = [specs, show, subcorpora, relative, keyness, sort, idx, 0]
+    this_table_list = [specs, list(show), subcorpora, relative, keyness, sort]
+    this_table_tuple = _tuple_or_list(this_table_list, tuple)
 
     # if table already made, use that one
-    key, exists = next(
-        ((k, v) for k, v in session_tables.items() if this_table[:6] == v[:6]),
-        (False, False),
-    )
-    if exists is not False:
-        exists_as_tuple = _tuple_or_list(exists, tuple)
+    key = next((k for k, v in session_tables.items() if this_table_list == v), False)
+    idx = key if key is not False else len(session_tables) + 1
 
     # if we are updating the table:
     if updating:
         # get the whole table from master dict of them
-        table = FREQUENCY_TABLES[exists_as_tuple[:6]]
-        # increment the last number, shows number of edits
-        exists_as_list = _tuple_or_list(exists, list)
-        exists_as_list[-1] += 1
-        # re-store it with the correct number of edits
-        session_tables[key] = exists_as_list
+        table = FREQUENCY_TABLES[this_table_tuple]
         # fix rows and columns
-        old_dim = table.shape
         table = table[[i["id"] for i in current_cols[1:]]]
         table = table.loc[[i["_" + table.index.name] for i in current_data]]
         # store table again with same key
-        FREQUENCY_TABLES[_tuple_or_list(exists_as_list[:6], tuple)] = table
-    elif exists:
+        FREQUENCY_TABLES[this_table_tuple] = table
+    elif key is not False:
         msg = "Table already exists. Switching to that one to save memory."
-        table = FREQUENCY_TABLES[exists_as_tuple[:6]]
+        table = FREQUENCY_TABLES[this_table_tuple]
     # if there was a validation problem, juse use last table (?)
     elif msg:
         if session_tables:
             # todo: figure this out...use current table instead?
             key, value = list(session_tables.items())[-1]
-            table = FREQUENCY_TABLES[_tuple_or_list(value[:6], tuple)]
+            table = FREQUENCY_TABLES[_tuple_or_list(value, tuple)]
             # todo: more here?
         else:
             table = INITIAL_TABLES[slug]
@@ -438,8 +424,8 @@ def _new_table(
             relative = None
 
         # then store the search information in store/freq table spaces
-        session_tables[idx] = _tuple_or_list(this_table, list)
-        FREQUENCY_TABLES[_tuple_or_list(this_table[:6], tuple)] = table
+        session_tables[idx] = this_table_list
+        FREQUENCY_TABLES[this_table_tuple] = table
 
     if updating:
         cols, data = current_cols, current_data
@@ -451,11 +437,9 @@ def _new_table(
     csv_path = "todo"
 
     if not msg and not updating:
-        table_name = _make_table_name(this_table)
+        table_name = _make_table_name(this_table_list)
         option = dict(value=idx, label=table_name)
         table_from_options.append(option)
-    elif exists or updating:
-        idx = key
     return (
         cols,
         data,

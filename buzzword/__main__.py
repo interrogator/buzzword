@@ -101,7 +101,7 @@ def _choose_correct_page(pathname, configs):
         layout = _get_explore_layout(slug, configs)
         if layout:
             return layout
-        print("LAYOUT ERROR: ", slug, list(CORPORA.keys()))
+        # layout does not exist. unloaded corpus?
     if not pathname:
         return start.layout
     else:

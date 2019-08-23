@@ -24,7 +24,7 @@ def _make_table_name(history):
     """
     if history == "initial":
         return "Part of speech tags by filename"
-    specs, show, subcorpora, relative, keyness, sort, n, updates = history
+    specs, show, subcorpora, relative, keyness, sort = history
     subcorpora = (
         SHORT_TO_LONG_NAME.get(subcorpora, subcorpora).lower().replace("_", " ")
     )
@@ -36,12 +36,9 @@ def _make_table_name(history):
     if relative is False and keyness is False:
         relkey = " showing absolute frequencies"
     basic = f"{show} by {subcorpora}{relkey}, sorting by {sort}"
-    if updates:
-        basic += f", {updates} edits"
-    parent = specs[4] if isinstance(specs, (tuple, list)) else 0
-    if not parent:
+    if not int(specs):
         return basic
-    return f"{basic} -- from search #{parent}"
+    return f"{basic} -- from search #{specs}"
 
 
 def _format_size(size):
@@ -56,7 +53,7 @@ def _format_size(size):
         return f"{size/1000:.2f} kB"
 
 
-def _make_search_name(history, size):
+def _make_search_name(history, size, searches):
     """
     Generate a search name from its history
     """
@@ -77,9 +74,9 @@ def _make_search_name(history, size):
     freq = f"(n={n_results:n}{rel_last}/{relative_corpus:.2f}%)"
     basic = f"{col} {no}matching '{search_string}' {freq}"
     hyphen = ""
-    while isinstance(previous, (tuple, list)):
+    while previous:
         hyphen += "──"
-        previous = previous[0]
+        previous = int(searches[str(previous)][0])
     if hyphen:
         basic = f"└{hyphen} " + basic
     return f"({n}) {basic}"

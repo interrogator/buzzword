@@ -347,7 +347,9 @@ def _build_chart_space(table, config):
             figure=figure,
             style={"height": "60vh", "width": "95vw"},
         )
-        chart = dcc.Graph(**chart_data)
+        chart = dcc.Loading(
+            type="default",
+            children=[dcc.Graph(**chart_data)])
         chart_space = html.Div([toolbar, chart])
         name = f"Chart #{chart_num}"
         summary = html.Summary(name, style=style.CHART_SUMMARY)
@@ -367,7 +369,7 @@ def _make_tabs(corpus, table, config):
     frequencies = _build_frequencies_space(corpus, table, config)
     chart = _build_chart_space(table, config)
     concordance = _build_concordance_space(corpus, config)
-    label = _make_search_name(config["corpus_name"], config["len"])
+    label = _make_search_name(config["corpus_name"], config["len"], dict())
     search_from = [dict(value=0, label=label)]
     clear = html.Button("Clear history", id="clear-history", style=style.MARGIN_5_MONO)
     dropdown = dcc.Dropdown(
