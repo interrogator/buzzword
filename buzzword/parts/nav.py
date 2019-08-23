@@ -3,7 +3,7 @@ buzzword: navigation bar
 """
 
 import buzzword
-import subprocess
+import os
 import dash_core_components as dcc
 import dash_html_components as html
 from buzzword.parts import style
@@ -13,11 +13,11 @@ def _make_navbar(debug):
     """
     Generate navigation bar. Debug will add version information
     """
-
     if debug:
         version = buzzword.__version__
         commit = "git rev-parse --short HEAD"
-        commit = subprocess.check_output(commit.split()).decode("utf-8").strip()
+        print('CURRENT DIR', os.getcwd())
+        commit = os.popen(commit).read()
         ver_string = "version {}: {}".format(version, commit)
         github = "https://github.com/interrogator/buzzword/tree/" + commit
         git_sty = {**style.NAV_HEADER, **{"fontSize": "12pt", "paddingLeft": "20px"}}
