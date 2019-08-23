@@ -138,8 +138,8 @@ def _configure_buzzword(name):
     If not from main, use dotenv only.
     """
     cmd_config = _from_cmdline()
-    if not os.path.isfile(config['env']) or config['no_env']:
-        return config
+    if not os.path.isfile(cmd_config["env"]) or cmd_config["no_env"]:
+        return cmd_config
     env_conf = _from_env(env_path)
     # todo: add in cmd line arguments that were explicit
     return env_conf
