@@ -23,7 +23,7 @@ from buzzword.parts.main import (
 from buzzword.parts.strings import _slug_from_name, _make_description
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
-from buzzword.parts.nav import navbar
+from buzzword.parts.nav import _make_navbar
 from buzzword.parts import style
 
 
@@ -319,5 +319,6 @@ if not is_empty:
 content_style = {"display": "inline-block", "width": "1000px", "textAlign": "left"}
 content = html.Div(content, style=content_style)
 content = html.Div(content, style={"textAlign": "center"})
+navbar = _make_navbar(GLOBAL_CONFIG["debug"])
 components = [navbar, content]
 layout = html.Div(components)
