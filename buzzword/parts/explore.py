@@ -6,6 +6,7 @@ import os
 import pandas as pd
 
 from buzz.dashview import _df_to_figure
+from buzz.exceptions import DataTypeError
 from buzzword.parts.helpers import (
     _get_specs_and_corpus,
     _translate_relative,
@@ -251,10 +252,19 @@ def _new_search(
                 # after which, either we return previous, or return none:
                 df = df.iloc[:0, :0]
         else:
+            search = _cast_query(search_string, col)
             method = "just" if not skip else "skip"
-            df = getattr(getattr(corpus, method), col)(search_string.strip())
+            try:
+                df = getattr(getattr(corpus, method), col)(search)
+            # todo: tell the user the problem?
+            except DataTypeError:
+                df = df.iloc[:0, :0]
+                msg = "Query type problem. Query is {}, col {} is {}."
+                if isinstance(search, list):
+                    search = search[0]
+                msg = msg.format(type(search), col, corpus[col].dtype)
         # if there are no results
-        if not len(df):
+        if not len(df) and not msg:
             found_results = False
             msg = "No results found, sorry."
 

@@ -201,3 +201,21 @@ def _get_initial_table(slug):
         return INITIAL_TABLES[slug]
     corpus = _get_corpus(slug)
     return corpus.table(show="p", subcorpora="file")
+
+def _cast_query(query, col):
+    """
+    ALlow different query types (e.g. numerical, list, str)
+    """
+    query = query.strip()
+    if col in {'t', 'd'}:
+        return query
+    if query.startswith("[") and query.endswith(']'):
+        if ',' in query:
+            query = ','.split(query[1:-1])
+            return [i.strip() for i in query]
+    if query.isdigit():
+        return int(query)
+    try:
+        return float(query)
+    except Exception:
+        return query

@@ -35,7 +35,7 @@ setup(
     license="MIT",
     keywords=[],
     install_requires=[
-        "buzz>=3.0.6",
+        "buzz>=3.0.8",
         "python-dotenv==0.10.3",
         "flask==1.1.1",
         "dash==1.1.1",
