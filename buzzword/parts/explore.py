@@ -12,6 +12,7 @@ from buzzword.parts.helpers import (
     _translate_relative,
     _update_datatable,
     _tuple_or_list,
+    _cast_query
 )
 from buzzword.parts.strings import (
     _make_search_name,
