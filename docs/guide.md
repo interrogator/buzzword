@@ -26,7 +26,7 @@ The dataset tab is also the place where you search the corpus. In *buzzword*, be
 
 **Feature to search**: in the leftmost dropdown field, you select the feature you want to search (word form, lemma form, POS, etc). Each of these options targets a token or metadata feature, except *Dependencies*, which is used to search the dependency grammar with which a corpus has been parsed. To start out, select something simple, like 'Word', so that your search string will be compared to the word as it was writtin in the original, unparsed text.
 
-**Query entry**: in the text entry field, you neeed to provide a case-sensitive regular expression that you want to match. The only exception to this is if you are searching *Dependencies*, in which case you will need to use [the depgrep query language](https://github.com/interrogator/depgrep). If you're new to regular expressions, and just want to find words that exactly match a string, enter `^word$`. The caret (`^`) denotes 'start of string', and the dollar sign (`$`) denotes the end of string. Without the dollar sign, the query would match not only *word*, but *wordy*, *wording*, *word-salad*, and so on.
+**Query entry**: in the text entry field, you neeed to provide a case-sensitive regular expression that you want to match. The only exception to this is if you are searching *Dependencies*, in which case you will need to use [the depgrep query language](depgrep.md). If you're new to regular expressions, and just want to find words that exactly match a string, enter `^word$`. The caret (`^`) denotes 'start of string', and the dollar sign (`$`) denotes the end of string. Without the dollar sign, the query would match not only *word*, but *wordy*, *wording*, *word-salad*, and so on.
 
 **Inverting searches**: finally, you can toggle result inversion using the toggle switch (i.e. return rows *not matching* the search criteria). This is especially useful if you want to remove particular unwanted results. For example, if you want to match any pronoun but *me*, rather than writing a regular expression to match every other pronoun (*I*, *you*, *he*, etc.), simple search for any token whose part of speech is *PRP*, and then run another search for any word matching *me*, inverting the result.
 
@@ -50,7 +50,7 @@ Alternatively, you could write one *depgrep* query:
 X"NOUN" = w/ing$/ != F"nsubj"
 ```
 
-If you want to learn to use the *depgrep* language, check out [its documentation on GitHub](https://github.com/interrogator/depgrep).
+If you want to learn to use the *depgrep* language, you can view the [*depgrep* page](depgrep.md) for a guide to query construction.
 
 At any time, if you want to delete your search history, you can use the 'Clear history' button to forget all previous searches.
 
