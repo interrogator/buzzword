@@ -1,4 +1,4 @@
-buzz>=3.0.9
+buzz>=3.0.10
 flask==1.1.1
 dash==1.1.1
 dash-core-components==1.1.1
