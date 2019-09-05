@@ -15,14 +15,14 @@ from dash.exceptions import PreventUpdate
 
 from .parts import start, explore  # noqa: F401
 from .parts.main import app, server  # noqa: F401
-from .parts.main import ROOT, CORPORA, CORPUS_META, CORPORA_CONFIGS
+from .parts.main import CORPORA, CORPUS_META, CORPORA_CONFIGS
 from .parts.tabs import _make_tabs
 from .parts.helpers import _get_corpus, _get_initial_table
 
 # where downloadable CSVs/corpora get stored
 for path in {"csv", "uploads"}:
     if not os.path.isdir(path):
-        os.makedirs("csv")
+        os.makedirs(path)
 
 
 def _get_layout():
@@ -50,8 +50,6 @@ def _make_explore_layout(slug, conf):
     """
     Simulate globals and generate layout for explore page
     """
-    from buzzword.parts.start import CORPORA, INITIAL_TABLES, CORPORA_CONFIGS
-
     corpus = _get_corpus(slug)
     table = _get_initial_table(slug)
     conf["len"] = conf.get("len", len(corpus))

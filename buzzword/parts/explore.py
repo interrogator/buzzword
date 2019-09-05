@@ -25,7 +25,7 @@ from dash.exceptions import PreventUpdate
 
 import flask
 
-from buzzword.parts.main import app, CORPORA, INITIAL_TABLES, CORPORA_CONFIGS
+from buzzword.parts.main import app, CORPORA, INITIAL_TABLES
 
 # we can't keep tables in dcc.store, they are too big. so we keep all here with
 # a tuple that can identify them (ideally, even dealing with user sessions)

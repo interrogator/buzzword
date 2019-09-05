@@ -283,6 +283,7 @@ def show_uploaded(contents, filenames):
         markdown += f"\n* and {rest} more ..."
     return dcc.Markdown(markdown)
 
+
 header = html.H2("buzzword: a tool for analysing annotated linguistic data")
 
 # if no corpora available, do not show this table
@@ -310,8 +311,6 @@ md = (
 upload_text = dcc.Markdown(md)
 
 upload = _make_upload_parse_space()
-
-hide = {"display": "none"}
 
 content = [header, intro, uphead, upload_text, upload]
 if not is_empty:

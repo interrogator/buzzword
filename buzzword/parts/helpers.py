@@ -173,7 +173,7 @@ def _make_csv(table, long_name):
     df = pd.DataFrame.from_dict(table)
     csv_string = df.to_csv(index=False, encoding="utf-8")
     with open(fpath, "w") as fo:
-        fo.write(df.to_csv())
+        fo.write(csv_string)
     return fpath
 
 
@@ -181,7 +181,7 @@ def _get_corpus(slug):
     """
     Get corpus from slug, loading from uploads dir if need be
     """
-    from buzzword.parts.start import CORPORA, INITIAL_TABLES
+    from buzzword.parts.start import CORPORA
     from buzzword.parts.main import ROOT
 
     if slug in CORPORA:
@@ -201,6 +201,7 @@ def _get_initial_table(slug):
         return INITIAL_TABLES[slug]
     corpus = _get_corpus(slug)
     return corpus.table(show="p", subcorpora="file")
+
 
 def _cast_query(query, col):
     """
