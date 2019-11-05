@@ -10,10 +10,7 @@ from buzzword.parts.helpers import _preprocess_corpus
 from buzzword.parts.configure import _configure_buzzword
 from buzzword.parts.strings import _slug_from_name
 
-external_stylesheets = [
-    "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css",
-    "https://codepen.io/chriddyp/pen/bWLwgP.css",
-]
+external_stylesheets = []
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 app.config.suppress_callback_exceptions = True
