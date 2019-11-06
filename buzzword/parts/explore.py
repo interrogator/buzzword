@@ -3,29 +3,19 @@ buzzword: callbacks for explore page
 """
 
 import os
-import pandas as pd
-
-from buzz.dashview import _df_to_figure
-from buzz.exceptions import DataTypeError
-from buzzword.parts.helpers import (
-    _get_specs_and_corpus,
-    _translate_relative,
-    _update_datatable,
-    _tuple_or_list,
-    _cast_query
-)
-from buzzword.parts.strings import (
-    _make_search_name,
-    _make_table_name,
-    _search_error,
-    _table_error,
-)
-from dash.dependencies import Input, Output, State
-from dash.exceptions import PreventUpdate
 
 import flask
-
-from buzzword.parts.main import app, CORPORA, INITIAL_TABLES
+import pandas as pd
+from buzz.dashview import _df_to_figure
+from buzz.exceptions import DataTypeError
+from buzzword.parts.helpers import (_cast_query, _get_specs_and_corpus,
+                                    _translate_relative, _tuple_or_list,
+                                    _update_datatable)
+from buzzword.parts.main import CORPORA, INITIAL_TABLES, app
+from buzzword.parts.strings import (_make_search_name, _make_table_name,
+                                    _search_error, _table_error)
+from dash.dependencies import Input, Output, State
+from dash.exceptions import PreventUpdate
 
 # we can't keep tables in dcc.store, they are too big. so we keep all here with
 # a tuple that can identify them (ideally, even dealing with user sessions)
@@ -35,14 +25,15 @@ FREQUENCY_TABLES = dict()
 # CALLBACKS #
 #############
 #
-@app.callback(Output("input-box", "placeholder"), [Input("search-target", "value")])
+@app.callback([Output("input-box", "placeholder"), Output("gram-select", "disabled")], [Input("search-target", "value")])
 def _correct_placeholder(value):
     """
     More accurate placeholder text when doing dependencies
     """
-    if value in {"bigrams", "trigrams", "describe", "d"}:
-        return "Enter depgrep query..."
-    return "Enter regular expression search query..."
+    disable_gram = value in {"t", "d", "describe"}
+    if value in {"describe", "d"}:
+        return "Enter depgrep query...", disable_gram
+    return "Enter regular expression search query...", disable_gram
 
 
 @app.callback(
@@ -134,6 +125,7 @@ def _on_load_callback(n_clicks):
         State("skip-switch", "on"),
         State("search-target", "value"),
         State("input-box", "value"),
+        State("gram-select", "value"),
         State("search-from", "options"),
         State("conll-view", "columns"),
         State("conll-view", "data"),
@@ -150,6 +142,7 @@ def _new_search(
     skip,
     col,
     search_string,
+    gram_select,
     search_from_options,
     current_cols,
     current_data,
@@ -251,6 +244,9 @@ def _new_search(
                 print(f"DEPGREP ERROR: {type(error)}: {error}")
                 # after which, either we return previous, or return none:
                 df = df.iloc[:0, :0]
+        # ngram stuff
+        if gram_select:
+            df = getattr(corpus.near, col)(search_string, distance=gram_select)
         else:
             search = _cast_query(search_string, col)
             method = "just" if not skip else "skip"

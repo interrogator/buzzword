@@ -6,21 +6,14 @@ import dash_core_components as dcc
 import dash_daq as daq
 import dash_html_components as html
 import dash_table
-
 from buzz.constants import SHORT_TO_COL_NAME
 from buzz.corpus import Corpus
 from buzz.dashview import CHART_TYPES, _df_to_figure
-from buzzword.parts.helpers import (
-    _get_cols,
-    _update_datatable,
-    _drop_cols_for_datatable,
-)
-from buzzword.parts.strings import (
-    _make_search_name,
-    _make_table_name,
-    _capitalize_first,
-)
 from buzzword.parts import style
+from buzzword.parts.helpers import (_drop_cols_for_datatable, _get_cols,
+                                    _update_datatable)
+from buzzword.parts.strings import (_capitalize_first, _make_search_name,
+                                    _make_table_name)
 
 
 def _build_dataset_space(df, config):
@@ -30,12 +23,17 @@ def _build_dataset_space(df, config):
     if isinstance(df, Corpus):
         df = df.files[0].load()
     cols = _get_cols(df, config["add_governor"])
-    extra = [("Dependencies", "d"),
-        ("Descriptors", "describe"),
-        ("Bigrams", "bigrams"),
-        ("Trigrams", "trigrams")
+    extra = [
+        ("Dependencies", "d"),
+        ("Descriptors", "describe")
+    ]
+    grams = [
+        ("Match (default)", 0),
+        ("Bigrams of match", 1),
+        ("Trigrams of match", 2),
     ]
     extra = [dict(label=l, value=v) for l, v in extra]
+    grams = [dict(label=l, value=v) for l, v in grams]
     cols = extra + cols
     df = _drop_cols_for_datatable(df, config["add_governor"])
     df = df.reset_index()
@@ -56,6 +54,14 @@ def _build_dataset_space(df, config):
             placeholder="Enter regular expression search query...",
             size="120",
             style=style.MARGIN_5_MONO,
+        ),
+        dcc.Dropdown(
+            id="gram-select",
+            options=grams,
+            # value="",
+            placeholder="What to return from search",
+            disabled=False,
+            style={"width": "240px", "fontFamily": "monospace"},
         ),
         daq.BooleanSwitch(
             id="skip-switch",
@@ -353,9 +359,7 @@ def _build_chart_space(table, config):
             figure=figure,
             style={"height": "60vh", "width": "95vw"},
         )
-        chart = dcc.Loading(
-            type="default",
-            children=[dcc.Graph(**chart_data)])
+        chart = dcc.Loading(type="default", children=[dcc.Graph(**chart_data)])
         chart_space = html.Div([toolbar, chart])
         name = f"Chart #{chart_num}"
         summary = html.Summary(name, style=style.CHART_SUMMARY)
@@ -370,7 +374,6 @@ def _make_tabs(corpus, table, config):
     """
     Generate initial layout div
     """
-    slug = config["slug"]
     dataset = _build_dataset_space(corpus, config)
     frequencies = _build_frequencies_space(corpus, table, config)
     chart = _build_chart_space(table, config)
