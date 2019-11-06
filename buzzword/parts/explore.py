@@ -40,10 +40,9 @@ def _correct_placeholder(value):
     """
     More accurate placeholder text when doing dependencies
     """
-    if value == "d":
+    if value in {"bigrams", "trigrams", "describe", "d"}:
         return "Enter depgrep query..."
-    else:
-        return "Enter regular expression search query..."
+    return "Enter regular expression search query..."
 
 
 @app.callback(

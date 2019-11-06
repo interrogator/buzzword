@@ -30,7 +30,13 @@ def _build_dataset_space(df, config):
     if isinstance(df, Corpus):
         df = df.files[0].load()
     cols = _get_cols(df, config["add_governor"])
-    cols = [dict(label="Dependencies", value="d")] + cols
+    extra = [("Dependencies", "d"),
+        ("Descriptors", "describe"),
+        ("Bigrams", "bigrams"),
+        ("Trigrams", "trigrams")
+    ]
+    extra = [dict(label=l, value=v) for l, v in extra]
+    cols = extra + cols
     df = _drop_cols_for_datatable(df, config["add_governor"])
     df = df.reset_index()
     max_row, max_col = config["table_size"]
