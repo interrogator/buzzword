@@ -52,7 +52,7 @@ def _build_dataset_space(df, config):
             id="input-box",
             type="text",
             placeholder="Enter regular expression search query...",
-            size="120",
+            size="80",
             style=style.MARGIN_5_MONO,
         ),
         dcc.Dropdown(

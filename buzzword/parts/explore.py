@@ -197,10 +197,10 @@ def _new_search(
     new_value = len(session_search) + 1
 
     # on first search, spec is slug name, so it goes here.
-    this_search = [specs, col, skip, search_string]
+    this_search = [specs, col, skip, search_string, gram_select]
 
     exists = next(
-        (i for i in session_search.values() if this_search == list(i)[:4]), False
+        (i for i in session_search.values() if this_search == list(i)[:5]), False
     )
     if exists:
         msg = "Table already exists. Switching to that one to save memory."

@@ -59,10 +59,12 @@ def _make_search_name(history, size, searches):
     """
     import locale
 
+    trans = {0: 'match', 1: 'bigrams', 2: 'trigrams'}
+
     locale.setlocale(locale.LC_ALL, "")
     if isinstance(history, str):
         return f"Search entire corpus: {history} ({size:n} tokens)"
-    previous, col, skip, search_string, n, n_results, _ = history
+    previous, col, skip, search_string, gram, n, n_results, _ = history
     no = "not " if skip else ""
     col = SHORT_TO_LONG_NAME.get(col, col)
     relative_corpus = n_results * 100 / size
@@ -72,7 +74,8 @@ def _make_search_name(history, size, searches):
         rel_last = n_results * 100 / prev_total
         rel_last = f"/{rel_last:.2f}%"
     freq = f"(n={n_results:n}{rel_last}/{relative_corpus:.2f}%)"
-    basic = f"{col} {no}matching '{search_string}' {freq}"
+    show = " " if not gram else f"(showing {trans[gram]}) "
+    basic = f"{col} {no}matching '{search_string}' {show}{freq}"
     hyphen = ""
     while previous:
         hyphen += "──"
