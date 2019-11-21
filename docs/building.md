@@ -106,12 +106,15 @@ Important things to remember when building your unparsed dataset:
 * XML annotations values can be strings, integers, floats and booleans will all be understood by the tool.
 * Metadata is always inherited, from file, to sentence, to span and token level. The `rating` for the whole file will be replaced for the final sentence with `7.8`.
 * If a field is missing in one of the metadata, it will end up with a value of `None` in the parsed corpus.
-* Make sure your metadata names are alphanumeric. Hyphens will be converted to underscores. Do not use any of the following names:
-  * CONLL columns: `w`, `l`, `x`, `p`, `m`, `f`, `g`, `o`, `e`
-  * Index names: `file`, `s`, `i`
-  * NER fields: `ent-type`, `ent_iob`, `ent_id`
-  * Sentiment analysis: `sentiment`
-  * Other names: `_n`, `sent_len`, `sent_id`, `text`, `parse`
+* Make sure your metadata names are alphanumeric. Hyphens will be converted to underscores.
+
+Finally, make sure that you do not use any of the following names as metadata fields, because these are needed for the attributes created by the parser:
+
+* CONLL columns: `w`, `l`, `x`, `p`, `m`, `f`, `g`, `o`, `e`
+* Index names: `file`, `s`, `i`
+* NER fields: `ent-type`, `ent_iob`, `ent_id`
+* Sentiment analysis: `sentiment`
+* Other names used internally by the system: `_n`, `sent_len`, `sent_id`, `text`, `parse`
 
 Once parsed, the first sentence of the underlying dataset will modelled as something like:
 
