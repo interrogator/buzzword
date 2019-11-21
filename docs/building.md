@@ -6,7 +6,7 @@
 
 At the very minimum, *buzzword* can accept a single file of plain text. For example, you could create a file, `joke.txt`, containing the following text:
 
-```text
+```xml
 A lion and a cheetah decide to race.      
 The cheetah crosses the finish line first.
 "I win!"
@@ -22,7 +22,7 @@ Once you upload it, the file will be run through a processing pipeline, which wi
 
 Therefore, the best way to use files is to give them a name that is both sequential and categorical. So, let's rename `joke.txt` to `001-joke-lion-pun.txt`. Just by doing this, we will later be able to filter by pun jokes, by lion jokes, or visualise language change from our first to our last joke.
 
-```text
+```xml
 jokes
 ├── 001-joke-lion-pun.txt
 ├── 002-joke-soldier-knock-knock.txt
@@ -33,7 +33,7 @@ jokes
 
 Now, let's add some metadata within our corpus files in a format that *buzzword* can understand. First (and simplest), we add speaker names at the start of lines. Like filenames, any like other annotations we may add, these speaker names will end up in the parsed corpus, allowing us to filter the corpus, calculate stats, and visualise data by speaker.
 
-```text
+```xml
 A lion and a cheetah decide to race. 
 The cheetah crosses the finish line first.
 CHEETAH: I win!
@@ -100,6 +100,8 @@ Available metadata formats are:
 2. Sentence level metadata (XML at end of sentences)
 3. Span/token level metadata (XML elements containing one or more tokens)
 4. Speaker names in script style
+
+Important things to remember when building your unparsed dataset:
 
 * XML annotations values can be strings, integers, floats and booleans will all be understood by the tool.
 * Metadata is always inherited, from file, to sentence, to span and token level. The `rating` for the whole file will be replaced for the final sentence with `7.8`.
