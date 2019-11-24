@@ -16,7 +16,7 @@
             </li>
             {% if not user.is_authenticated %}
                 <li class="nav-item">
-                    <a class="nav-link" href="yyy">Register</a>
+                    <a class="nav-link" href="{% url 'signup' %}">Register</a>
                 </li>
             {% endif %}
         </ul>
@@ -25,19 +25,13 @@
                 <li class="nav-item">
                     <a class="nav-link">Logged in as {{ user.username }}</a>
                 </li>
-                <form class="form-inline my-2 my-lg-0" action="logout" method="POST">
-                    {% csrf_token %}
-                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Logout</button>
-                </form>
+                <a class="btn btn-default" href="{% url 'logout' %}">Logout</a>
             </ul>
         {% else %}
-            <form class="form-inline my-2 my-lg-0" action="login" method="POST">
+        <form class="form-inline my-2 my-lg-0" action="{% url 'login' %}" method="POST">
                 {% csrf_token %}
-                <input class="form-control mr-sm-2" type="text" placeholder="Username" aria-label="Username"
-                       name="username" id="id_username">
-                <input class="form-control mr-sm-2" type="password" placeholder="Password" aria-label="Password"
-                       name="password" id="id_password">
-                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Sign in</button>
+                {{ login_form.as_p }}
+                <button type="submit" class="btn btn-primary">Login</button>
             </form>
         {% endif %}
     </div>
