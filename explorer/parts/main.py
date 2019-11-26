@@ -8,10 +8,10 @@ import os
 from buzz.corpus import Corpus
 from django_plotly_dash import DjangoDash
 
-from ..parts.configure import _configure_buzzword
-from ..parts.helpers import _get_corpus, _get_initial_table, _preprocess_corpus
-from ..parts.strings import _slug_from_name
-from ..parts.tabs import _make_tabs
+from .configure import _configure_buzzword
+from .helpers import _get_corpus, _get_initial_table, _preprocess_corpus
+from .strings import _slug_from_name
+from .tabs import _make_tabs
 
 external_stylesheets = []
 

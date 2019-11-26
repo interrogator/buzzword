@@ -10,11 +10,9 @@ from buzz.constants import SHORT_TO_COL_NAME
 from buzz.corpus import Corpus
 from buzz.dashview import CHART_TYPES, _df_to_figure
 
-from ..parts import style
-from ..parts.helpers import (_drop_cols_for_datatable, _get_cols,
-                             _update_datatable)
-from ..parts.strings import (_capitalize_first, _make_search_name,
-                             _make_table_name)
+from . import style
+from .helpers import _drop_cols_for_datatable, _get_cols, _update_datatable
+from .strings import _capitalize_first, _make_search_name, _make_table_name
 
 
 def _make_storage(configs):

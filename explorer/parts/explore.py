@@ -8,12 +8,11 @@ from buzz.exceptions import DataTypeError
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
-from ..parts.helpers import (_cast_query, _get_specs_and_corpus,
-                             _translate_relative, _tuple_or_list,
-                             _update_datatable)
-from ..parts.main import CORPORA, INITIAL_TABLES, app
-from ..parts.strings import (_make_search_name, _make_table_name,
-                             _search_error, _table_error)
+from .helpers import (_cast_query, _get_specs_and_corpus, _translate_relative,
+                      _tuple_or_list, _update_datatable)
+from .main import CORPORA, INITIAL_TABLES, app
+from .strings import (_make_search_name, _make_table_name, _search_error,
+                      _table_error)
 
 # we can't keep tables in dcc.store, they are too big. so we keep all here with
 # a tuple that can identify them (ideally, even dealing with user sessions)
