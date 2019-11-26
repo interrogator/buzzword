@@ -1,7 +1,7 @@
 from django.shortcuts import render
-from explorer.parts.main import populate_explorer_with_initial_data
+from explorer.parts.main import load_layout
 
 
 def explore(request, slug):
-    populate_explorer_with_initial_data(slug)
+    load_layout(slug)
     return render(request, 'explore/explore.html')

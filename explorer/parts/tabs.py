@@ -1,5 +1,5 @@
 """
-buzzword: building tab layout and populating with initial data
+buzzword explorer: build the explore page and its tabs
 """
 
 import dash_core_components as dcc
@@ -17,7 +17,7 @@ from .strings import _capitalize_first, _make_search_name, _make_table_name
 
 def _make_storage(configs):
     """
-    Function for layout. Could be helpful in future to do it this way.
+    Invisible containers that store session info
     """
     # user storage for searches, tables, and click counts
     search_store = dcc.Store(id="session-search", data=dict())
@@ -348,7 +348,6 @@ def _build_chart_space(table, config):
         update = html.Button("Update", id=f"figure-button-{chart_num}")
 
         toolbar = [dropdown, chart_type, top_n, transpose, update]
-        tstyle = dict(display="inline-block", verticalAlign="middle")
         widths = {
             dropdown: "65%",
             chart_type: "25%",
@@ -384,9 +383,11 @@ def _build_chart_space(table, config):
     return html.Div(id="display-chart", children=[div])
 
 
-def _make_tabs(corpus, table, config, configs):
+def make_explore_page(corpus, table, config, configs):
     """
-    Generate initial layout div
+    Create every tab, as well as the top rows of stuff, and tab container
+
+    Return html.Div
     """
     slug = html.Div(id='slug', title=config["slug"], style={'display': 'none'})
     dataset = _build_dataset_space(corpus, config)

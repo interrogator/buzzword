@@ -1,5 +1,5 @@
 """
-buzzword: making human-readable strings from data
+buzzword explorer: making human-readable strings from data
 """
 import urllib.parse
 
@@ -113,6 +113,9 @@ def _table_error(show, subcorpora, updating):
 
 
 def _capitalize_first(s):
+    """
+    First letter capitalised and notheing else
+    """
     return s[0].upper() + s[1:]
 
 

@@ -18,10 +18,7 @@ from .strings import (_make_search_name, _make_table_name, _search_error,
 # a tuple that can identify them (ideally, even dealing with user sessions)
 FREQUENCY_TABLES = dict()
 
-#############
-# CALLBACKS #
-#############
-#
+
 @app.expanded_callback([Output("input-box", "placeholder"), Output("gram-select", "disabled")], [Input("search-target", "value")])
 def _correct_placeholder(value, **kwargs):
     """

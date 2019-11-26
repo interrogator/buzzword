@@ -1,150 +1,19 @@
 """
-buzzword: command-line and .env processing
+buzzword explorer: .env processing
 """
-
-import argparse
 import os
 
 from dotenv import load_dotenv
 
 
-def _from_cmdline():
+def configure_buzzword():
     """
-    Command line argument parsing
-    """
-    parser = argparse.ArgumentParser(
-        description="Run the buzzword app for a given corpus."
-    )
+    Read .env, give defaults if missing
 
-    parser.add_argument(
-        "-nl",
-        "--load",
-        default=True,
-        action="store_true",
-        required=False,
-        help="Load corpus into memory. Longer startup, faster search.",
-    )
-
-    parser.add_argument(
-        "-r",
-        "--root",
-        default=".",
-        required=False,
-        type=str,
-        nargs="?",
-        help="Space for the tool to store CSVs, uploaded data, etc.",
-    )
-
-    parser.add_argument(
-        "-t", "--title", nargs="?", type=str, required=False, help="Title for app"
-    )
-
-    parser.add_argument(
-        "-d",
-        "--drop-columns",
-        nargs="?",
-        type=str,
-        required=False,
-        help="Dataset columns to remove before loading (comma-separated)",
-    )
-
-    parser.add_argument(
-        "-m",
-        "--max-dataset-rows",
-        nargs="?",
-        type=int,
-        required=False,
-        help="Truncate datasets at this many rows",
-    )
-
-    parser.add_argument(
-        "-s",
-        "--table-size",
-        nargs="?",
-        type=str,
-        required=False,
-        default="2000,200",
-        help="Max table dimensions as str ('nrows,ncolumns')",
-    )
-
-    parser.add_argument(
-        "-p",
-        "--page-size",
-        nargs="?",
-        type=int,
-        default=25,
-        required=False,
-        help="Rows to display per page",
-    )
-
-    parser.add_argument(
-        "-debug",
-        "--debug",
-        default=False,
-        action="store_true",
-        required=False,
-        help="Debug mode",
-    )
-
-    parser.add_argument(
-        "-g",
-        "--add-governor",
-        default=False,
-        action="store_true",
-        required=False,
-        help="Load governor attributes into dataset. Slow to load and uses more memory, but allows more kinds of searching/showing",
-    )
-
-    parser.add_argument(
-        "-ne",
-        "--no-env",
-        default=False,
-        action="store_true",
-        required=False,
-        help="Ignore config taken from .env file.",
-    )
-
-    parser.add_argument(
-        "-c",
-        "--corpora-file",
-        default="corpora.json",
-        type=str,
-        nargs="?",
-        help="Path to corpora.json",
-    )
-
-    parser.add_argument(
-        "-e",
-        "--env",
-        nargs="?",
-        type=str,
-        required=False,
-        default=".env",
-        help="Path to .env file",
-    )
-
-    kwargs = vars(parser.parse_args())
-    if kwargs["drop_columns"] is not None:
-        kwargs["drop_columns"] = kwargs["drop_columns"].split(",")
-    if kwargs["table_size"] is not None:
-        kwargs["table_size"] = [int(i) for i in kwargs["table_size"].split(",")][:2]
-    return kwargs
-
-
-def _configure_buzzword(name):
-    """
-    Configure application. First, look at command line args.
-    If the user wants to use dotenv (--env flag), load from that.
-    If not from main, use dotenv only.
-    """
-    return _from_env(os.path.abspath(".env"))
-
-
-def _from_env(env_path):
-    """
-    Read .env. Should return same as command line, except --env argument
+    Raise ValueError if .env not there
     """
     trues = {"1", "true", "True", "Y", "y", "yes", True}
+    env_path = os.path.abspath(".env")
     if not os.path.isfile(env_path):
         raise ValueError(f'Please configure {env_path}')
     load_dotenv(dotenv_path=env_path)
@@ -169,4 +38,5 @@ def _from_env(env_path):
         max_dataset_rows=max_dataset_rows,
         drop_columns=drop_columns,
         table_size=table_size,
+        load_layouts=os.getenv("BUZZWORD_LOAD_LAYOUTS", True) in trues
     )
