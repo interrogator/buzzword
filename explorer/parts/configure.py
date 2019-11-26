@@ -137,14 +137,7 @@ def _configure_buzzword(name):
     If the user wants to use dotenv (--env flag), load from that.
     If not from main, use dotenv only.
     """
-    cmd_config = {"env": "/home/danny/work/buzzword/.env", "no_env": False}
-    env_path = cmd_config["env"]
-    if not os.path.isfile(env_path) or cmd_config["no_env"]:
-        return cmd_config
-    print('USING ENV')
-    env_conf = _from_env(env_path)
-    # todo: add in cmd line arguments that were explicit
-    return env_conf
+    return _from_env(os.path.expanduser("~/.env"))
 
 
 def _from_env(env_path):

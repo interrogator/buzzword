@@ -9,8 +9,9 @@ from buzz.corpus import Corpus
 from django_plotly_dash import DjangoDash
 
 from ..parts.configure import _configure_buzzword
-from ..parts.helpers import _preprocess_corpus
+from ..parts.helpers import _get_corpus, _get_initial_table, _preprocess_corpus
 from ..parts.strings import _slug_from_name
+from ..parts.tabs import _make_tabs
 
 external_stylesheets = []
 
@@ -82,3 +83,47 @@ def _get_corpora_meta(corpora_file):
 CORPUS_META = _get_corpora_meta(GLOBAL_CONFIG.get("corpora_file"))
 
 CORPORA, INITIAL_TABLES, CORPORA_CONFIGS = _get_corpora(CORPUS_META)
+
+LAYOUTS = dict()
+
+
+def _make_explore_layout(slug, conf, configs):
+    """
+    Simulate globals and generate layout for explore page
+    """
+    corpus = _get_corpus(slug)
+    table = _get_initial_table(slug)
+    conf["len"] = conf.get("len", len(corpus))
+    conf["slug"] = slug  # can i delete this?
+    return _make_tabs(corpus, table, conf, configs)
+
+
+def _populate_explore_layouts():
+    """
+    Can be used to create explore page on startup, save loading time
+
+    broken right now, unused
+    """
+    for name, meta in CORPUS_META.items():
+        slug = meta["slug"]
+        LAYOUTS[slug] = _make_explore_layout(slug, meta)
+
+
+def _get_explore_layout(slug, all_configs):
+    """
+    Get (and maybe generate) the explore layout for this slug
+    """
+    conf = all_configs.get(slug)
+    if not conf:
+        return
+    # store the default explore for each corpus in a dict for speed
+    if slug in LAYOUTS:
+        return LAYOUTS[slug]
+    layout = _make_explore_layout(slug, conf, all_configs)
+    LAYOUTS[slug] = layout
+    return layout
+
+
+def populate_explorer_with_initial_data(slug):
+    app.layout = _get_explore_layout(slug, CORPORA_CONFIGS)
+    return app
