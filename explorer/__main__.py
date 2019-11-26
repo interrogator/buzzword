@@ -10,14 +10,15 @@ import os
 
 import dash_core_components as dcc
 import dash_html_components as html
+import dpd_components as dpd
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
-from .parts import start, explore  # noqa: F401
-from .parts.main import app, server  # noqa: F401
-from .parts.main import CORPORA, CORPUS_META, CORPORA_CONFIGS
-from .parts.tabs import _make_tabs
+from .parts import explore  # noqa: F401
 from .parts.helpers import _get_corpus, _get_initial_table
+from .parts.main import (CORPORA, CORPORA_CONFIGS, CORPUS_META,  # noqa: F401
+                         app)
+from .parts.tabs import _make_tabs
 
 # where downloadable CSVs/corpora get stored
 for path in {"csv", "uploads"}:
@@ -46,7 +47,7 @@ app.layout = _get_layout
 LAYOUTS = dict()
 
 
-def _make_explore_layout(slug, conf):
+def _make_explore_layout(slug, conf, configs):
     """
     Simulate globals and generate layout for explore page
     """
@@ -54,7 +55,7 @@ def _make_explore_layout(slug, conf):
     table = _get_initial_table(slug)
     conf["len"] = conf.get("len", len(corpus))
     conf["slug"] = slug  # can i delete this?
-    return _make_tabs(corpus, table, conf)
+    return _make_tabs(corpus, table, conf, configs)
 
 
 def _populate_explore_layouts():
@@ -78,33 +79,6 @@ def _get_explore_layout(slug, all_configs):
     # store the default explore for each corpus in a dict for speed
     if slug in LAYOUTS:
         return LAYOUTS[slug]
-    layout = _make_explore_layout(slug, conf)
+    layout = _make_explore_layout(slug, conf, all_configs)
     LAYOUTS[slug] = layout
     return layout
-
-
-@app.callback(Output("page-content", "children"), [Input("url", "pathname")], [State("session-configs", "data")])
-def _choose_correct_page(pathname, configs):
-    """
-    When the URL changes, get correct page and populate page-content with it
-    """
-    if pathname is None:
-        raise PreventUpdate
-    pathname = pathname.lstrip("/")
-    if pathname.startswith("explore"):
-        slug = pathname.rstrip("/").split("/")[-1]
-        # if corpus not found, redirect
-        if slug not in CORPORA:
-            pathname = ""
-        layout = _get_explore_layout(slug, configs)
-        if layout:
-            return layout
-        # layout does not exist. unloaded corpus?
-    if not pathname:
-        return start.layout
-    else:
-        return "404. Page not found: {}".format(pathname)
-
-
-if __name__ == "__main__":
-    app.run_server(debug=True)

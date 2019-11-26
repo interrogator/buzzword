@@ -2,22 +2,21 @@
 buzzword: run on startup, corpus loading and app initialisation
 """
 
-import dash
-from buzz.corpus import Corpus
 import json
 import os
-from buzzword.parts.helpers import _preprocess_corpus
-from buzzword.parts.configure import _configure_buzzword
-from buzzword.parts.strings import _slug_from_name
+
+from buzz.corpus import Corpus
+from django_plotly_dash import DjangoDash
+
+from ..parts.configure import _configure_buzzword
+from ..parts.helpers import _preprocess_corpus
+from ..parts.strings import _slug_from_name
 
 external_stylesheets = []
 
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-app.config.suppress_callback_exceptions = True
-app.title = "buzzword"
-server = app.server
+app = DjangoDash("buzzword", external_stylesheets=external_stylesheets, suppress_callback_exceptions=True)
 
-GLOBAL_CONFIG = _configure_buzzword(__name__)
+GLOBAL_CONFIG = _configure_buzzword("buzzword")
 
 ROOT = GLOBAL_CONFIG["root"]
 

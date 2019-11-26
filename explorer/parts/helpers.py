@@ -1,20 +1,21 @@
 """
-buzzword: helpers and utilities
+buzzword explorer: helpers and utilities
 """
 
 import os
-import pandas as pd
 
-from buzz.corpus import Corpus
+import pandas as pd
 from buzz.constants import SHORT_TO_COL_NAME, SHORT_TO_LONG_NAME
-from buzzword.parts.strings import _capitalize_first, _downloadable_name
+from buzz.corpus import Corpus
+
+from ..parts.strings import _capitalize_first, _downloadable_name
 
 
 def _get_specs_and_corpus(search_from, searches, corpora, slug):
     """
     Get the correct corpus based on search_from
     """
-    from buzzword.parts.main import ROOT
+    from ..parts.main import ROOT
 
     # if corpus not loaded into corpora, it is an upload. fix now
     if not corpora:
@@ -166,7 +167,7 @@ def _make_csv(table, long_name):
     """
     Save a CSV for table with this name
     """
-    from buzzword.parts.main import CONFIG
+    from ..parts.main import CONFIG
 
     fname = _downloadable_name(long_name)
     fpath = os.path.join(CONFIG["root"], f"csv/{fname}.csv")
@@ -181,8 +182,8 @@ def _get_corpus(slug):
     """
     Get corpus from slug, loading from uploads dir if need be
     """
-    from buzzword.parts.start import CORPORA
-    from buzzword.parts.main import ROOT
+    from ..parts.start import CORPORA
+    from ..parts.main import ROOT
 
     if slug in CORPORA:
         return CORPORA[slug]
@@ -196,7 +197,7 @@ def _get_initial_table(slug):
     """
     Get or create the initial table for this slug
     """
-    from buzzword.parts.start import INITIAL_TABLES
+    from ..parts.start import INITIAL_TABLES
     if slug in INITIAL_TABLES:
         return INITIAL_TABLES[slug]
     corpus = _get_corpus(slug)

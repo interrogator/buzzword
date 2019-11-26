@@ -11,20 +11,14 @@ import dash_core_components as dcc
 import dash_html_components as html
 from buzz.constants import SPACY_LANGUAGES
 from buzz.corpus import Corpus
-from buzzword.parts.main import (
-    app,
-    CORPORA,
-    INITIAL_TABLES,
-    CORPUS_META,
-    ROOT,
-    CORPORA_CONFIGS,
-    GLOBAL_CONFIG,
-)
-from buzzword.parts.strings import _slug_from_name, _make_description
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
-from buzzword.parts.nav import _make_navbar
-from buzzword.parts import style
+
+from ..parts import style
+from ..parts.main import (CORPORA, CORPORA_CONFIGS, CORPUS_META, GLOBAL_CONFIG,
+                          INITIAL_TABLES, ROOT, app)
+from ..parts.nav import _make_navbar
+from ..parts.strings import _make_description, _slug_from_name
 
 
 def _make_row(row_data, index=None, upload=False):

@@ -9,11 +9,27 @@ import dash_table
 from buzz.constants import SHORT_TO_COL_NAME
 from buzz.corpus import Corpus
 from buzz.dashview import CHART_TYPES, _df_to_figure
-from buzzword.parts import style
-from buzzword.parts.helpers import (_drop_cols_for_datatable, _get_cols,
-                                    _update_datatable)
-from buzzword.parts.strings import (_capitalize_first, _make_search_name,
-                                    _make_table_name)
+
+from ..parts import style
+from ..parts.helpers import (_drop_cols_for_datatable, _get_cols,
+                             _update_datatable)
+from ..parts.strings import (_capitalize_first, _make_search_name,
+                             _make_table_name)
+
+
+def _make_storage(configs):
+    """
+    Function for layout. Could be helpful in future to do it this way.
+    """
+    # user storage for searches, tables, and click counts
+    search_store = dcc.Store(id="session-search", data=dict())
+    tables_store = dcc.Store(id="session-tables", data=dict())
+    click_clear = dcc.Store(id="session-clicks-clear", data=-1)
+    click_table = dcc.Store(id="session-clicks-table", data=-1)
+    configs = dcc.Store(id="session-configs", data=configs)
+    content = html.Div(id="page-content")
+    stores = [search_store, tables_store, click_clear, click_table, configs]
+    return html.Div(stores + [content])
 
 
 def _build_dataset_space(df, config):
@@ -370,10 +386,11 @@ def _build_chart_space(table, config):
     return html.Div(id="display-chart", children=[div])
 
 
-def _make_tabs(corpus, table, config):
+def _make_tabs(corpus, table, config, configs):
     """
     Generate initial layout div
     """
+    slug = html.Div(id='slug', title=config["slug"], style={'display': 'none'})
     dataset = _build_dataset_space(corpus, config)
     frequencies = _build_frequencies_space(corpus, table, config)
     chart = _build_chart_space(table, config)
@@ -444,5 +461,5 @@ def _make_tabs(corpus, table, config):
     ]
     pad = {"paddingLeft": "10px", "paddingRight": "10px"}
     tab_contents = html.Div(id="tab-contents", children=tab_contents)
-    children = [top_bit, tab_headers, tab_contents]
+    children = [slug, _make_storage(configs), top_bit, tab_headers, tab_contents]
     return html.Div(id="everything", children=children, style=pad)
