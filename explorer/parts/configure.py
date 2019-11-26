@@ -137,7 +137,7 @@ def _configure_buzzword(name):
     If the user wants to use dotenv (--env flag), load from that.
     If not from main, use dotenv only.
     """
-    return _from_env(os.path.expanduser("~/.env"))
+    return _from_env(os.path.abspath(".env"))
 
 
 def _from_env(env_path):
@@ -145,6 +145,8 @@ def _from_env(env_path):
     Read .env. Should return same as command line, except --env argument
     """
     trues = {"1", "true", "True", "Y", "y", "yes", True}
+    if not os.path.isfile(env_path):
+        raise ValueError(f'Please configure {env_path}')
     load_dotenv(dotenv_path=env_path)
     drop_columns = os.getenv("BUZZWORD_DROP_COLUMNS")
     if drop_columns:
