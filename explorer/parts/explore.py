@@ -1,10 +1,7 @@
 """
-buzzword: callbacks for explore page
+buzzword explorer: callbacks
 """
 
-import os
-
-import flask
 import pandas as pd
 from buzz.dashview import _df_to_figure
 from buzz.exceptions import DataTypeError

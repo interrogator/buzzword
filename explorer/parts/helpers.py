@@ -182,8 +182,7 @@ def _get_corpus(slug):
     """
     Get corpus from slug, loading from uploads dir if need be
     """
-    from ..parts.start import CORPORA
-    from ..parts.main import ROOT
+    from ..parts.main import ROOT, CORPORA
 
     if slug in CORPORA:
         return CORPORA[slug]
@@ -197,9 +196,7 @@ def _get_initial_table(slug):
     """
     Get or create the initial table for this slug
     """
-    from ..parts.start import INITIAL_TABLES
-    if slug in INITIAL_TABLES:
-        return INITIAL_TABLES[slug]
+    # speed up by storing as INITIAL_TABLES
     corpus = _get_corpus(slug)
     return corpus.table(show="p", subcorpora="file")
 
