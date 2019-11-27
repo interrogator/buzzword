@@ -12,14 +12,12 @@ RUN \
     cd buzzword && \
     pip install -r requirements.txt
 
-RUN pip install dash_bootstrap_components
-
 WORKDIR /buzzword
+
 RUN \
     cp .env.example .env && \
     cp corpora.json.example corpora.json && \
-    sed -i 's!dtrt/do-the-right-thing-parsed!/buzz/dtrt/do-the-right-thing-parsed!' corpora.json && \
-    sed -i '0,/disabled/! s/"disabled": false/"disabled": true/' corpora.json
+    sed -i 's!dtrt/do-the-right-thing-parsed!/buzz/dtrt/do-the-right-thing-parsed!' corpora.json
 
 RUN python manage.py migrate
 

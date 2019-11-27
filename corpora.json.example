@@ -18,7 +18,7 @@
     "desc": "Text of the Unabomber's manifesto",
     "len": 37347,
     "add_governor": false,
-    "disabled": false,
+    "disabled": true,
     "date": "1995",
     "load": true,
     "url": "https://en.wikipedia.org/wiki/Ted_Kaczynski#Industrial_Society_and_Its_Future"
