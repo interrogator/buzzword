@@ -1,25 +1,24 @@
 """
-buzzword: run on startup, corpus loading and app initialisation
+buzzword explorer: run on startup, corpus loading and app initialisation
 """
 
-import dash
+
 from buzz.corpus import Corpus
-import json
-import os
-from buzzword.parts.helpers import _preprocess_corpus
-from buzzword.parts.configure import _configure_buzzword
-from buzzword.parts.strings import _slug_from_name
+from django_plotly_dash import DjangoDash
 
-external_stylesheets = []
+from .configure import configure_buzzword
+from .helpers import (_get_corpora_meta, _get_corpus, _get_initial_table,
+                      _preprocess_corpus, register_callbacks)
+from .strings import _slug_from_name
+from .tabs import make_explore_page
 
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-app.config.suppress_callback_exceptions = True
-app.title = "buzzword"
-server = app.server
+app = DjangoDash("buzzword", suppress_callback_exceptions=True)
 
-GLOBAL_CONFIG = _configure_buzzword(__name__)
+GLOBAL_CONFIG = configure_buzzword()
 
 ROOT = GLOBAL_CONFIG["root"]
+
+LAYOUTS = dict()
 
 
 def _get_corpus_config(local_conf, global_conf, name):
@@ -68,18 +67,39 @@ def _get_corpora(corpus_meta):
     return corpora, tables, corpora_config
 
 
-def _get_corpora_meta(corpora_file):
-    """
-    Get the contents of corpora.json, or an empty dict
-    """
-    exists = os.path.isfile(corpora_file)
-    if not exists:
-        print("Corpora file not found at {}!".format(corpora_file))
-        return dict()
-    with open(corpora_file, "r") as fo:
-        return json.loads(fo.read())
-
-
 CORPUS_META = _get_corpora_meta(GLOBAL_CONFIG.get("corpora_file"))
 
 CORPORA, INITIAL_TABLES, CORPORA_CONFIGS = _get_corpora(CORPUS_META)
+
+
+def load_layout(slug, set_and_register=True):
+    """
+    Django can import this function to set the correct dataset on explore page
+
+    Return app instance, just in case django has a use for it.
+    """
+    conf = CORPORA_CONFIGS[slug]
+    # store the default explore for each corpus in a dict for speed
+    if slug in LAYOUTS:
+        layout = LAYOUTS[slug]
+    else:
+        corpus = _get_corpus(slug)
+        table = _get_initial_table(slug)
+        conf["len"] = conf.get("len", len(corpus))
+        layout = make_explore_page(corpus, table, conf, CORPORA_CONFIGS)
+        LAYOUTS[slug] = layout
+    if set_and_register:
+        app.layout = layout
+        register_callbacks()
+    return app
+
+
+# this can potentially save time: generate layouts for all datasets
+# before the pages are visited. comes at expense of some memory,
+# but the app should obviously be able to handle all datasets in use
+if GLOBAL_CONFIG["load_layouts"]:
+    for corpus_name, metadata in CORPUS_META.items():
+        if metadata.get("disabled"):
+            continue
+        slug = metadata.get("slug", _slug_from_name(corpus_name))
+        load_layout(slug, set_and_register=False)

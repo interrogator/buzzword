@@ -1,5 +1,5 @@
 """
-buzzword: collection of reusable CSS styles
+buzzword explorer: collection of reusable CSS styles
 """
 
 VERTICAL_MARGINS = {"marginBottom": 15, "marginTop": 15}

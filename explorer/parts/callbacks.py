@@ -1,32 +1,26 @@
 """
-buzzword: callbacks for explore page
+buzzword explorer: callbacks
 """
 
-import os
-
-import flask
 import pandas as pd
 from buzz.dashview import _df_to_figure
 from buzz.exceptions import DataTypeError
-from buzzword.parts.helpers import (_cast_query, _get_specs_and_corpus,
-                                    _translate_relative, _tuple_or_list,
-                                    _update_datatable)
-from buzzword.parts.main import CORPORA, INITIAL_TABLES, app
-from buzzword.parts.strings import (_make_search_name, _make_table_name,
-                                    _search_error, _table_error)
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
+
+from .helpers import (_cast_query, _get_specs_and_corpus, _translate_relative,
+                      _tuple_or_list, _update_datatable)
+from .main import CORPORA, INITIAL_TABLES, app
+from .strings import (_make_search_name, _make_table_name, _search_error,
+                      _table_error)
 
 # we can't keep tables in dcc.store, they are too big. so we keep all here with
 # a tuple that can identify them (ideally, even dealing with user sessions)
 FREQUENCY_TABLES = dict()
 
-#############
-# CALLBACKS #
-#############
-#
-@app.callback([Output("input-box", "placeholder"), Output("gram-select", "disabled")], [Input("search-target", "value")])
-def _correct_placeholder(value):
+
+@app.expanded_callback([Output("input-box", "placeholder"), Output("gram-select", "disabled")], [Input("search-target", "value")])
+def _correct_placeholder(value, **kwargs):
     """
     More accurate placeholder text when doing dependencies
     """
@@ -36,7 +30,7 @@ def _correct_placeholder(value):
     return "Enter regular expression search query...", disable_gram
 
 
-@app.callback(
+@app.expanded_callback(
     [
         Output("tab-dataset", "style"),
         Output("tab-frequencies", "style"),
@@ -45,7 +39,7 @@ def _correct_placeholder(value):
     ],
     [Input("tabs", "value")],
 )
-def render_content(tab):
+def render_content(tab, **kwargs):
     """
     Tab display callback. If the user clicked this tab, show it, otherwise hide
     """
@@ -63,7 +57,7 @@ def render_content(tab):
 # one for each chart space
 for i in range(1, 6):
 
-    @app.callback(
+    @app.expanded_callback(
         Output(f"chart-{i}", "figure"),
         [Input(f"figure-button-{i}", "n_clicks")],
         [
@@ -74,7 +68,7 @@ for i in range(1, 6):
             State("session-tables", "data"),
         ],
     )
-    def _new_chart(n_clicks, table_from, chart_type, top_n, transpose, session_tables):
+    def _new_chart(n_clicks, table_from, chart_type, top_n, transpose, session_tables, **kwargs):
         """
         Make new chart by kind. Do it 5 times, once for each chart space
         """
@@ -94,12 +88,12 @@ for i in range(1, 6):
         return _df_to_figure(df, chart_type)
 
 
-@app.callback(
+@app.expanded_callback(
     [Output("loading-main", "className"), Output("loading-main", "fullscreen")],
     [Input("everything", "children")],
     [],
 )
-def _on_load_callback(n_clicks):
+def _on_load_callback(n_clicks, **kwargs):
     """
     This gets triggered on load; we use it to fix loading screen
     """
@@ -132,7 +126,7 @@ def _on_load_callback(n_clicks):
         State("session-configs", "data"),
         State("session-search", "data"),
         State("session-clicks-clear", "data"),
-        State("url", "pathname"),
+        State("slug", "title"),
     ],
 )
 def _new_search(
@@ -150,6 +144,7 @@ def _new_search(
     session_search,
     session_clicks_clear,
     url,
+    **kwargs
 ):
     """
     Callback when a new search is submitted
@@ -294,7 +289,7 @@ def _new_search(
     )
 
 
-@app.callback(
+@app.expanded_callback(
     [
         Output("freq-table", "columns"),
         Output("freq-table", "data"),
@@ -330,7 +325,7 @@ def _new_search(
         State("session-search", "data"),
         State("session-tables", "data"),
         State("session-clicks-table", "data"),
-        State("url", "pathname"),
+        State("slug", "title"),
     ],
 )
 def _new_table(
@@ -351,6 +346,7 @@ def _new_table(
     session_tables,
     session_click_table,
     url,
+    **kwargs
 ):
     """
     Callback when a new freq table is generated. Same logic as new_search.
@@ -464,7 +460,7 @@ def _new_table(
     )
 
 
-@app.callback(
+@app.expanded_callback(
     [
         Output("conc-table", "columns"),
         Output("conc-table", "data"),
@@ -479,10 +475,10 @@ def _new_table(
         State("conc-table", "data"),
         State("session-configs", "data"),
         State("session-search", "data"),
-        State("url", "pathname"),
+        State("slug", "title"),
     ],
 )
-def _new_conc(n_clicks, show, search_from, cols, data, conf, session_search, url):
+def _new_conc(n_clicks, show, search_from, cols, data, conf, session_search, url, **kwargs):
     """
     Callback for concordance. We just pick what to show and where from...
     """
@@ -511,10 +507,10 @@ def _new_conc(n_clicks, show, search_from, cols, data, conf, session_search, url
     return cols, data, bool(msg), msg
 
 
-@app.server.route("/csv/<path:path>")
-def serve_static(path):
-    """
-    Download the file at the specified path
-    """
-    root_dir = os.path.join(os.getcwd(), "csv")
-    return flask.send_from_directory(root_dir, path)
+# @app.server.route("/csv/<path:path>")
+# def serve_static(path):
+#     """
+#     Download the file at the specified path
+#     """
+#     root_dir = os.path.join(os.getcwd(), "csv")
+#     return flask.send_from_directory(root_dir, path)

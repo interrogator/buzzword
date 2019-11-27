@@ -10,6 +10,8 @@
 
 > Web-app for corpus linguistics; documentation available [via ReadTheDocs](https://buzzword.readthedocs.io/en/latest/)
 
+> Note, this app is currently being overhauled and turned into a Django project. The last stable (Dash) app was version `1.2.5`. Versions after this will be in Django, and for now, a bit unstable, as features like user management are added in. Documentation for now targets 1.2.5, not the new Django app.
+
 ## Install
 
 ```bash
