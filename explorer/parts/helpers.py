@@ -238,3 +238,20 @@ def _get_corpora_meta(corpora_file):
         return dict()
     with open(corpora_file, "r") as fo:
         return json.loads(fo.read())
+
+
+def _special_search(df, col, search_string, skip):
+    """
+    Perform nonstandard search types (tgrep, depgrep, describe)
+
+    todo: proper error handling etc
+    """
+    mapped = dict(t="tgrep", d="depgrep", describe="describe")
+    try:
+        # note, describe inverse is nonfunctional!
+        matches = getattr(df, mapped[col])(search_string, inverse=skip)
+        return matches, None
+    except Exception as error:
+        msg = f"search error for {col} ({search_string}): {type(error)}: {error}"
+        print(msg)
+        return df.iloc[:0, :0], msg

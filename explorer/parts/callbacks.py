@@ -9,7 +9,7 @@ from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
 from .helpers import (_cast_query, _get_specs_and_corpus, _translate_relative,
-                      _tuple_or_list, _update_datatable)
+                      _tuple_or_list, _update_datatable, _special_search)
 from .main import CORPORA, INITIAL_TABLES, app
 from .strings import (_make_search_name, _make_table_name, _search_error,
                       _table_error)
@@ -24,10 +24,14 @@ def _correct_placeholder(value, **kwargs):
     """
     More accurate placeholder text when doing dependencies
     """
-    disable_gram = value in {"t", "d", "describe"}
-    if value in {"describe", "d"}:
-        return "Enter depgrep query...", disable_gram
-    return "Enter regular expression search query...", disable_gram
+    default = "Enter regular expression search query..."
+    mapped = {
+        "t": "Enter Tgrep2 query...",
+        "d": "Enter depgrep query",
+        "describe": "Enter depgrep query (e.g. l\"man\")"
+    }
+    disable_gram = value in mapped
+    return mapped.get(value, default), disable_gram
 
 
 @app.expanded_callback(
@@ -227,22 +231,15 @@ def _new_search(
     found_results = True
 
     if not exists:
-        # the expected callback. run a search and update dataset view and search history
-        if col == "t":
-            df = corpus.tgrep(search_string, inverse=skip)
-        elif col == "d":
-            try:
-                df = corpus.depgrep(search_string, inverse=skip)
-            except Exception as error:
-                # todo: handle invalid queries properly...
-                # we need to give hepful message back to user...
-                print(f"DEPGREP ERROR: {type(error)}: {error}")
-                # after which, either we return previous, or return none:
-                df = df.iloc[:0, :0]
-        # ngram stuff
+        # todo: more cleanup for this, it's ugly!
+        # tricky searches
+        if col in {"t", "d", "describe"}:
+            df, msg = _special_search(corpus, col, search_string, skip)
+        # do ngramming stuff
         if gram_select:
             df = getattr(corpus.near, col)(search_string, distance=gram_select)
-        else:
+        # skip/just searches
+        elif col not in {"t", "d", "describe"}:
             search = _cast_query(search_string, col)
             method = "just" if not skip else "skip"
             try:

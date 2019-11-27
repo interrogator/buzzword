@@ -39,7 +39,7 @@ def _build_dataset_space(df, config):
     cols = _get_cols(df, config["add_governor"])
     extra = [
         ("Dependencies", "d"),
-        ("Descriptors", "describe")
+        ("Describe thing", "describe")
     ]
     grams = [
         ("Match (default)", 0),
