@@ -26,6 +26,8 @@ def configure_buzzword():
     max_dataset_rows = os.getenv("BUZZWORD_MAX_DATASET_ROWS")
     if max_dataset_rows and max_dataset_rows.strip():
         max_dataset_rows = int(max_dataset_rows.strip())
+    else:
+        max_dataset_rows = None
 
     return dict(
         corpora_file=os.getenv("BUZZWORD_CORPORA_FILE", "corpora.json"),
