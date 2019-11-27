@@ -25,7 +25,7 @@ SECRET_KEY = '_^vo*lm=7o!zoj4c6zi*di!kw5ovar@*@%subhxmv*pu=)!-w5'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1", "0.0.0.0", "localhost", "127.0.0.1:8000"]
 
 
 # Application definition
@@ -92,7 +92,7 @@ ROOT_URLCONF = 'buzzword.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, "buzzword", 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -155,6 +155,14 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/2.2/howto/static-files/
+PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
+
+STATICFILES_DIRS = (
+    os.path.join(PROJECT_ROOT, 'static'),
+)
 STATIC_URL = '/static/'
 
 PLOTLY_DASH = {

@@ -1,4 +1,9 @@
-<h1>Welcome to buzzword!</h1>
+{% extends "base.html" %}
+
+{% block title %}Welcome{% endblock %}
+
+
+{% block content %}
 
 <p>
     On this page will be a navbar, introduction, table of corpora, and potentially the upload/parse space
@@ -7,3 +12,6 @@
 <a href="explore/do-the-right-thing">Do the right thing</a>
 <br>
 <a href="explore/manifesto">Unabomber manifesto</a>
+
+{% endblock %}
+
