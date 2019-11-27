@@ -42,3 +42,11 @@ To set things up more more permanently, either modify the directory created with
 buzzword --debug
 # or python -m buzzword --debug
 ```
+
+## Run from Dockerfile
+
+```bash
+docker build . -t name/tag
+docker run -it -p 8001:8000 name/tag
+```
+buzzword is now available at http://localhost:8001
