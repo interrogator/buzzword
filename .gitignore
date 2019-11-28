@@ -115,3 +115,6 @@ csv/
 corpora.json
 uploads/
 db.sqlite3
+
+# vim 
+*.swp
