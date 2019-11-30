@@ -362,7 +362,7 @@ def _new_table(
 
     sort = sort or "total"
 
-    relative, keyness = _translate_relative(relkey, CORPORA[slug])
+    relative, keyness = _translate_relative(relkey)
 
     # check if there are any validation problems
     if session_click_table != n_clicks:
@@ -410,7 +410,7 @@ def _new_table(
         table = corpus.table(
             show=show,
             subcorpora=subcorpora,
-            relative=relative,
+            relative=relative if relative != "corpus" else CORPORA[slug],
             keyness=keyness,
             sort=sort,
         )

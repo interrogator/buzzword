@@ -46,13 +46,13 @@ def _tuple_or_list(this_identifier, typ):
     return typ(out)
 
 
-def _translate_relative(inp, corpus):
+def _translate_relative(inp):
     """
     Get relative and keyness from two-character input
     """
     if not inp:
         return False, False
-    mapping = dict(t=True, f=False, n=corpus, l="ll", p="pd")  # noqa: E741
+    mapping = dict(t=True, f=False, n="corpus", l="ll", p="pd")  # noqa: E741
     return mapping[inp[0]], mapping[inp[1]]
 
 
