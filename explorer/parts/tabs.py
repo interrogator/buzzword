@@ -148,7 +148,7 @@ def _build_frequencies_space(corpus, table, config):
     show_check = html.Div(show_check, style=style.TSTYLE)
     subcorpora_drop = dcc.Dropdown(
         id="subcorpora-for-table",
-        options=cols,
+        options=[dict(value="_corpus", label="Entire corpus")] + cols,
         placeholder="Feature for index",
         style=style.MARGIN_5_MONO,
     )

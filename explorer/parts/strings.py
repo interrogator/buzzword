@@ -25,6 +25,8 @@ def _make_table_name(history):
     if history == "initial":
         return "Part of speech tags by filename"
     specs, show, subcorpora, relative, keyness, sort = history
+    if subcorpora is None:
+        subcorpora = "corpus"
     subcorpora = (
         SHORT_TO_LONG_NAME.get(subcorpora, subcorpora).lower().replace("_", " ")
     )
@@ -105,8 +107,10 @@ def _table_error(show, subcorpora, updating):
     errors = []
     if not show:
         errors.append("No choice made for feature to use as columns.")
-    if not subcorpora:
-        errors.append("No choice made for feature to use as index")
+    # this is now allowed ... can probably remove this function if
+    # we don't do any extra validations.
+    # if not subcorpora:
+    #     errors.append("No choice made for feature to use as index")
     if not errors:
         return ""
     return "* " + "\n* ".join(errors)

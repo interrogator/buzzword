@@ -362,6 +362,9 @@ def _new_table(
 
     sort = sort or "total"
 
+    if subcorpora == "_corpus":
+        subcorpora = None
+
     relative, keyness = _translate_relative(relkey)
 
     # check if there are any validation problems
