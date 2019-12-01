@@ -45,8 +45,6 @@ def _get_corpora(corpus_meta):
     tables = dict()
     corpora_config = dict()
     for corpus in corpus_meta:
-        print(f"{corpus.name} started processing")
-    #for i, (corpus_name, metadata) in enumerate(corpus_meta.items(), start=1):
         if corpus.disabled:
             print("Skipping corpus because it is disabled: {}".format(corpus.name))
             continue
