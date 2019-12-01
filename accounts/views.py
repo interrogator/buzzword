@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
+
 import explore.models
 
 def signup(request):
@@ -28,16 +29,19 @@ def login_view(request):
     return redirect('/')
 
 def corpus_settings(request):
-    class CSForm(forms.Form):
-        def __init__(self, corpora):
-            super().__init__()
-            for corpus in corpora:
-                self.fields[f'disabled[{corpus.id}]'] = forms.BooleanField(initial=corpus.disabled, label=corpus.name)
-
+    fields = ('disabled', 'load', 'add_governor', 'name')
+    formset_factory = forms.modelformset_factory(explore.models.Corpus, fields=fields, extra=0)
+    
+    if request.method == 'POST':
+        formset = formset_factory(request.POST)
+        if formset.is_valid()
+            formset.save()
+    
     corpora = explore.models.Corpus.objects.all()
+    formset = formset_factory(queryset=corpora)
     context = {
         'corpora': corpora,
-        'form': CSForm(corpora),
+        'formset': formset,
     }
     return render(request, 'accounts/corpus_settings.html', context)
 

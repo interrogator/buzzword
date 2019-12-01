@@ -1,11 +1,24 @@
 
 {% block content %}
     <h2>Corpus Settings</h2>
+    <table class="table">
     <form method="post" novalidate>
+        {{ formset.management_form }}
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary">Save</button>
+        <tr>
+        {% for form in formset %}
+        <td>
+            Slug: {{ form.instance.slug }}
+            {{ form.as_p }}
+        </td>
+        {% endfor %}
+        </tr>
+        <tr>
+            <td>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </td>
+        </tr>
     </form>
-
+    </table>
 {% endblock %}
 
