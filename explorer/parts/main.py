@@ -63,15 +63,6 @@ def _get_corpora(corpus_meta):
     return corpora, tables, corpora_config
 
 
-# this is a workaround to stop migrate.py from loading corpora.
-# if you don't want to load corpora, comment out the call to _get_corpora_meta.
-# if you do want to load corpora, leave it uncommented.
-# CORPUS_META = dict()
-CORPUS_META = _get_corpora_meta(GLOBAL_CONFIG.get("corpora_file"))
-
-CORPORA, INITIAL_TABLES, CORPORA_CONFIGS = _get_corpora(CORPUS_META)
-
-
 def load_layout(slug, set_and_register=True):
     """
     Django can import this function to set the correct dataset on explore page
@@ -94,10 +85,18 @@ def load_layout(slug, set_and_register=True):
     return app
 
 
-# this can potentially save time: generate layouts for all datasets
-# before the pages are visited. comes at expense of some memory,
-# but the app should obviously be able to handle all datasets in use
-if GLOBAL_CONFIG["load_layouts"]:
-    for corpus in CORPUS_META:
-        if not corpus.disabled:
-            load_layout(corpus.slug, set_and_register=False)
+def load_corpora():
+    global CORPUS_META, CORPORA, INITIAL_TABLES, CORPORA_CONFIGS
+
+    CORPUS_META = _get_corpora_meta(GLOBAL_CONFIG.get("corpora_file"))
+    CORPORA, INITIAL_TABLES, CORPORA_CONFIGS = _get_corpora(CORPUS_META)
+    
+    # this can potentially save time: generate layouts for all datasets
+    # before the pages are visited. comes at expense of some memory,
+    # but the app should obviously be able to handle all datasets in use
+    if GLOBAL_CONFIG["load_layouts"]:
+        for corpus in CORPUS_META:
+            if not corpus.disabled:
+                load_layout(corpus.slug, set_and_register=False)
+
+
