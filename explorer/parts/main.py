@@ -90,7 +90,7 @@ def load_corpora():
 
     CORPUS_META = _get_corpora_meta(GLOBAL_CONFIG.get("corpora_file"))
     CORPORA, INITIAL_TABLES, CORPORA_CONFIGS = _get_corpora(CORPUS_META)
-    
+
     # this can potentially save time: generate layouts for all datasets
     # before the pages are visited. comes at expense of some memory,
     # but the app should obviously be able to handle all datasets in use
@@ -98,5 +98,4 @@ def load_corpora():
         for corpus in CORPUS_META:
             if not corpus.disabled:
                 load_layout(corpus.slug, set_and_register=False)
-
 
