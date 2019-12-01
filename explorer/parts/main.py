@@ -21,20 +21,17 @@ ROOT = GLOBAL_CONFIG["root"]
 LAYOUTS = dict()
 
 
-def _get_corpus_config(local_conf, global_conf, name):
+def _get_corpus_config(corpus, global_conf):
     """
     Return global conf plus individual settings for corpus
     """
     conf = {**global_conf}
     settings = {"max_dataset_rows", "drop_columns", "add_governor", "load", "slug"}
     for setting in settings:
-        loc = local_conf.get(setting)
+        loc = getattr(corpus, setting, None)
         if loc is not None:
             conf[setting] = loc
-        else:
-            if setting == "slug":
-                conf[setting] = _slug_from_name(name)
-    conf["corpus_name"] = name
+    conf["corpus_name"] = corpus.name
     return conf
 
 
@@ -47,25 +44,25 @@ def _get_corpora(corpus_meta):
     corpora = dict()
     tables = dict()
     corpora_config = dict()
-    for i, (corpus_name, metadata) in enumerate(corpus_meta.items(), start=1):
-        if metadata.get("disabled"):
-            print("Skipping corpus because it is disabled: {}".format(corpus_name))
+    for corpus in corpus_meta:
+        print(f"{corpus.name} started processing")
+    #for i, (corpus_name, metadata) in enumerate(corpus_meta.items(), start=1):
+        if corpus.disabled:
+            print("Skipping corpus because it is disabled: {}".format(corpus.name))
             continue
-        slug = metadata.get("slug", _slug_from_name(corpus_name))
-        corpus = Corpus(metadata["path"])
-        conf = _get_corpus_config(metadata, GLOBAL_CONFIG, corpus_name)
+        buzz_corpus = Corpus(corpus.path)
+        conf = _get_corpus_config(corpus, GLOBAL_CONFIG)
         if conf["load"]:
-            print("Loading corpus into memory: {} ...".format(corpus_name))
-            corpus = corpus.load(add_governor=conf["add_governor"])
-            corpus = _preprocess_corpus(corpus, **conf)
+            print("Loading corpus into memory: {} ...".format(corpus.name))
+            buzz_corpus = buzz_corpus.load(add_governor=conf["add_governor"])
+            buzz_corpus = _preprocess_corpus(buzz_corpus, **conf)
         else:
-            print("NOT loading corpus into memory: {} ...".format(corpus_name))
-        initial_table = corpus.table(show="p", subcorpora="file")
-        corpora[slug] = corpus
-        tables[slug] = initial_table
-        corpora_config[slug] = conf
+            print("NOT loading corpus into memory: {} ...".format(corpus.name))
+        initial_table = buzz_corpus.table(show="p", subcorpora="file")
+        corpora[corpus.slug] = buzz_corpus
+        tables[corpus.slug] = initial_table
+        corpora_config[corpus.slug] = conf
     return corpora, tables, corpora_config
-
 
 CORPUS_META = _get_corpora_meta(GLOBAL_CONFIG.get("corpora_file"))
 
@@ -98,8 +95,6 @@ def load_layout(slug, set_and_register=True):
 # before the pages are visited. comes at expense of some memory,
 # but the app should obviously be able to handle all datasets in use
 if GLOBAL_CONFIG["load_layouts"]:
-    for corpus_name, metadata in CORPUS_META.items():
-        if metadata.get("disabled"):
-            continue
-        slug = metadata.get("slug", _slug_from_name(corpus_name))
-        load_layout(slug, set_and_register=False)
+    for corpus in CORPUS_META:
+        if not corpus.disabled:
+            load_layout(corpus.slug, set_and_register=False)

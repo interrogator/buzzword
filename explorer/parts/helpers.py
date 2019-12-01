@@ -10,7 +10,7 @@ from buzz.constants import SHORT_TO_COL_NAME, SHORT_TO_LONG_NAME
 from buzz.corpus import Corpus
 
 from .strings import _capitalize_first, _downloadable_name
-
+from explore.models import Corpus as CorpusModel
 
 def _get_specs_and_corpus(search_from, searches, corpora, slug):
     """
@@ -227,8 +227,7 @@ def register_callbacks():
     """
     from . import callbacks
 
-
-def _get_corpora_meta(corpora_file):
+def _get_corpora_json_contents(corpora_file):
     """
     Get the contents of corpora.json, or an empty dict
     """
@@ -239,6 +238,12 @@ def _get_corpora_meta(corpora_file):
     with open(corpora_file, "r") as fo:
         return json.loads(fo.read())
 
+def _get_corpora_meta(corpora_file):
+    contents = _get_corpora_json_contents(corpora_file)
+    corpora = []
+    for corpus_name, corpus_json in contents.items():
+        corpora.append(CorpusModel.from_json(corpus_json, corpus_name))
+    return corpora
 
 def _special_search(df, col, search_string, skip):
     """
