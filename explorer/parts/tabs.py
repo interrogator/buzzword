@@ -117,7 +117,7 @@ def _build_dataset_space(df, config):
         page_size=config["page_size"],
         # style_as_list_view=True,
         virtualization=True,
-        fixed_rows={ 'headers': True, 'data': 0 },
+        fixed_rows={'headers': True, 'data': 0},
         style_header=style.BOLD_DARK,
         style_cell_conditional=style.LEFT_ALIGN,
         style_data_conditional=style.INDEX + style.STRIPES,
@@ -190,10 +190,7 @@ def _build_frequencies_space(corpus, table, config):
     # modify the style_index used for other tables to just work for this index
     style_index = style.FILE_INDEX
     style_index["if"]["column_id"] = table.index.name
-    freq_table = dcc.Loading(
-        type="default",
-        children=[
-            dash_table.DataTable(
+    freq_table = dash_table.DataTable(
                 id="freq-table",
                 columns=columns,
                 data=data,
@@ -204,21 +201,17 @@ def _build_frequencies_space(corpus, table, config):
                 sort_mode="multi",
                 row_deletable=False,
                 selected_rows=[],
-                page_action="native",
                 page_current=0,
                 page_size=config["page_size"],
+                page_action="none",
+                fixed_rows={'headers': True, 'data': 0},
+                virtualization=True,
+                style_table={
+                    'maxHeight': '2000px',
+                },
                 style_header=style.BOLD_DARK,
                 style_cell_conditional=style.LEFT_ALIGN,
                 style_data_conditional=[style_index] + style.STRIPES,
-            ),
-            html.A(
-                "Download",
-                id="download-link",
-                # download="freq-table.csv",
-                href="",
-                target="_blank",
-            ),
-        ],
     )
     gen = "Generate table"
     sty = {"width": "20%", **style.CELL_MIDDLE_35, **style.MARGIN_5_MONO}
@@ -250,7 +243,7 @@ def _build_concordance_space(df, config):
     conc_space = html.Div(toolbar, style=style.VERTICAL_MARGINS)
 
     max_row, max_col = config["table_size"]
-    df = df.iloc[:max_row, :max_col]
+    # df = df.iloc[:max_row, :max_col]
 
     meta = ["file", "s", "i"]
     if "speaker" in df.columns:
@@ -288,10 +281,12 @@ def _build_concordance_space(df, config):
                 sort_mode="multi",
                 row_deletable=True,
                 selected_rows=[],
-                page_action="native",
+                page_action="none",
+                fixed_rows={'headers': True, 'data': 0},
                 page_current=0,
                 page_size=config["page_size"],
-                # style_as_list_view=True,
+                virtualization=True,
+                style_as_list_view=True,
                 style_header=style.BOLD_DARK,
                 style_cell_conditional=style.LEFT_ALIGN_CONC,
                 style_data_conditional=style_data,
@@ -448,7 +443,7 @@ def make_explore_page(corpus, table, config, configs):
     )
     blk = {"display": "block", **style.HORIZONTAL_PAD_5}
     conll_display = html.Div(id="display-dataset", children=[dataset])
-    hide = {"display": "none"}
+    hide = {"visibility": "hidden"}
 
     tab_contents = [
         html.Div(
@@ -460,6 +455,7 @@ def make_explore_page(corpus, table, config, configs):
             ]
         )
     ]
+
     pad = {"paddingLeft": "10px", "paddingRight": "10px"}
     tab_contents = html.Div(id="tab-contents", children=tab_contents)
     children = [slug, _make_storage(configs), top_bit, tab_headers, tab_contents]
