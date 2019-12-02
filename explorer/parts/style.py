@@ -50,6 +50,7 @@ FILE_INDEX = {
     "backgroundColor": "#fafafa",
     "color": "#555555",
     "fontWeight": "bold",
+    "width": "20%"
 }
 INDEX = [
     {
@@ -61,7 +62,7 @@ INDEX = [
     for c in ["file", "s", "i"]
 ]
 CONC_LMR = [
-    {"if": {"column_id": "match"}, "fontWeight": "bold"},
+    {"if": {"column_id": "match"}, "fontWeight": "bold", "width": "140px"},
     {
         "if": {"column_id": "left"},
         "whiteSpace": "no-wrap",
