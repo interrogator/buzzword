@@ -1,6 +1,9 @@
 from django.http import HttpResponse
 from django.shortcuts import render
-
+import explore.models
 
 def start(request):
-    return render(request, 'start/start.html')
+    context = {
+        'corpora': explore.models.Corpus.objects.filter(disabled=False,load=True)
+    }
+    return render(request, 'start/start.html', context)
