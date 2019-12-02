@@ -1,11 +1,3 @@
-<!DOCTYPE html>
-<html>
-    <head>
-    {% load plotly_dash%}
-    {% plotly_header %}
-    </head>
-    <body>
-    {%plotly_app name="buzzword"%}
-    </body>
-    {% plotly_footer %}
-</html>
+{%load plotly_dash%}
+
+{%plotly_app name="buzzword" ratio=0.6 %}
