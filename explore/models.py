@@ -9,7 +9,7 @@ class Corpus(models.Model):
     language = models.CharField(max_length=255) # probably turn this into a model later
     path = models.TextField()
     desc = models.TextField(default="")
-    len = models.BigIntegerField(null=True)
+    length = models.BigIntegerField(null=True)
     add_governor = models.BooleanField(null=True)
     #drop_columns = array -> needs to be relation
     disabled = models.BooleanField(default=False)
@@ -21,14 +21,14 @@ class Corpus(models.Model):
     def from_json(cls, jsondata, corpus_name):
         slug = jsondata.get("slug", _slug_from_name(corpus_name))
         try:
-            corp = Corpus.objects.get(slug=slug)
+            corp = cls.objects.get(slug=slug)
             return corp
-        except Entry.DoesNotExist:
+        except cls.DoesNotExist:
             pass
         language = jsondata.get("language")
         path = jsondata.get("path")
         desc = jsondata.get("desc", "")
-        len = jsondata.get("len")
+        length = jsondata.get("length")
         disabled = jsondata.get("disabled", False)
         date = datetime.datetime.strptime(jsondata.get("date", '1900'), '%Y').date()
         load = jsondata.get("load", True)
@@ -44,7 +44,7 @@ class Corpus(models.Model):
         if has_error:
             raise Exception('some problem with loading corpus from json. check error log')
 
-        corp = Corpus(name=corpus_name, slug=slug, language=language, path=path, desc=desc, len=len, disabled=disabled, date=date, load=load, url=url)
+        corp = Corpus(name=corpus_name, slug=slug, language=language, path=path, desc=desc, length=length, disabled=disabled, date=date, load=load, url=url)
         corp.save()
 
         for drop_col in jsondata.get('drop_columns', []):

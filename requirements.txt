@@ -1,7 +1,8 @@
-django==2.2.7
+django==3.0.0
 django-plotly-dash==1.1.1
 dpd-static-support==0.0.4
 dash_bootstrap_components==0.7.2
+whitenoise==4.1.4
 buzz>=3.0.10
 flask==1.1.1
 dash==1.1.1

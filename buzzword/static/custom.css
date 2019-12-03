@@ -6,17 +6,17 @@
 
 /* Hide the 'Loading...' text at startup */
 ._dash-loading {
-	display:none;
+    display:none;
 }
 
 .no-underline {
-	text-decoration: none;
-	color: blue;
+    text-decoration: none;
+    color: blue;
 }
 
 p, ul, ol {
-	padding-bottom: 10px !important;
-	padding-top: 10px !important;
+    padding-bottom: 10px !important;
+    padding-top: 10px !important;
 }
 
 @-webkit-keyframes demo {

@@ -5,11 +5,12 @@ buzzword explorer: callbacks
 import pandas as pd
 from buzz.dashview import _df_to_figure
 from buzz.exceptions import DataTypeError
+from dash import no_update
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
-from .helpers import (_cast_query, _get_specs_and_corpus, _translate_relative,
-                      _tuple_or_list, _update_datatable, _special_search)
+from .helpers import (_cast_query, _get_specs_and_corpus, _special_search,
+                      _translate_relative, _tuple_or_list, _update_datatable)
 from .main import CORPORA, INITIAL_TABLES, app
 from .strings import (_make_search_name, _make_table_name, _search_error,
                       _table_error)
@@ -78,7 +79,7 @@ for i in range(1, 6):
         """
         # before anything is loaded, do nothing
         if n_clicks is None:
-            raise PreventUpdate
+            return no_update
         # get correct dataset to chart
 
         this_table = session_tables[str(table_from)]
@@ -125,8 +126,6 @@ def _on_load_callback(n_clicks, **kwargs):
         State("input-box", "value"),
         State("gram-select", "value"),
         State("search-from", "options"),
-        State("conll-view", "columns"),
-        State("conll-view", "data"),
         State("session-configs", "data"),
         State("session-search", "data"),
         State("session-clicks-clear", "data"),
@@ -142,8 +141,6 @@ def _new_search(
     search_string,
     gram_select,
     search_from_options,
-    current_cols,
-    current_data,
     conf,
     session_search,
     session_clicks_clear,
@@ -157,20 +154,8 @@ def _new_search(
     """
     # the first callback, before anything is loaded
     if n_clicks is None:
-        raise PreventUpdate
-        # can i delete the below?
-        return (
-            current_cols,
-            current_data,
-            search_from_options,
-            search_from,
-            True,
-            False,
-            "",
-            False,
-            session_search,
-            session_clicks_clear,
-        )
+        return [no_update] * 10
+
     slug = url.rstrip("/").split("/")[-1]
     conf = conf[slug]
     add_governor = conf["add_governor"]
@@ -180,18 +165,7 @@ def _new_search(
 
     msg = _search_error(col, search_string)
     if msg:
-        return (
-            current_cols,
-            current_data,
-            search_from_options,
-            search_from,
-            False,
-            True,
-            msg,
-            False,
-            session_search,
-            session_clicks_clear,
-        )
+        return [no_update, no_update, no_update, no_update, False, True, msg, False, no_update, no_update]
 
     new_value = len(session_search) + 1
 
@@ -264,6 +238,9 @@ def _new_search(
         current_cols, current_data = _update_datatable(
             corpus, df, drop_govs=add_governor, deletable=True
         )
+    else:
+        current_cols, current_data = no_update, no_update
+
     if not msg:
         name = _make_search_name(this_search, len(corpus), session_search)
         option = dict(value=new_value, label=name)
@@ -350,7 +327,7 @@ def _new_table(
     """
     # do nothing if not yet loaded
     if n_clicks is None:
-        raise PreventUpdate
+        return [no_update] * 14
 
     slug = url.rstrip("/").split("/")[-1]
     conf = conf[slug]
@@ -360,11 +337,10 @@ def _new_table(
 
     specs, corpus = _get_specs_and_corpus(search_from, session_search, CORPORA, slug)
 
+    # figure out sort, subcorpora,relative and keyness
     sort = sort or "total"
-
     if subcorpora == "_corpus":
         subcorpora = None
-
     relative, keyness = _translate_relative(relkey)
 
     # check if there are any validation problems
@@ -430,7 +406,7 @@ def _new_table(
         FREQUENCY_TABLES[this_table_tuple] = table
 
     if updating:
-        cols, data = current_cols, current_data
+        cols, data = no_update, no_update
     else:
         max_row, max_col = conf["table_size"]
         tab = table.iloc[:max_row, :max_col]
@@ -471,19 +447,17 @@ def _new_table(
     [
         State("show-for-conc", "value"),
         State("search-from", "value"),
-        State("conc-table", "columns"),
-        State("conc-table", "data"),
         State("session-configs", "data"),
         State("session-search", "data"),
         State("slug", "title"),
     ],
 )
-def _new_conc(n_clicks, show, search_from, cols, data, conf, session_search, url, **kwargs):
+def _new_conc(n_clicks, show, search_from, conf, session_search, url, **kwargs):
     """
     Callback for concordance. We just pick what to show and where from...
     """
     if n_clicks is None:
-        raise PreventUpdate
+        return [no_update] * 4
 
     slug = url.rstrip("/").split("/")[-1]
     conf = conf[slug]
@@ -491,7 +465,7 @@ def _new_conc(n_clicks, show, search_from, cols, data, conf, session_search, url
     # easy validation!
     msg = "" if show else "No choice made for match formatting."
     if not show:
-        return cols, data, True, msg
+        return no_update, no_update, True, msg
 
     specs, corpus = _get_specs_and_corpus(search_from, session_search, CORPORA, slug)
 
