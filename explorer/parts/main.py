@@ -62,6 +62,11 @@ def _get_corpora(corpus_meta):
         corpora_config[corpus.slug] = conf
     return corpora, tables, corpora_config
 
+
+# this is a workaround to stop migrate.py from loading corpora.
+# if you don't want to load corpora, comment out the call to _get_corpora_meta.
+# if you do want to load corpora, leave it uncommented.
+# CORPUS_META = dict()
 CORPUS_META = _get_corpora_meta(GLOBAL_CONFIG.get("corpora_file"))
 
 CORPORA, INITIAL_TABLES, CORPORA_CONFIGS = _get_corpora(CORPUS_META)
