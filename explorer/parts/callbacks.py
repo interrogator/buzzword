@@ -79,7 +79,7 @@ for i in range(1, 6):
         """
         # before anything is loaded, do nothing
         if n_clicks is None:
-            raise PreventUpdate
+            return no_update
         # get correct dataset to chart
 
         this_table = session_tables[str(table_from)]
@@ -154,7 +154,7 @@ def _new_search(
     """
     # the first callback, before anything is loaded
     if n_clicks is None:
-        raise PreventUpdate
+        return [no_update] * 10
 
     slug = url.rstrip("/").split("/")[-1]
     conf = conf[slug]
@@ -327,7 +327,7 @@ def _new_table(
     """
     # do nothing if not yet loaded
     if n_clicks is None:
-        raise PreventUpdate
+        return [no_update] * 14
 
     slug = url.rstrip("/").split("/")[-1]
     conf = conf[slug]
@@ -457,7 +457,7 @@ def _new_conc(n_clicks, show, search_from, conf, session_search, url, **kwargs):
     Callback for concordance. We just pick what to show and where from...
     """
     if n_clicks is None:
-        raise PreventUpdate
+        return [no_update] * 4
 
     slug = url.rstrip("/").split("/")[-1]
     conf = conf[slug]
