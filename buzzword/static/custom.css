@@ -1,0 +1,37 @@
+.loading-main::after{
+  content: "Preparing your workspace...";
+  position: fixed;
+  margin-top: 100px;
+}
+
+/* Hide the 'Loading...' text at startup */
+._dash-loading {
+    display:none;
+}
+
+.no-underline {
+    text-decoration: none;
+    color: blue;
+}
+
+p, ul, ol {
+    padding-bottom: 10px !important;
+    padding-top: 10px !important;
+}
+
+@-webkit-keyframes demo {
+    0% {
+        background-color: #d1f5c1;
+        opacity:1;
+    }
+    100% {
+        background-color: white;
+    }
+}
+    
+.flash {
+    -webkit-animation-name: demo;
+    -webkit-animation-duration: 7s;
+    -webkit-animation-iteration-count: 1;
+    -webkit-animation-timing-function: ease-in-out;
+}
