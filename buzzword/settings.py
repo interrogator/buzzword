@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 import os
 
+X_FRAME_OPTIONS = "SAMEORIGIN"
+
 DATA_UPLOAD_MAX_MEMORY_SIZE = 50000000
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
