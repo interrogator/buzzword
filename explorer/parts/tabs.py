@@ -409,7 +409,7 @@ def make_explore_page(corpus, table, config, configs):
 
     top_bit = [
         html.Img(
-            src="../assets/bolt.jpg", height=42, width=38, style=style.BLOCK_MIDDLE_35
+            src="../../assets/bolt.jpg", height=42, width=38, style=style.BLOCK_MIDDLE_35
         ),
         dcc.Link("buzzword", href="/", style=nav),
         # these spaces are used to flash messages to the user if something is wrong
