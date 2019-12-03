@@ -4,7 +4,11 @@
   <head>
     <meta charset="utf-8">
     <title>{% block title %}buzzword{% endblock %}</title>
-    <link rel="stylesheet" href="{{ STATIC_URL }}static/buzzword/bootstrap.css">
+    <!-- tab icon -->
+    <link rel="shortcut icon" type="image/png" href="{{ STATIC_URL }}static/favicon.ico"/>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="{{ STATIC_URL }}static/bootstrap.min.css"/>
+    <!-- Optional theme <link rel="stylesheet" href="{{ STATIC_URL }}static/bootstrap-theme.min.css"/> -->
   </head>
   <body>
   {% block body %}
@@ -13,6 +17,10 @@
     {% block content %}
     {% endblock %}
     </div>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="{{ STATIC_URL }}static/jquery.min.js"/>
+    <script src="{{ STATIC_URL }}static/popper.min.js"/>
+    <script src="{{ STATIC_URL }}static/bootstrap.min.js"/>
   {% endblock body %}
   </body>
 </html>

@@ -65,6 +65,8 @@ PLOTLY_COMPONENTS = [
     'dash_core_components',
     'dash_html_components',
     'dash_renderer',
+    'dash_daq',
+    'dash_table',
 
     # django-plotly-dash components
     'dpd_components',
@@ -75,6 +77,7 @@ PLOTLY_COMPONENTS = [
     'dash_bootstrap_components',
 ]
 
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MIDDLEWARE = [
     'django_plotly_dash.middleware.BaseMiddleware',
@@ -86,9 +89,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
+
 PLOTLY_DASH = {
+    "serve_locally": False,
 }
 
 
