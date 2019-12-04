@@ -63,7 +63,11 @@ def _build_dataset_space(df, config):
                     id="skip-switch",
                     on=False,
                     style={"verticalAlign": "top", **style.MARGIN_5_MONO},
-                ), html.Div(id="matching-text", style={"verticalAlign": "bottom", **style.MARGIN_5_MONO}),
+                ),
+                html.Div(
+                    id="matching-text",
+                    style={"verticalAlign": "bottom", **style.MARGIN_5_MONO},
+                ),
             ],
         ),
         dcc.Input(
@@ -207,14 +211,32 @@ def _build_frequencies_space(corpus, table, config):
         style_header=style.BOLD_DARK,
         style_cell_conditional=style.LEFT_ALIGN,
         style_data_conditional=[style_index] + style.STRIPES,
-        merge_duplicate_headers=True
+        merge_duplicate_headers=True,
     )
-    gen = "Generate table"
+
     sty = {"width": "20%", **style.CELL_MIDDLE_35, **style.MARGIN_5_MONO}
+
+    multi = html.Span(
+        children=[
+            daq.BooleanSwitch(
+                id="multiindex-switch",
+                on=False,
+                disabled=True,
+                style={**style.MARGIN_5_MONO, **style.TSTYLE},
+            ),
+            html.Div(
+                id="multiindex-text",
+                style={**style.MARGIN_5_MONO, **style.TSTYLE},
+            ),
+        ],
+        style={**style.CELL_MIDDLE_35, **style.TSTYLE}
+    )
+
+    gen = "Generate table"
     generate = html.Button(gen, id="table-button", style=sty)
-    left = html.Div([show_check, subcorpora_drop])
-    right = html.Div([sort_drop, relative_drop, generate])
-    toolbar = html.Div([left, right], style=style.VERTICAL_MARGINS)
+    top = html.Div([show_check, subcorpora_drop, multi])
+    bottom = html.Div([sort_drop, relative_drop, generate])
+    toolbar = html.Div([top, bottom], style=style.VERTICAL_MARGINS)
     div = html.Div([toolbar, freq_table])
     return html.Div(id="display-frequencies", children=[div])
 
@@ -399,7 +421,7 @@ def make_explore_page(corpus, table, config, configs):
         "width": "60%",
         **style.HORIZONTAL_PAD_5,
         **style.BLOCK_MIDDLE_35,
-        **style.FRONT
+        **style.FRONT,
     }
     # remove the paddingTop, which is not needed in explore view
     nav = {k: v for k, v in style.NAV_HEADER.items() if k != "paddingTop"}

@@ -292,6 +292,7 @@ def _new_search(
         State("subcorpora-for-table", "value"),
         State("relative-for-table", "value"),
         State("sort-for-table", "value"),
+        State("multiindex-switch", "on"),
         State("chart-from-1", "options"),
         State("chart-from-1", "value"),
         State("session-configs", "data"),
@@ -312,6 +313,7 @@ def _new_table(
     subcorpora,
     relkey,
     sort,
+    multiindex_columns,
     table_from_options,
     nv1,
     conf,
@@ -327,8 +329,6 @@ def _new_table(
     # do nothing if not yet loaded
     if n_clicks is None:
         return [no_update] * 14
-
-    multiindex_columns = True
 
     slug = url.rstrip("/").split("/")[-1]
     conf = conf[slug]
@@ -485,6 +485,12 @@ def _new_conc(n_clicks, show, search_from, conf, session_search, url, **kwargs):
 
 @app.expanded_callback(Output("matching-text", "children"), [Input("skip-switch", "on")])
 def _matching_not_matching(on, **kwargs):
-    if on is None:
-        return no_update
     return "matching" if not on else "not matching"
+
+
+@app.expanded_callback([Output("multiindex-text", "children"), Output("multiindex-switch", "disabled")], [Input("multiindex-switch", "on"), Input("show-for-table", "value")])
+def _multiindex(on, show, **kwargs):
+    if not show or len(show) < 2:
+        return "", True
+    text = "Join columns" if not on else "Multiple column levels"
+    return text, False
