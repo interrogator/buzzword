@@ -2,6 +2,7 @@
 buzzword explorer: collection of reusable CSS styles
 """
 
+FRONT = {'position':'relative', 'zIndex':'999'}
 VERTICAL_MARGINS = {"marginBottom": 15, "marginTop": 15}
 HORIZONTAL_PAD_5 = {"paddingLeft": 5, "paddingRight": 5}
 CELL_MIDDLE_35 = {"display": "table-cell", "verticalAlign": "middle", "height": "35px"}

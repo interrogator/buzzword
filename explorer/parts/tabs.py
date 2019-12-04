@@ -53,7 +53,7 @@ def _build_dataset_space(df, config):
             value="w",
             # title="Select the column you wish to search (e.g. word/lemma/POS) "
             # + ", or query language (e.g. Tgrep2, Depgrep)",
-            style={"width": "200px", "fontFamily": "monospace"},
+            style={"width": "200px", "fontFamily": "monospace", **style.FRONT},
         ),
         # the matching/not matching button and its text
         html.Div(
@@ -79,7 +79,7 @@ def _build_dataset_space(df, config):
             # value="",
             placeholder="What to return from search",
             disabled=False,
-            style={"width": "240px", "fontFamily": "monospace"},
+            style={"width": "240px", "fontFamily": "monospace", **style.FRONT},
         ),
         html.Button("Search", id="search-button"),
     ]
@@ -142,19 +142,19 @@ def _build_frequencies_space(corpus, table, config):
         id="show-for-table",
         options=cols,
         value=[],
-        style=style.MARGIN_5_MONO,
+        style={**style.MARGIN_5_MONO, **style.FRONT},
     )
     show_check = html.Div(show_check, style=style.TSTYLE)
     subcorpora_drop = dcc.Dropdown(
         id="subcorpora-for-table",
         options=[dict(value="_corpus", label="Entire corpus")] + cols,
         placeholder="Feature for index",
-        style=style.MARGIN_5_MONO,
+        style={**style.MARGIN_5_MONO, **style.FRONT},
     )
     subcorpora_drop = html.Div(subcorpora_drop, style=style.TSTYLE)
     relative_drop = dcc.Dropdown(
         id="relative-for-table",
-        style=style.MARGIN_5_MONO,
+        style={**style.MARGIN_5_MONO, **style.FRONT},
         options=[
             {"label": "Absolute frequency", "value": "ff"},
             {"label": "Relative of result", "value": "tf"},
@@ -167,7 +167,7 @@ def _build_frequencies_space(corpus, table, config):
     relative_drop = html.Div(relative_drop, style=style.TSTYLE)
     sort_drop = dcc.Dropdown(
         id="sort-for-table",
-        style=style.MARGIN_5_MONO,
+        style={**style.MARGIN_5_MONO, **style.FRONT},
         options=[
             {"label": "Total", "value": "total"},
             {"label": "Infrequent", "value": "infreq"},
@@ -230,7 +230,7 @@ def _build_concordance_space(df, config):
         placeholder="Features to show",
         id="show-for-conc",
         options=cols,
-        style=style.MARGIN_5_MONO,
+        style={**style.MARGIN_5_MONO, **style.FRONT},
     )
     update = html.Button("Update", id="update-conc", style=style.MARGIN_5_MONO)
     tstyle = dict(width="100%", **style.CELL_MIDDLE_35)
@@ -398,6 +398,7 @@ def make_explore_page(corpus, table, config, configs):
         "width": "60%",
         **style.HORIZONTAL_PAD_5,
         **style.BLOCK_MIDDLE_35,
+        **style.FRONT
     }
     # remove the paddingTop, which is not needed in explore view
     nav = {k: v for k, v in style.NAV_HEADER.items() if k != "paddingTop"}
