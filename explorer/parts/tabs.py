@@ -67,6 +67,7 @@ def _build_dataset_space(df, config):
             children=[
                 daq.BooleanSwitch(
                     theme=DAQ_THEME,
+                    className="colour-off",
                     id="skip-switch",
                     on=False,
                     style={"verticalAlign": "top", **style.MARGIN_5_MONO},
@@ -290,7 +291,7 @@ def _build_concordance_space(df, config):
     df = df[just]
     columns = [
         {
-            "name": SHORT_TO_COL_NAME.get(i, i),
+            "name": _capitalize_first(SHORT_TO_COL_NAME.get(i, i)),
             "id": i,
             "deletable": i not in ["left", "match", "right"],
             "hideable": True,
