@@ -5,10 +5,10 @@
     <meta charset="utf-8">
     <title>{% block title %}buzzword{% endblock %}</title>
     <!-- tab icon -->
-    <link rel="shortcut icon" type="image/png" href="{{ STATIC_URL }}static/favicon.ico"/>
+    <link rel="shortcut icon" type="image/png" href="{% static "favicon.ico" %}"/>
     <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="{{ STATIC_URL }}static/bootstrap.min.css"/>
-    <!-- Optional theme <link rel="stylesheet" href="{{ STATIC_URL }}static/bootstrap-theme.min.css"/> -->
+    <link rel="stylesheet" href="{% static "bootstrap.min.css" %}"/>
+    <!-- Optional theme <link rel="stylesheet" href="{% static "bootstrap-theme.min.css" %}"/> -->
   </head>
   <body>
   {% block body %}
@@ -18,9 +18,9 @@
     {% endblock %}
     </div>
     <!-- Latest compiled and minified JavaScript -->
-    <script src="{{ STATIC_URL }}static/jquery.min.js"/>
-    <script src="{{ STATIC_URL }}static/popper.min.js"/>
-    <script src="{{ STATIC_URL }}static/bootstrap.min.js"/>
+    <script src="{% static "jquery.min.js" %}"/>
+    <script src="{% static "popper.min.js" %}"/>
+    <script src="{% static "bootstrap.min.js" %}"/>
   {% endblock body %}
   </body>
 </html>
