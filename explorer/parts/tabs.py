@@ -11,7 +11,7 @@ from buzz.corpus import Corpus
 from buzz.dashview import CHART_TYPES, _df_to_figure
 
 from . import style
-from .helpers import _drop_cols_for_datatable, _get_cols, _update_datatable
+from .helpers import _drop_cols_for_datatable, _get_cols, _update_frequencies
 from .strings import _capitalize_first, _make_search_name, _make_table_name
 
 
@@ -154,7 +154,7 @@ def _build_frequencies_space(corpus, table, config):
     subcorpora_drop = html.Div(subcorpora_drop, style=style.TSTYLE)
     relative_drop = dcc.Dropdown(
         id="relative-for-table",
-        style={**style.MARGIN_5_MONO, **style.FRONT},
+        style={**style.MARGIN_5_MONO, **style.NEAR_FRONT},
         options=[
             {"label": "Absolute frequency", "value": "ff"},
             {"label": "Relative of result", "value": "tf"},
@@ -167,7 +167,7 @@ def _build_frequencies_space(corpus, table, config):
     relative_drop = html.Div(relative_drop, style=style.TSTYLE)
     sort_drop = dcc.Dropdown(
         id="sort-for-table",
-        style={**style.MARGIN_5_MONO, **style.FRONT},
+        style={**style.MARGIN_5_MONO, **style.NEAR_FRONT},
         options=[
             {"label": "Total", "value": "total"},
             {"label": "Infrequent", "value": "infreq"},
@@ -182,7 +182,7 @@ def _build_frequencies_space(corpus, table, config):
     sort_drop = html.Div(sort_drop, style=style.TSTYLE)
     max_row, max_col = config["table_size"]
     table = table.iloc[:max_row, :max_col]
-    columns, data = _update_datatable(corpus, table, conll=False, deletable=False)
+    columns, data = _update_frequencies(table, deletable=False)
 
     # modify the style_index used for other tables to just work for this index
     style_index = style.FILE_INDEX
@@ -207,6 +207,7 @@ def _build_frequencies_space(corpus, table, config):
         style_header=style.BOLD_DARK,
         style_cell_conditional=style.LEFT_ALIGN,
         style_data_conditional=[style_index] + style.STRIPES,
+        merge_duplicate_headers=True
     )
     gen = "Generate table"
     sty = {"width": "20%", **style.CELL_MIDDLE_35, **style.MARGIN_5_MONO}

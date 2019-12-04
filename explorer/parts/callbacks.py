@@ -10,7 +10,8 @@ from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
 from .helpers import (_cast_query, _get_specs_and_corpus, _special_search,
-                      _translate_relative, _tuple_or_list, _update_datatable)
+                      _translate_relative, _tuple_or_list, _update_concordance,
+                      _update_conll, _update_frequencies)
 from .main import CORPORA, INITIAL_TABLES, app
 from .strings import (_make_search_name, _make_table_name, _search_error,
                       _table_error)
@@ -184,7 +185,7 @@ def _new_search(
         session_search.clear()
         corpus = CORPORA[slug]
         corpus = corpus.iloc[:max_row, :max_col]
-        cols, data = _update_datatable(corpus, corpus, drop_govs=add_governor)
+        cols, data = _update_conll(corpus, False, drop_govs=add_governor)
         name = _make_search_name(conf["corpus_name"], len(corpus), session_search)
         search_from = [dict(value=0, label=name)]
         # set number of clicks at last moment
@@ -235,9 +236,7 @@ def _new_search(
         session_search[new_value] = _tuple_or_list(this_search, list)
         corpus = CORPORA[slug]
         df = df.iloc[:max_row, :max_col]
-        current_cols, current_data = _update_datatable(
-            corpus, df, drop_govs=add_governor, deletable=True
-        )
+        current_cols, current_data = _update_conll(df, True, add_governor)
     else:
         current_cols, current_data = no_update, no_update
 
@@ -329,6 +328,8 @@ def _new_table(
     if n_clicks is None:
         return [no_update] * 14
 
+    multiindex_columns = True
+
     slug = url.rstrip("/").split("/")[-1]
     conf = conf[slug]
 
@@ -392,6 +393,7 @@ def _new_table(
             relative=relative if relative != "corpus" else CORPORA[slug],
             keyness=keyness,
             sort=sort,
+            multiindex_columns=multiindex_columns
         )
         # round df if floats are used
         if relative is not False or keyness:
@@ -410,7 +412,7 @@ def _new_table(
     else:
         max_row, max_col = conf["table_size"]
         tab = table.iloc[:max_row, :max_col]
-        cols, data = _update_datatable(CORPORA[slug], tab, conll=False)
+        cols, data = _update_frequencies(tab, deletable=True)
 
     csv_path = "todo"
 
@@ -477,7 +479,7 @@ def _new_conc(n_clicks, show, search_from, conf, session_search, url, **kwargs):
     conc = corpus.conc(show=show, metadata=met, window=(100, 100))
     max_row, max_col = conf["table_size"]
     short = conc.iloc[:max_row, :max_col]
-    cols, data = _update_datatable(CORPORA[slug], short, conc=True)
+    cols, data = _update_concordance(short, deletable=True)
     return cols, data, bool(msg), msg
 
 
