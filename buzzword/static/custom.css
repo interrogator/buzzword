@@ -35,3 +35,20 @@ p, ul, ol {
     -webkit-animation-iteration-count: 1;
     -webkit-animation-timing-function: ease-in-out;
 }
+
+.column-header-name::before {
+  white-space: pre;
+  content: "\A";
+}
+
+.column-header--hide {
+    float: right !important;
+}
+
+.column-header--delete {
+    float: right !important;
+}
+
+.column-header--sort {
+    float: right !important;
+}
