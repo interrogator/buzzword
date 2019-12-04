@@ -14,6 +14,12 @@ from . import style
 from .helpers import _drop_cols_for_datatable, _get_cols, _update_frequencies
 from .strings import _capitalize_first, _make_search_name, _make_table_name
 
+DAQ_THEME = {
+    "dark": False,
+    'detail': '#007439',
+    'primary': '#a32424', # button when switched 'on' / not matching
+    'secondary': '#44ad78' # bottom off / matching
+}
 
 def _make_storage(configs):
     """
@@ -60,6 +66,7 @@ def _build_dataset_space(df, config):
             id="matching-box",
             children=[
                 daq.BooleanSwitch(
+                    theme=DAQ_THEME,
                     id="skip-switch",
                     on=False,
                     style={"verticalAlign": "top", **style.MARGIN_5_MONO},
@@ -226,6 +233,7 @@ def _build_frequencies_space(corpus, table, config):
     multi = html.Span(
         children=[
             daq.BooleanSwitch(
+                theme=DAQ_THEME,
                 id="multiindex-switch",
                 on=False,
                 disabled=True,
@@ -358,6 +366,7 @@ def _build_chart_space(table, config):
             style=style.MARGIN_5_MONO,
         )
         transpose = daq.BooleanSwitch(
+            theme=DAQ_THEME,
             id=f"chart-transpose-{chart_num}",
             on=False,
             style={"verticalAlign": "middle"},

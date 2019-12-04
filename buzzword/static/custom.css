@@ -52,3 +52,11 @@ p, ul, ol {
 .column-header--sort {
     float: right !important;
 }
+
+.colour-off div div div {
+    background: #47d153;
+}
+
+.colour-on div div div {
+    background: #a32424;
+}

@@ -483,9 +483,11 @@ def _new_conc(n_clicks, show, search_from, conf, session_search, url, **kwargs):
     return cols, data, bool(msg), msg
 
 
-@app.expanded_callback(Output("matching-text", "children"), [Input("skip-switch", "on")])
+@app.expanded_callback([Output("matching-text", "children"), Output("skip-switch", "className")], [Input("skip-switch", "on")])
 def _matching_not_matching(on, **kwargs):
-    return "matching" if not on else "not matching"
+    text = "matching" if not on else "not matching"
+    classname = "colour-off" if not on else "colour-on" 
+    return text, classname
 
 
 @app.expanded_callback([Output("multiindex-text", "children"), Output("multiindex-switch", "disabled")], [Input("multiindex-switch", "on"), Input("show-for-table", "value")])
