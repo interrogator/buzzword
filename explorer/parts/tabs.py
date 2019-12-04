@@ -37,15 +37,8 @@ def _build_dataset_space(df, config):
     if isinstance(df, Corpus):
         df = df.files[0].load()
     cols = _get_cols(df, config["add_governor"])
-    extra = [
-        ("Dependencies", "d"),
-        ("Describe thing", "describe")
-    ]
-    grams = [
-        ("Match (default)", 0),
-        ("Bigrams of match", 1),
-        ("Trigrams of match", 2),
-    ]
+    extra = [("Dependencies", "d"), ("Describe thing", "describe")]
+    grams = [("Match (default)", 0), ("Bigrams of match", 1), ("Trigrams of match", 2)]
     extra = [dict(label=l, value=v) for l, v in extra]
     grams = [dict(label=l, value=v) for l, v in grams]
     cols = extra + cols
@@ -62,6 +55,17 @@ def _build_dataset_space(df, config):
             # + ", or query language (e.g. Tgrep2, Depgrep)",
             style={"width": "200px", "fontFamily": "monospace"},
         ),
+        # the matching/not matching button and its text
+        html.Div(
+            id="matching-box",
+            children=[
+                daq.BooleanSwitch(
+                    id="skip-switch",
+                    on=False,
+                    style={"verticalAlign": "top", **style.MARGIN_5_MONO},
+                ), html.Div(id="matching-text", style={"verticalAlign": "bottom", **style.MARGIN_5_MONO}),
+            ],
+        ),
         dcc.Input(
             id="input-box",
             type="text",
@@ -77,17 +81,10 @@ def _build_dataset_space(df, config):
             disabled=False,
             style={"width": "240px", "fontFamily": "monospace"},
         ),
-        daq.BooleanSwitch(
-            id="skip-switch",
-            on=False,
-            style={"verticalAlign": "middle", **style.MARGIN_5_MONO},
-        ),
         html.Button("Search", id="search-button"),
     ]
     pieces = [html.Div(piece, style=style.CELL_MIDDLE_35) for piece in pieces]
-    # add tooltip to boolean switch
-    pieces[2].title = "Invert result"
-    # pieces[0].style['position'] = "absolute";
+
     search_space = html.Div(
         pieces, style={"fontFamily": "bold", **style.VERTICAL_MARGINS}
     )
@@ -106,7 +103,7 @@ def _build_dataset_space(df, config):
         columns=columns,
         data=data,
         editable=True,
-        style_cell={**style.HORIZONTAL_PAD_5, **{'whiteSpace': 'normal'}},
+        style_cell={**style.HORIZONTAL_PAD_5, **{"whiteSpace": "normal"}},
         filter_action="native",
         sort_action="native",
         sort_mode="multi",
@@ -117,7 +114,7 @@ def _build_dataset_space(df, config):
         page_size=config["page_size"],
         # style_as_list_view=True,
         virtualization=True,
-        fixed_rows={'headers': True, 'data': 0},
+        fixed_rows={"headers": True, "data": 0},
         style_header=style.BOLD_DARK,
         style_cell_conditional=style.LEFT_ALIGN,
         style_data_conditional=style.INDEX + style.STRIPES,
@@ -191,27 +188,25 @@ def _build_frequencies_space(corpus, table, config):
     style_index = style.FILE_INDEX
     style_index["if"]["column_id"] = table.index.name
     freq_table = dash_table.DataTable(
-                id="freq-table",
-                columns=columns,
-                data=data,
-                editable=True,
-                style_cell=style.HORIZONTAL_PAD_5,
-                filter_action="native",
-                sort_action="native",
-                sort_mode="multi",
-                row_deletable=False,
-                selected_rows=[],
-                page_current=0,
-                page_size=config["page_size"],
-                page_action="none",
-                fixed_rows={'headers': True, 'data': 0},
-                virtualization=True,
-                style_table={
-                    'maxHeight': '2000px',
-                },
-                style_header=style.BOLD_DARK,
-                style_cell_conditional=style.LEFT_ALIGN,
-                style_data_conditional=[style_index] + style.STRIPES,
+        id="freq-table",
+        columns=columns,
+        data=data,
+        editable=True,
+        style_cell=style.HORIZONTAL_PAD_5,
+        filter_action="native",
+        sort_action="native",
+        sort_mode="multi",
+        row_deletable=False,
+        selected_rows=[],
+        page_current=0,
+        page_size=config["page_size"],
+        page_action="none",
+        fixed_rows={"headers": True, "data": 0},
+        virtualization=True,
+        style_table={"maxHeight": "2000px"},
+        style_header=style.BOLD_DARK,
+        style_cell_conditional=style.LEFT_ALIGN,
+        style_data_conditional=[style_index] + style.STRIPES,
     )
     gen = "Generate table"
     sty = {"width": "20%", **style.CELL_MIDDLE_35, **style.MARGIN_5_MONO}
@@ -282,7 +277,7 @@ def _build_concordance_space(df, config):
                 row_deletable=True,
                 selected_rows=[],
                 page_action="none",
-                fixed_rows={'headers': True, 'data': 0},
+                fixed_rows={"headers": True, "data": 0},
                 page_current=0,
                 page_size=config["page_size"],
                 virtualization=True,
@@ -386,7 +381,7 @@ def make_explore_page(corpus, table, config, configs):
 
     Return html.Div
     """
-    slug = html.Div(id='slug', title=config["slug"], style={'display': 'none'})
+    slug = html.Div(id="slug", title=config["slug"], style={"display": "none"})
     dataset = _build_dataset_space(corpus, config)
     frequencies = _build_frequencies_space(corpus, table, config)
     chart = _build_chart_space(table, config)
@@ -409,7 +404,10 @@ def make_explore_page(corpus, table, config, configs):
 
     top_bit = [
         html.Img(
-            src="../../static/bolt.jpg", height=42, width=38, style=style.BLOCK_MIDDLE_35
+            src="../../static/bolt.jpg",
+            height=42,
+            width=38,
+            style=style.BLOCK_MIDDLE_35,
         ),
         dcc.Link("buzzword", href="/", style=nav),
         # these spaces are used to flash messages to the user if something is wrong

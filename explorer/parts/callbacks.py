@@ -481,10 +481,8 @@ def _new_conc(n_clicks, show, search_from, conf, session_search, url, **kwargs):
     return cols, data, bool(msg), msg
 
 
-# @app.server.route("/csv/<path:path>")
-# def serve_static(path):
-#     """
-#     Download the file at the specified path
-#     """
-#     root_dir = os.path.join(os.getcwd(), "csv")
-#     return flask.send_from_directory(root_dir, path)
+@app.expanded_callback(Output("matching-text", "children"), [Input("skip-switch", "on")])
+def _matching_not_matching(on, **kwargs):
+    if on is None:
+        return no_update
+    return "matching" if not on else "not matching"
