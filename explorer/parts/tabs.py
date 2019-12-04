@@ -97,6 +97,7 @@ def _build_dataset_space(df, config):
             "name": _capitalize_first(SHORT_TO_COL_NAME.get(i, i)).replace("_", " "),
             "id": i,
             "deletable": False,
+            "hideable": True,
         }
         for i in df.columns
     ]
@@ -122,6 +123,9 @@ def _build_dataset_space(df, config):
         style_header=style.BOLD_DARK,
         style_cell_conditional=style.LEFT_ALIGN,
         style_data_conditional=style.INDEX + style.STRIPES,
+        merge_duplicate_headers=True,
+        export_format='xlsx',
+        export_headers='display',
     )
     # add loading
     conll_table = dcc.Loading(
@@ -212,6 +216,8 @@ def _build_frequencies_space(corpus, table, config):
         style_cell_conditional=style.LEFT_ALIGN,
         style_data_conditional=[style_index] + style.STRIPES,
         merge_duplicate_headers=True,
+        export_format='xlsx',
+        export_headers='display',
     )
 
     sty = {"width": "20%", **style.CELL_MIDDLE_35, **style.MARGIN_5_MONO}
@@ -278,6 +284,7 @@ def _build_concordance_space(df, config):
             "name": SHORT_TO_COL_NAME.get(i, i),
             "id": i,
             "deletable": i not in ["left", "match", "right"],
+            "hideable": True,
         }
         for i in df.columns
     ]
@@ -308,6 +315,9 @@ def _build_concordance_space(df, config):
                 style_header=style.BOLD_DARK,
                 style_cell_conditional=style.LEFT_ALIGN_CONC,
                 style_data_conditional=style_data,
+                merge_duplicate_headers=True,
+                export_format='xlsx',
+                export_headers='display',
             )
         ],
     )

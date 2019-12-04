@@ -124,6 +124,7 @@ def _update_frequencies(df, deletable):
                 "name": i.lstrip("_"),
                 "id": i,
                 "deletable": deletable and "_" + i not in names,
+                "hideable": True,
             }
             for i in df.columns
         ]
@@ -134,6 +135,7 @@ def _update_frequencies(df, deletable):
             "name": [x.strip('_') for x in i],
             "id": "-".join(i),
             "deletable": ['_' + x in names for x in i],
+            "hideable": True,
         }
         for i in df.columns
     ]
@@ -158,6 +160,7 @@ def _update_concordance(df, deletable):
             "name": _capitalize_first(SHORT_TO_COL_NAME.get(i, i)),
             "id": i,
             "deletable": i not in cannot_delete and deletable,
+            "hideable": True,
         }
         for i in df.columns
     ]
@@ -178,6 +181,7 @@ def _update_conll(df, deletable, drop_govs):
             "name": _capitalize_first(SHORT_TO_COL_NAME.get(i, i)),
             "id": i,
             "deletable": i not in cannot_delete and deletable,
+            "hideable": True,
         }
         for i in df.columns
     ]
