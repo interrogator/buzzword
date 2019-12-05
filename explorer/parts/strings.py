@@ -24,7 +24,7 @@ def _make_table_name(history):
     """
     if history == "initial":
         return "Part of speech tags by filename"
-    specs, show, subcorpora, relative, keyness, sort = history
+    specs, show, subcorpora, relative, keyness, sort, multi = history
     if subcorpora is None:
         subcorpora = "corpus"
     subcorpora = (
@@ -38,6 +38,8 @@ def _make_table_name(history):
     if relative is False and keyness is False:
         relkey = " showing absolute frequencies"
     basic = f"{show} by {subcorpora}{relkey}, sorting by {sort}"
+    if len(show) > 1 and multi:
+        basic += " (columns split)"
     if not int(specs):
         return basic
     return f"{basic} -- from search #{specs}"

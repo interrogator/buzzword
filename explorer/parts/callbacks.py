@@ -357,7 +357,7 @@ def _new_table(
             updating = True
 
     msg = _table_error(show, subcorpora, updating)
-    this_table_list = [specs, list(show), subcorpora, relative, keyness, sort]
+    this_table_list = [specs, list(show), subcorpora, relative, keyness, sort, multiindex_columns]
     this_table_tuple = _tuple_or_list(this_table_list, tuple)
 
     # if table already made, use that one
