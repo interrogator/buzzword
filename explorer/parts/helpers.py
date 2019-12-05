@@ -8,9 +8,10 @@ import os
 import pandas as pd
 from buzz.constants import SHORT_TO_COL_NAME, SHORT_TO_LONG_NAME
 from buzz.corpus import Corpus
+from explore.models import Corpus as CorpusModel
 
 from .strings import _capitalize_first, _downloadable_name
-from explore.models import Corpus as CorpusModel
+
 
 def _get_specs_and_corpus(search_from, searches, corpora, slug):
     """
@@ -108,48 +109,82 @@ def _get_cols(corpus, add_governor):
     return [dict(value=v, label=l) for v, l in longs]
 
 
-def _update_datatable(
-    corpus, df, conll=True, conc=False, drop_govs=False, deletable=True
-):
+def _update_frequencies(df, deletable):
     """
-    Make columns and data for datatable display
+    Turn DF into dash table data for frequencies
     """
-    conll = conll if not conc else False
-    if conll:
-        df = _drop_cols_for_datatable(df, drop_govs)
-        col_order = ["file", "s", "i"] + list(df.columns)
-    elif conc:
-        col_order = ["left", "match", "right", "file", "s", "i"]
-        if "speaker" in df.columns:
-            col_order.append("speaker")
-    # for frequency table: rename index in case 'file' appears in columns
-    else:
-        names = ["_" + str(x) for x in df.index.names]
-        df.index.names = names
-        col_order = list(df.index.names) + list(df.columns)
-    # concordance doesn't need resetting, because index is unhelpful
-    if not conc:
-        df = df.reset_index()
-    df = df[[i for i in col_order if i is not None]]
-    cannot_delete = {"s", "i"} if conll else {"left", "match", "right"}
-    if conll or conc:
-        columns = [
-            {
-                "name": _capitalize_first(SHORT_TO_COL_NAME.get(i, i)),
-                "id": i,
-                "deletable": i not in cannot_delete and deletable,
-            }
-            for i in df.columns
-        ]
-    else:
+    multicols = isinstance(df.columns, pd.MultiIndex)
+    names = ["_" + str(x) for x in df.index.names]
+    df.index.names = names
+    # col_order = list(df.index.names) + list(df.columns)
+    df = df.reset_index()
+    if not multicols:
         columns = [
             {
                 "name": i.lstrip("_"),
                 "id": i,
                 "deletable": deletable and "_" + i not in names,
+                "hideable": True,
             }
             for i in df.columns
         ]
+        return columns, df.to_dict("rows")
+
+    columns = [
+        {
+            "name": [x.strip('_') for x in i],
+            "id": "-".join(i),
+            "deletable": ['_' + x in names for x in i],
+            "hideable": True,
+        }
+        for i in df.columns
+    ]
+    # format multiindex column data correctly (by id)
+    rows = []
+    for row in df.to_dict("rows"):
+        rows.append({"-".join(name): val for name, val in row.items()})
+    return columns, rows
+
+
+def _update_concordance(df, deletable):
+    """
+    Turn DF into dash table data for concordance
+    """
+    col_order = ["left", "match", "right", "file", "s", "i"]
+    if "speaker" in df.columns:
+        col_order.append("speaker")
+    df = df[[i for i in col_order if i is not None]]
+    cannot_delete = {"left", "match", "right"}
+    columns = [
+        {
+            "name": _capitalize_first(SHORT_TO_COL_NAME.get(i, i)),
+            "id": i,
+            "deletable": i not in cannot_delete and deletable,
+            "hideable": True,
+        }
+        for i in df.columns
+    ]
+    return columns, df.to_dict("rows")
+
+
+def _update_conll(df, deletable, drop_govs):
+    """
+    Turn DF into dash table data for conll
+    """
+    df = _drop_cols_for_datatable(df, drop_govs)
+    col_order = ["file", "s", "i"] + list(df.columns)
+    df = df.reset_index()
+    df = df[[i for i in col_order if i is not None]]
+    cannot_delete = {"s", "i"}
+    columns = [
+        {
+            "name": _capitalize_first(SHORT_TO_COL_NAME.get(i, i)),
+            "id": i,
+            "deletable": i not in cannot_delete and deletable,
+            "hideable": True,
+        }
+        for i in df.columns
+    ]
     return columns, df.to_dict("rows")
 
 
@@ -207,11 +242,11 @@ def _cast_query(query, col):
     ALlow different query types (e.g. numerical, list, str)
     """
     query = query.strip()
-    if col in {'t', 'd'}:
+    if col in {"t", "d"}:
         return query
-    if query.startswith("[") and query.endswith(']'):
-        if ',' in query:
-            query = ','.split(query[1:-1])
+    if query.startswith("[") and query.endswith("]"):
+        if "," in query:
+            query = ",".split(query[1:-1])
             return [i.strip() for i in query]
     if query.isdigit():
         return int(query)
@@ -227,6 +262,7 @@ def register_callbacks():
     """
     from . import callbacks
 
+
 def _get_corpora_json_contents(corpora_file):
     """
     Get the contents of corpora.json, or an empty dict
@@ -238,12 +274,14 @@ def _get_corpora_json_contents(corpora_file):
     with open(corpora_file, "r") as fo:
         return json.loads(fo.read())
 
+
 def _get_corpora_meta(corpora_file):
     contents = _get_corpora_json_contents(corpora_file)
     corpora = []
     for corpus_name, corpus_json in contents.items():
         corpora.append(CorpusModel.from_json(corpus_json, corpus_name))
     return corpora
+
 
 def _special_search(df, col, search_string, skip):
     """

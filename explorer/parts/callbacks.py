@@ -10,7 +10,8 @@ from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
 from .helpers import (_cast_query, _get_specs_and_corpus, _special_search,
-                      _translate_relative, _tuple_or_list, _update_datatable)
+                      _translate_relative, _tuple_or_list, _update_concordance,
+                      _update_conll, _update_frequencies)
 from .main import CORPORA, INITIAL_TABLES, app
 from .strings import (_make_search_name, _make_table_name, _search_error,
                       _table_error)
@@ -184,7 +185,7 @@ def _new_search(
         session_search.clear()
         corpus = CORPORA[slug]
         corpus = corpus.iloc[:max_row, :max_col]
-        cols, data = _update_datatable(corpus, corpus, drop_govs=add_governor)
+        cols, data = _update_conll(corpus, False, drop_govs=add_governor)
         name = _make_search_name(conf["corpus_name"], len(corpus), session_search)
         search_from = [dict(value=0, label=name)]
         # set number of clicks at last moment
@@ -235,9 +236,7 @@ def _new_search(
         session_search[new_value] = _tuple_or_list(this_search, list)
         corpus = CORPORA[slug]
         df = df.iloc[:max_row, :max_col]
-        current_cols, current_data = _update_datatable(
-            corpus, df, drop_govs=add_governor, deletable=True
-        )
+        current_cols, current_data = _update_conll(df, True, add_governor)
     else:
         current_cols, current_data = no_update, no_update
 
@@ -293,6 +292,7 @@ def _new_search(
         State("subcorpora-for-table", "value"),
         State("relative-for-table", "value"),
         State("sort-for-table", "value"),
+        State("multiindex-switch", "on"),
         State("chart-from-1", "options"),
         State("chart-from-1", "value"),
         State("session-configs", "data"),
@@ -313,6 +313,7 @@ def _new_table(
     subcorpora,
     relkey,
     sort,
+    multiindex_columns,
     table_from_options,
     nv1,
     conf,
@@ -392,6 +393,7 @@ def _new_table(
             relative=relative if relative != "corpus" else CORPORA[slug],
             keyness=keyness,
             sort=sort,
+            multiindex_columns=multiindex_columns
         )
         # round df if floats are used
         if relative is not False or keyness:
@@ -410,7 +412,7 @@ def _new_table(
     else:
         max_row, max_col = conf["table_size"]
         tab = table.iloc[:max_row, :max_col]
-        cols, data = _update_datatable(CORPORA[slug], tab, conll=False)
+        cols, data = _update_frequencies(tab, deletable=True)
 
     csv_path = "todo"
 
@@ -477,14 +479,18 @@ def _new_conc(n_clicks, show, search_from, conf, session_search, url, **kwargs):
     conc = corpus.conc(show=show, metadata=met, window=(100, 100))
     max_row, max_col = conf["table_size"]
     short = conc.iloc[:max_row, :max_col]
-    cols, data = _update_datatable(CORPORA[slug], short, conc=True)
+    cols, data = _update_concordance(short, deletable=True)
     return cols, data, bool(msg), msg
 
 
-# @app.server.route("/csv/<path:path>")
-# def serve_static(path):
-#     """
-#     Download the file at the specified path
-#     """
-#     root_dir = os.path.join(os.getcwd(), "csv")
-#     return flask.send_from_directory(root_dir, path)
+@app.expanded_callback(Output("matching-text", "children"), [Input("skip-switch", "on")])
+def _matching_not_matching(on, **kwargs):
+    return "matching" if not on else "not matching"
+
+
+@app.expanded_callback([Output("multiindex-text", "children"), Output("multiindex-switch", "disabled")], [Input("multiindex-switch", "on"), Input("show-for-table", "value")])
+def _multiindex(on, show, **kwargs):
+    if not show or len(show) < 2:
+        return "", True
+    text = "Join columns" if not on else "Multiple column levels"
+    return text, False

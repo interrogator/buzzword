@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Welcome{% endblock %}
+{% block title %}buzzword: home{% endblock %}
 
 
 {% block content %}
@@ -9,7 +9,8 @@
     On this page will be a navbar, introduction, table of corpora, and potentially the upload/parse space
 </p>
 <h2>Corpora</h2>
-
+<br>
+<br>
 {% for corpus in corpora %}
     <a href="explore/{{ corpus.slug }}">{{ corpus.name }}</a>
     <br>
