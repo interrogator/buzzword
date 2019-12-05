@@ -1,7 +1,7 @@
 """
 buzzword explorer: build the explore page and its tabs
 """
-
+import json
 import dash_core_components as dcc
 import dash_daq as daq
 import dash_html_components as html
@@ -283,7 +283,17 @@ def _build_concordance_space(df, config):
     if "speaker" in df.columns:
         meta.append("speaker")
 
-    df = df.just.x.NOUN.conc(metadata=meta, window=(100, 100))
+    # do an initial search, potentially from corpora.json
+    # default to, get nouns
+    if config.get("initial_query"):
+        query = json.loads(config["initial_query"])
+    else:
+        query = {"target": "x", "query": "NOUN"}
+
+    print(f"Making concordance for {config['corpus_name']} ...")
+    df = getattr(df.just, query["target"])(query["query"])
+    df = df.conc(metadata=meta, window=(100, 100))
+    print('Done!')
 
     just = ["left", "match", "right", "file", "s", "i"]
     if "speaker" in df.columns:

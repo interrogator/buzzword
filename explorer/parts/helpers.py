@@ -228,13 +228,16 @@ def _get_corpus(slug):
     return corpus
 
 
-def _get_initial_table(slug):
+def _get_initial_table(slug, config):
     """
     Get or create the initial table for this slug
     """
     # todo: speed up by storing as INITIAL_TABLES?
     corpus = _get_corpus(slug)
-    return corpus.table(show="p", subcorpora="file")
+    default = dict(show="p", subcorpora="file")
+    if "initial_table" in config:
+        default = json.loads(config["initial_table"])
+    return corpus.table(**default)
 
 
 def _cast_query(query, col):
