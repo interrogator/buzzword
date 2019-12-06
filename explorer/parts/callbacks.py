@@ -469,6 +469,10 @@ def _new_conc(n_clicks, show, search_from, conf, session_search, url, **kwargs):
     if not show:
         return no_update, no_update, True, msg
 
+    if not search_from:
+        msg = "Cannot concordance whole corpus. Do a search first."
+        return no_update, no_update, True, msg
+
     specs, corpus = _get_specs_and_corpus(search_from, session_search, CORPORA, slug)
 
     met = ["file", "s", "i"]

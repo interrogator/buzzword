@@ -16,10 +16,11 @@ from .strings import _capitalize_first, _make_search_name, _make_table_name
 
 DAQ_THEME = {
     "dark": False,
-    'detail': '#007439',
-    'primary': '#a32424', # button when switched 'on' / not matching
-    'secondary': '#44ad78' # bottom off / matching
+    "detail": "#007439",
+    "primary": "#a32424",  # button when switched 'on' / not matching
+    "secondary": "#44ad78",  # bottom off / matching
 }
+
 
 def _make_storage(configs):
     """
@@ -127,13 +128,14 @@ def _build_dataset_space(df, config):
         page_size=config["page_size"],
         # style_as_list_view=True,
         virtualization=True,
+        style_table={"maxHeight": "1000px"},
         fixed_rows={"headers": True, "data": 0},
         style_header=style.BOLD_DARK,
         style_cell_conditional=style.LEFT_ALIGN,
         style_data_conditional=style.INDEX + style.STRIPES,
         merge_duplicate_headers=True,
-        export_format='xlsx',
-        export_headers='display',
+        export_format="xlsx",
+        export_headers="display",
     )
     # add loading
     conll_table = dcc.Loading(
@@ -188,6 +190,7 @@ def _build_frequencies_space(corpus, table, config):
             {"label": "Total", "value": "total"},
             {"label": "Infrequent", "value": "infreq"},
             {"label": "Alphabetical", "value": "name"},
+            {"label": "Reverse-alphabetical", "value": "reverse"},
             {"label": "Increasing", "value": "increase"},
             {"label": "Decreasing", "value": "decrease"},
             {"label": "Static", "value": "static"},
@@ -208,8 +211,10 @@ def _build_frequencies_space(corpus, table, config):
         columns=columns,
         data=data,
         editable=True,
-        style_cell={**style.HORIZONTAL_PAD_5, **{"maxWidth": "145px", "minWidth": "60px"}},
-        # style_table={'overflowX': 'scroll'},
+        style_cell={
+            **style.HORIZONTAL_PAD_5,
+            **{"maxWidth": "145px", "minWidth": "60px"},
+        },
         filter_action="native",
         sort_action="native",
         sort_mode="multi",
@@ -220,13 +225,13 @@ def _build_frequencies_space(corpus, table, config):
         page_action="none",
         fixed_rows={"headers": True, "data": 0},
         virtualization=True,
-        # style_table={"maxHeight": "2000px"},
+        style_table={"maxHeight": "1000px"},
         style_header=style.BOLD_DARK,
         style_cell_conditional=style.LEFT_ALIGN,
         style_data_conditional=[style_index] + style.STRIPES,
         merge_duplicate_headers=True,
-        export_format='xlsx',
-        export_headers='display',
+        export_format="xlsx",
+        export_headers="display",
     )
 
     sty = {"width": "20%", **style.CELL_MIDDLE_35, **style.MARGIN_5_MONO}
@@ -241,11 +246,10 @@ def _build_frequencies_space(corpus, table, config):
                 style={**style.MARGIN_5_MONO, **style.TSTYLE},
             ),
             html.Div(
-                id="multiindex-text",
-                style={**style.MARGIN_5_MONO, **style.TSTYLE},
+                id="multiindex-text", style={**style.MARGIN_5_MONO, **style.TSTYLE}
             ),
         ],
-        style={**style.CELL_MIDDLE_35, **style.TSTYLE}
+        style={**style.CELL_MIDDLE_35, **style.TSTYLE},
     )
     content = html.Span(
         children=[
@@ -260,7 +264,7 @@ def _build_frequencies_space(corpus, table, config):
                 style={**style.MARGIN_5_MONO, **style.TSTYLE},
             ),
         ],
-        style={**style.CELL_MIDDLE_35, **style.TSTYLE}
+        style={**style.CELL_MIDDLE_35, **style.TSTYLE},
     )
 
     gen = "Generate table"
@@ -308,7 +312,7 @@ def _build_concordance_space(df, config):
     print(f"Making concordance for {config['corpus_name']} ...")
     df = getattr(df.just, query["target"])(query["query"])
     df = df.conc(metadata=meta, window=(100, 100))
-    print('Done!')
+    print("Done!")
 
     just = ["left", "match", "right", "file", "s", "i"]
     if "speaker" in df.columns:
@@ -346,13 +350,14 @@ def _build_concordance_space(df, config):
                 page_current=0,
                 page_size=config["page_size"],
                 virtualization=True,
+                style_table={"maxHeight": "1000px"},
                 style_as_list_view=True,
                 style_header=style.BOLD_DARK,
                 style_cell_conditional=style.LEFT_ALIGN_CONC,
                 style_data_conditional=style_data,
                 merge_duplicate_headers=True,
-                export_format='xlsx',
-                export_headers='display',
+                export_format="xlsx",
+                export_headers="display",
             )
         ],
     )
