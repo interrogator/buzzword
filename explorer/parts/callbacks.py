@@ -9,19 +9,28 @@ from dash import no_update
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
-from .helpers import (_cast_query, _get_specs_and_corpus, _special_search,
-                      _translate_relative, _tuple_or_list, _update_concordance,
-                      _update_conll, _update_frequencies)
+from .helpers import (
+    _cast_query,
+    _get_specs_and_corpus,
+    _special_search,
+    _translate_relative,
+    _tuple_or_list,
+    _update_concordance,
+    _update_conll,
+    _update_frequencies,
+)
 from .main import CORPORA, INITIAL_TABLES, app
-from .strings import (_make_search_name, _make_table_name, _search_error,
-                      _table_error)
+from .strings import _make_search_name, _make_table_name, _search_error, _table_error
 
 # we can't keep tables in dcc.store, they are too big. so we keep all here with
 # a tuple that can identify them (ideally, even dealing with user sessions)
 FREQUENCY_TABLES = dict()
 
 
-@app.expanded_callback([Output("input-box", "placeholder"), Output("gram-select", "disabled")], [Input("search-target", "value")])
+@app.expanded_callback(
+    [Output("input-box", "placeholder"), Output("gram-select", "disabled")],
+    [Input("search-target", "value")],
+)
 def _correct_placeholder(value, **kwargs):
     """
     More accurate placeholder text when doing dependencies
@@ -30,7 +39,7 @@ def _correct_placeholder(value, **kwargs):
     mapped = {
         "t": "Enter Tgrep2 query...",
         "d": "Enter depgrep query",
-        "describe": "Enter depgrep query (e.g. l\"man\")"
+        "describe": 'Enter depgrep query (e.g. l"man")',
     }
     disable_gram = value in mapped
     return mapped.get(value, default), disable_gram
@@ -74,7 +83,9 @@ for i in range(1, 6):
             State("session-tables", "data"),
         ],
     )
-    def _new_chart(n_clicks, table_from, chart_type, top_n, transpose, session_tables, **kwargs):
+    def _new_chart(
+        n_clicks, table_from, chart_type, top_n, transpose, session_tables, **kwargs
+    ):
         """
         Make new chart by kind. Do it 5 times, once for each chart space
         """
@@ -146,7 +157,7 @@ def _new_search(
     session_search,
     session_clicks_clear,
     url,
-    **kwargs
+    **kwargs,
 ):
     """
     Callback when a new search is submitted
@@ -166,7 +177,18 @@ def _new_search(
 
     msg = _search_error(col, search_string)
     if msg:
-        return [no_update, no_update, no_update, no_update, False, True, msg, False, no_update, no_update]
+        return [
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            False,
+            True,
+            msg,
+            False,
+            no_update,
+            no_update,
+        ]
 
     new_value = len(session_search) + 1
 
@@ -322,7 +344,7 @@ def _new_table(
     session_tables,
     session_click_table,
     url,
-    **kwargs
+    **kwargs,
 ):
     """
     Callback when a new freq table is generated. Same logic as new_search.
@@ -358,7 +380,16 @@ def _new_table(
             updating = True
 
     msg = _table_error(show, subcorpora, updating)
-    this_table_list = [specs, list(show), subcorpora, relative, keyness, sort, multiindex_columns]
+    this_table_list = [
+        specs,
+        list(show),
+        subcorpora,
+        relative,
+        keyness,
+        sort,
+        multiindex_columns,
+        content_table,
+    ]
     this_table_tuple = _tuple_or_list(this_table_list, tuple)
 
     # if table already made, use that one
@@ -396,7 +427,7 @@ def _new_table(
             keyness=keyness,
             sort=sort,
             multiindex_columns=multiindex_columns,
-            show_frequencies=relative is not False and relative is not None
+            show_frequencies=relative is not False and relative is not None,
         )
         # round df if floats are used
         if relative is not False or keyness:
@@ -417,7 +448,7 @@ def _new_table(
         tab = table.iloc[:max_row, :max_col]
         cols, data = _update_frequencies(tab, True, content_table)
 
-    if not msg and not updating:
+    if not msg and not updating and not content_table:
         table_name = _make_table_name(this_table_list)
         option = dict(value=idx, label=table_name)
         table_from_options.append(option)
@@ -487,14 +518,20 @@ def _new_conc(n_clicks, show, search_from, conf, session_search, url, **kwargs):
     return cols, data, bool(msg), msg
 
 
-@app.expanded_callback([Output("matching-text", "children"), Output("skip-switch", "className")], [Input("skip-switch", "on")])
+@app.expanded_callback(
+    [Output("matching-text", "children"), Output("skip-switch", "className")],
+    [Input("skip-switch", "on")],
+)
 def _matching_not_matching(on, **kwargs):
     text = "matching" if not on else "not matching"
-    classname = "colour-off" if not on else "colour-on" 
+    classname = "colour-off" if not on else "colour-on"
     return text, classname
 
 
-@app.expanded_callback([Output("multiindex-text", "children"), Output("multiindex-switch", "disabled")], [Input("multiindex-switch", "on"), Input("show-for-table", "value")])
+@app.expanded_callback(
+    [Output("multiindex-text", "children"), Output("multiindex-switch", "disabled")],
+    [Input("multiindex-switch", "on"), Input("show-for-table", "value")],
+)
 def _multiindex(on, show, **kwargs):
     if not show or len(show) < 2:
         return "", True

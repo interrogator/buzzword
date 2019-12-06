@@ -24,7 +24,7 @@ def _make_table_name(history):
     """
     if history == "initial":
         return "Part of speech tags by filename"
-    specs, show, subcorpora, relative, keyness, sort, multi = history
+    specs, show, subcorpora, relative, keyness, sort, multi, cont = history
     if subcorpora is None:
         subcorpora = "corpus"
     subcorpora = (
@@ -63,7 +63,7 @@ def _make_search_name(history, size, searches):
     """
     import locale
 
-    trans = {0: 'match', 1: 'bigrams', 2: 'trigrams'}
+    trans = {0: "match", 1: "bigrams", 2: "trigrams"}
 
     locale.setlocale(locale.LC_ALL, "")
     if isinstance(history, str):
