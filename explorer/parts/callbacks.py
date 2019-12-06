@@ -275,7 +275,6 @@ def _new_search(
         Output("dialog-table", "displayed"),
         Output("dialog-table", "message"),
         Output("freq-table", "row_deletable"),
-        Output("download-link", "href"),
         Output("session-tables", "data"),
         Output("session-clicks-table", "data"),
     ],
@@ -293,6 +292,7 @@ def _new_search(
         State("relative-for-table", "value"),
         State("sort-for-table", "value"),
         State("multiindex-switch", "on"),
+        State("content-table-switch", "on"),
         State("chart-from-1", "options"),
         State("chart-from-1", "value"),
         State("session-configs", "data"),
@@ -314,6 +314,7 @@ def _new_table(
     relkey,
     sort,
     multiindex_columns,
+    content_table,
     table_from_options,
     nv1,
     conf,
@@ -328,7 +329,7 @@ def _new_table(
     """
     # do nothing if not yet loaded
     if n_clicks is None:
-        return [no_update] * 14
+        raise PreventUpdate
 
     slug = url.rstrip("/").split("/")[-1]
     conf = conf[slug]
@@ -387,13 +388,15 @@ def _new_table(
             table = INITIAL_TABLES[slug]
     else:
         # generate table
-        table = corpus.table(
+        method = "table" if not content_table else "content_table"
+        table = getattr(corpus, method)(
             show=show,
             subcorpora=subcorpora,
             relative=relative if relative != "corpus" else CORPORA[slug],
             keyness=keyness,
             sort=sort,
-            multiindex_columns=multiindex_columns
+            multiindex_columns=multiindex_columns,
+            show_frequencies=relative is not False and relative is not None
         )
         # round df if floats are used
         if relative is not False or keyness:
@@ -412,9 +415,7 @@ def _new_table(
     else:
         max_row, max_col = conf["table_size"]
         tab = table.iloc[:max_row, :max_col]
-        cols, data = _update_frequencies(tab, deletable=True)
-
-    csv_path = "todo"
+        cols, data = _update_frequencies(tab, True, content_table)
 
     if not msg and not updating:
         table_name = _make_table_name(this_table_list)
@@ -432,7 +433,6 @@ def _new_table(
         bool(msg),
         msg,
         row_deletable,
-        csv_path,
         session_tables,
         session_click_table,
     )

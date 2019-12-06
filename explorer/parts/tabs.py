@@ -198,7 +198,7 @@ def _build_frequencies_space(corpus, table, config):
     sort_drop = html.Div(sort_drop, style=style.TSTYLE)
     max_row, max_col = config["table_size"]
     table = table.iloc[:max_row, :max_col]
-    columns, data = _update_frequencies(table, deletable=False)
+    columns, data = _update_frequencies(table, False, False)
 
     # modify the style_index used for other tables to just work for this index
     style_index = style.FILE_INDEX
@@ -247,10 +247,25 @@ def _build_frequencies_space(corpus, table, config):
         ],
         style={**style.CELL_MIDDLE_35, **style.TSTYLE}
     )
+    content = html.Span(
+        children=[
+            daq.BooleanSwitch(
+                theme={**DAQ_THEME, **{"primary": "#47d153"}},
+                id="content-table-switch",
+                on=False,
+                style={**style.MARGIN_5_MONO, **style.TSTYLE},
+            ),
+            html.Div(
+                children="Show content, not frequency",
+                style={**style.MARGIN_5_MONO, **style.TSTYLE},
+            ),
+        ],
+        style={**style.CELL_MIDDLE_35, **style.TSTYLE}
+    )
 
     gen = "Generate table"
     generate = html.Button(gen, id="table-button", style=sty)
-    top = html.Div([show_check, subcorpora_drop, multi])
+    top = html.Div([show_check, subcorpora_drop, multi, content])
     bottom = html.Div([sort_drop, relative_drop, generate])
     toolbar = html.Div([top, bottom], style=style.VERTICAL_MARGINS)
     div = html.Div([toolbar, freq_table])

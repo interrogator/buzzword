@@ -109,7 +109,7 @@ def _get_cols(corpus, add_governor):
     return [dict(value=v, label=l) for v, l in longs]
 
 
-def _update_frequencies(df, deletable):
+def _update_frequencies(df, deletable, content_table):
     """
     Turn DF into dash table data for frequencies
     """
@@ -117,7 +117,8 @@ def _update_frequencies(df, deletable):
     names = ["_" + str(x) for x in df.index.names]
     df.index.names = names
     # col_order = list(df.index.names) + list(df.columns)
-    df = df.reset_index()
+    if not content_table:
+        df = df.reset_index()
     if not multicols:
         columns = [
             {
