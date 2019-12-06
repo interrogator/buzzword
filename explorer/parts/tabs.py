@@ -206,32 +206,37 @@ def _build_frequencies_space(corpus, table, config):
     # modify the style_index used for other tables to just work for this index
     style_index = style.FILE_INDEX
     style_index["if"]["column_id"] = table.index.name
-    freq_table = dash_table.DataTable(
-        id="freq-table",
-        columns=columns,
-        data=data,
-        editable=True,
-        style_cell={
-            **style.HORIZONTAL_PAD_5,
-            **{"maxWidth": "145px", "minWidth": "60px"},
-        },
-        filter_action="native",
-        sort_action="native",
-        sort_mode="multi",
-        row_deletable=False,
-        selected_rows=[],
-        page_current=0,
-        page_size=config["page_size"],
-        page_action="none",
-        fixed_rows={"headers": True, "data": 0},
-        virtualization=True,
-        style_table={"maxHeight": "1000px"},
-        style_header=style.BOLD_DARK,
-        style_cell_conditional=style.LEFT_ALIGN,
-        style_data_conditional=[style_index] + style.STRIPES,
-        merge_duplicate_headers=True,
-        export_format="xlsx",
-        export_headers="display",
+    freq_table = dcc.Loading(
+        type="default",
+        children=[
+            dash_table.DataTable(
+                id="freq-table",
+                columns=columns,
+                data=data,
+                editable=True,
+                style_cell={
+                    **style.HORIZONTAL_PAD_5,
+                    **{"maxWidth": "145px", "minWidth": "60px"},
+                },
+                filter_action="native",
+                sort_action="native",
+                sort_mode="multi",
+                row_deletable=False,
+                selected_rows=[],
+                page_current=0,
+                page_size=config["page_size"],
+                page_action="none",
+                fixed_rows={"headers": True, "data": 0},
+                virtualization=True,
+                style_table={"maxHeight": "1000px"},
+                style_header=style.BOLD_DARK,
+                style_cell_conditional=style.LEFT_ALIGN,
+                style_data_conditional=[style_index] + style.STRIPES,
+                merge_duplicate_headers=True,
+                export_format="xlsx",
+                export_headers="display",
+            )
+        ],
     )
 
     sty = {"width": "20%", **style.CELL_MIDDLE_35, **style.MARGIN_5_MONO}
