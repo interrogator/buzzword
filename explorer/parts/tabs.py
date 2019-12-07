@@ -59,7 +59,6 @@ def _build_dataset_space(df, config):
             id="search-target",
             options=cols,
             value="w",
-            disabled=True,
             # title="Select the column you wish to search (e.g. word/lemma/POS) "
             # + ", or query language (e.g. Tgrep2, Depgrep)",
             style={"width": "200px", "fontFamily": "monospace", **style.FRONT},
