@@ -30,10 +30,11 @@ def _make_storage(configs):
     search_store = dcc.Store(id="session-search", data=dict())
     tables_store = dcc.Store(id="session-tables", data=dict())
     click_clear = dcc.Store(id="session-clicks-clear", data=-1)
+    click_show = dcc.Store(id="session-clicks-show", data=-1)
     click_table = dcc.Store(id="session-clicks-table", data=-1)
     configs = dcc.Store(id="session-configs", data=configs)
     content = html.Div(id="page-content")
-    stores = [search_store, tables_store, click_clear, click_table, configs]
+    stores = [search_store, tables_store, click_clear, click_show, click_table, configs]
     return html.Div(stores + [content])
 
 
@@ -58,6 +59,7 @@ def _build_dataset_space(df, config):
             id="search-target",
             options=cols,
             value="w",
+            disabled=True,
             # title="Select the column you wish to search (e.g. word/lemma/POS) "
             # + ", or query language (e.g. Tgrep2, Depgrep)",
             style={"width": "200px", "fontFamily": "monospace", **style.FRONT},
@@ -467,14 +469,17 @@ def make_explore_page(corpus, table, config, configs):
     concordance = _build_concordance_space(corpus, config)
     label = _make_search_name(config["corpus_name"], config["len"], dict())
     search_from = [dict(value=0, label=label)]
+    show = html.Button("Show", id="show-this-dataset", style=style.MARGIN_5_MONO)
     clear = html.Button("Clear history", id="clear-history", style=style.MARGIN_5_MONO)
+
+
     dropdown = dcc.Dropdown(
         id="search-from", options=search_from, value=0, disabled=True
     )
 
     drop_style = {
         "fontFamily": "monospace",
-        "width": "60%",
+        "width": "50%",
         **style.HORIZONTAL_PAD_5,
         **style.BLOCK_MIDDLE_35,
         **style.FRONT,
@@ -496,6 +501,7 @@ def make_explore_page(corpus, table, config, configs):
         dcc.ConfirmDialog(id="dialog-chart", message=""),
         dcc.ConfirmDialog(id="dialog-conc", message=""),
         html.Div(dropdown, style=drop_style),
+        html.Div(show, style=dict(width="10%", **style.BLOCK_MIDDLE_35)),
         html.Div(clear, style=dict(width="10%", **style.BLOCK_MIDDLE_35)),
     ]
     top_bit = html.Div(top_bit, style=style.VERTICAL_MARGINS)

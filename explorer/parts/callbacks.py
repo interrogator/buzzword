@@ -5,6 +5,7 @@ buzzword explorer: callbacks
 import pandas as pd
 from buzz.dashview import _df_to_figure
 from buzz.exceptions import DataTypeError
+import dash
 from dash import no_update
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
@@ -53,8 +54,9 @@ def _correct_placeholder(value, **kwargs):
         Output("tab-concordance", "style"),
     ],
     [Input("tabs", "value")],
+    [State("search-from", "value")],
 )
-def render_content(tab, **kwargs):
+def render_content(tab, search_from, **kwargs):
     """
     Tab display callback. If the user clicked this tab, show it, otherwise hide
     """
@@ -129,8 +131,13 @@ def _on_load_callback(n_clicks, **kwargs):
         Output("conll-view", "row_deletable"),
         Output("session-search", "data"),
         Output("session-clicks-clear", "data"),
+        Output("session-clicks-show", "data"),
     ],
-    [Input("search-button", "n_clicks"), Input("clear-history", "n_clicks")],
+    [
+        Input("search-button", "n_clicks"),
+        Input("clear-history", "n_clicks"),
+        Input("show-this-dataset", "n_clicks"),
+    ],
     [
         State("search-from", "value"),
         State("skip-switch", "on"),
@@ -141,12 +148,14 @@ def _on_load_callback(n_clicks, **kwargs):
         State("session-configs", "data"),
         State("session-search", "data"),
         State("session-clicks-clear", "data"),
+        State("session-clicks-show", "data"),
         State("slug", "title"),
     ],
 )
 def _new_search(
     n_clicks,
     cleared,
+    show_dataset,
     search_from,
     skip,
     col,
@@ -156,6 +165,7 @@ def _new_search(
     conf,
     session_search,
     session_clicks_clear,
+    session_clicks_show,
     url,
     **kwargs,
 ):
@@ -166,7 +176,7 @@ def _new_search(
     """
     # the first callback, before anything is loaded
     if n_clicks is None:
-        return [no_update] * 10
+        return [no_update] * 11
 
     slug = url.rstrip("/").split("/")[-1]
     conf = conf[slug]
@@ -174,6 +184,25 @@ def _new_search(
     max_row, max_col = conf["table_size"]
 
     specs, corpus = _get_specs_and_corpus(search_from, session_search, CORPORA, slug)
+
+    # user clicked the show button, show search_from
+    if show_dataset and show_dataset != session_clicks_show:
+        session_clicks_show = show_dataset
+        editable = bool(search_from)
+        cols, data = _update_conll(corpus, editable, drop_govs=add_governor)
+        return [
+            cols,
+            data,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            session_clicks_show,
+        ]
 
     msg = _search_error(col, search_string)
     if msg:
@@ -186,6 +215,7 @@ def _new_search(
             True,
             msg,
             False,
+            no_update,
             no_update,
             no_update,
         ]
@@ -223,6 +253,7 @@ def _new_search(
             False,
             session_search,
             session_clicks_clear,
+            session_clicks_show,
         )
 
     found_results = True
@@ -281,6 +312,7 @@ def _new_search(
         True,
         session_search,
         session_clicks_clear,
+        session_clicks_show,
     )
 
 
