@@ -9,12 +9,18 @@ def _string_or_none(jsonfield):
         return
     return json.dumps(jsonfield)
 
+class Language(models.Model):
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
+
 class Corpus(models.Model):
     slug = models.SlugField(
         max_length=255, unique=True
     )  # this can't be null because a name needs to exist
     name = models.CharField(max_length=255)
-    language = models.CharField(max_length=255)  # probably turn this into a model later
+    language = models.ForeignKey(Language, on_delete=models.SET_NULL, null=True)
     path = models.TextField()
     desc = models.TextField(default="")
     length = models.BigIntegerField(null=True)
