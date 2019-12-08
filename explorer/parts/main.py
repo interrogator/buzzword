@@ -3,18 +3,14 @@ buzzword explorer: run on startup, corpus loading and app initialisation
 """
 
 
-from buzz.corpus import Corpus
-from django_plotly_dash import DjangoDash
 import json
 
+from buzz.corpus import Corpus
+from django_plotly_dash import DjangoDash
+
 from .configure import configure_buzzword
-from .helpers import (
-    _get_corpora_meta,
-    _get_corpus,
-    _get_initial_table,
-    _preprocess_corpus,
-    register_callbacks,
-)
+from .helpers import (_get_corpora_meta, _get_corpus, _get_initial_table,
+                      _preprocess_corpus, register_callbacks)
 from .strings import _slug_from_name
 from .tabs import make_explore_page
 
@@ -98,7 +94,7 @@ def load_layout(slug, set_and_register=True):
     else:
         corpus = _get_corpus(slug)
         table = _get_initial_table(slug, conf)
-        conf["len"] = conf.get("len", len(corpus))
+        conf["length"] = conf.get("length", len(corpus))
         layout = make_explore_page(corpus, table, conf, CORPORA_CONFIGS)
         LAYOUTS[slug] = layout
     if set_and_register:
