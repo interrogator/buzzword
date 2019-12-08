@@ -3,6 +3,7 @@ from explorer.parts.main import app, load_layout
 from django import forms
 from explore.models import Corpus
 from explorer.parts.strings import _slug_from_name
+from guardian.shortcuts import assign_perm
 
 def _make_path(slug):
     return f"storage/{slug}"
@@ -47,6 +48,7 @@ def upload_corpus(request):
             corpus.slug = slug
             corpus.path = path
             corpus.save()
+            assign_perm("view_corpus", request.user, corpus)
             _start_parse_corpus_job(corpus)
             return redirect("/")
     else:
