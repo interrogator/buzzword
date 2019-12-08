@@ -29,7 +29,7 @@ def login_view(request):
     return redirect('/')
 
 def corpus_settings(request):
-    fields = ('disabled', 'load', 'add_governor', 'name')
+    fields = ('name', 'desc')
     formset_factory = forms.modelformset_factory(explore.models.Corpus, fields=fields, extra=0)
     
     if request.method == 'POST':
