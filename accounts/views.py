@@ -34,7 +34,7 @@ def corpus_settings(request):
     
     if request.method == 'POST':
         formset = formset_factory(request.POST)
-        if formset.is_valid()
+        if formset.is_valid():
             formset.save()
     
     corpora = explore.models.Corpus.objects.all()
