@@ -1,4 +1,6 @@
 django==3.0.0
+#django-guardian==2.1.0
+git+git://github.com/django-guardian/django-guardian@devel#egg=django-guardian
 django-plotly-dash==1.1.3
 dpd-static-support==0.0.4
 dash_bootstrap_components==0.7.2

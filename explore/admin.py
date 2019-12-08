@@ -1,9 +1,9 @@
 from django.contrib import admin
 from explore.models import Corpus
-
+from guardian.admin import GuardedModelAdmin
 
 @admin.register(Corpus)
-class CorpusAdmin(admin.ModelAdmin):
+class CorpusAdmin(GuardedModelAdmin):
     list_display = ('slug',)
 
     def get_fields(self, request, obj):
