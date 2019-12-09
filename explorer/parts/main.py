@@ -5,10 +5,16 @@ buzzword explorer: run on startup, corpus loading and app initialisation
 
 from buzz.corpus import Corpus
 from django_plotly_dash import DjangoDash
+import json
 
 from .configure import configure_buzzword
-from .helpers import (_get_corpora_meta, _get_corpus, _get_initial_table,
-                      _preprocess_corpus, register_callbacks)
+from .helpers import (
+    _get_corpora_meta,
+    _get_corpus,
+    _get_initial_table,
+    _preprocess_corpus,
+    register_callbacks,
+)
 from .strings import _slug_from_name
 from .tabs import make_explore_page
 
@@ -26,10 +32,21 @@ def _get_corpus_config(corpus, global_conf):
     Return global conf plus individual settings for corpus
     """
     conf = {**global_conf}
-    settings = {"max_dataset_rows", "drop_columns", "add_governor", "load", "slug"}
+    settings = {
+        "max_dataset_rows",
+        "drop_columns",
+        "add_governor",
+        "load",
+        "slug",
+        "initial_table",
+        "initial_query",
+    }
+    is_json_data = {"initial_table", "initial_query"}
     for setting in settings:
         loc = getattr(corpus, setting, None)
         if loc is not None:
+            if loc in is_json_data:
+                loc = json.loads(loc)
             conf[setting] = loc
     conf["corpus_name"] = corpus.name
     return conf
@@ -55,8 +72,13 @@ def _get_corpora(corpus_meta):
             buzz_corpus = buzz_corpus.load(add_governor=conf["add_governor"])
             buzz_corpus = _preprocess_corpus(buzz_corpus, **conf)
         else:
-            print("NOT loading corpus into memory: {} ...".format(corpus.name))
-        initial_table = buzz_corpus.table(show="p", subcorpora="file")
+            print(f"NOT loading corpus into memory: {corpus.name} ...")
+        if getattr(corpus, "initial_table"):
+            display = json.loads(corpus.initial_table)
+        else:
+            display = dict(show="p", subcorpora="file")
+        print(f"Generating an initial table for {corpus.name} using {display}")
+        initial_table = buzz_corpus.table(**display)
         corpora[corpus.slug] = buzz_corpus
         tables[corpus.slug] = initial_table
         corpora_config[corpus.slug] = conf
@@ -75,7 +97,7 @@ def load_layout(slug, set_and_register=True):
         layout = LAYOUTS[slug]
     else:
         corpus = _get_corpus(slug)
-        table = _get_initial_table(slug)
+        table = _get_initial_table(slug, conf)
         conf["len"] = conf.get("len", len(corpus))
         layout = make_explore_page(corpus, table, conf, CORPORA_CONFIGS)
         LAYOUTS[slug] = layout
@@ -98,4 +120,3 @@ def load_corpora():
         for corpus in CORPUS_META:
             if not corpus.disabled:
                 load_layout(corpus.slug, set_and_register=False)
-

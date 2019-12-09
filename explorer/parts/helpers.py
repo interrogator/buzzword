@@ -109,7 +109,7 @@ def _get_cols(corpus, add_governor):
     return [dict(value=v, label=l) for v, l in longs]
 
 
-def _update_frequencies(df, deletable):
+def _update_frequencies(df, deletable, content_table):
     """
     Turn DF into dash table data for frequencies
     """
@@ -117,7 +117,8 @@ def _update_frequencies(df, deletable):
     names = ["_" + str(x) for x in df.index.names]
     df.index.names = names
     # col_order = list(df.index.names) + list(df.columns)
-    df = df.reset_index()
+    if not content_table:
+        df = df.reset_index()
     if not multicols:
         columns = [
             {
@@ -228,13 +229,16 @@ def _get_corpus(slug):
     return corpus
 
 
-def _get_initial_table(slug):
+def _get_initial_table(slug, config):
     """
     Get or create the initial table for this slug
     """
     # todo: speed up by storing as INITIAL_TABLES?
     corpus = _get_corpus(slug)
-    return corpus.table(show="p", subcorpora="file")
+    default = dict(show="p", subcorpora="file")
+    if "initial_table" in config:
+        default = json.loads(config["initial_table"])
+    return corpus.table(**default)
 
 
 def _cast_query(query, col):

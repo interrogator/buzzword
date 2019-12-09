@@ -1,7 +1,7 @@
 """
 buzzword explorer: build the explore page and its tabs
 """
-
+import json
 import dash_core_components as dcc
 import dash_daq as daq
 import dash_html_components as html
@@ -14,6 +14,13 @@ from . import style
 from .helpers import _drop_cols_for_datatable, _get_cols, _update_frequencies
 from .strings import _capitalize_first, _make_search_name, _make_table_name
 
+DAQ_THEME = {
+    "dark": False,
+    "detail": "#007439",
+    "primary": "#a32424",  # button when switched 'on' / not matching
+    "secondary": "#44ad78",  # bottom off / matching
+}
+
 
 def _make_storage(configs):
     """
@@ -23,10 +30,11 @@ def _make_storage(configs):
     search_store = dcc.Store(id="session-search", data=dict())
     tables_store = dcc.Store(id="session-tables", data=dict())
     click_clear = dcc.Store(id="session-clicks-clear", data=-1)
+    click_show = dcc.Store(id="session-clicks-show", data=-1)
     click_table = dcc.Store(id="session-clicks-table", data=-1)
     configs = dcc.Store(id="session-configs", data=configs)
     content = html.Div(id="page-content")
-    stores = [search_store, tables_store, click_clear, click_table, configs]
+    stores = [search_store, tables_store, click_clear, click_show, click_table, configs]
     return html.Div(stores + [content])
 
 
@@ -60,6 +68,8 @@ def _build_dataset_space(df, config):
             id="matching-box",
             children=[
                 daq.BooleanSwitch(
+                    theme=DAQ_THEME,
+                    className="colour-off",
                     id="skip-switch",
                     on=False,
                     style={"verticalAlign": "top", **style.MARGIN_5_MONO},
@@ -108,7 +118,7 @@ def _build_dataset_space(df, config):
         columns=columns,
         data=data,
         editable=True,
-        style_cell={**style.HORIZONTAL_PAD_5, **{"whiteSpace": "normal"}},
+        style_cell={**style.HORIZONTAL_PAD_5, **{"minWidth": "60px"}},
         filter_action="native",
         sort_action="native",
         sort_mode="multi",
@@ -119,13 +129,14 @@ def _build_dataset_space(df, config):
         page_size=config["page_size"],
         # style_as_list_view=True,
         virtualization=True,
+        style_table={"maxHeight": "1000px"},
         fixed_rows={"headers": True, "data": 0},
         style_header=style.BOLD_DARK,
         style_cell_conditional=style.LEFT_ALIGN,
         style_data_conditional=style.INDEX + style.STRIPES,
         merge_duplicate_headers=True,
-        export_format='xlsx',
-        export_headers='display',
+        export_format="xlsx",
+        export_headers="display",
     )
     # add loading
     conll_table = dcc.Loading(
@@ -180,6 +191,7 @@ def _build_frequencies_space(corpus, table, config):
             {"label": "Total", "value": "total"},
             {"label": "Infrequent", "value": "infreq"},
             {"label": "Alphabetical", "value": "name"},
+            {"label": "Reverse-alphabetical", "value": "reverse"},
             {"label": "Increasing", "value": "increase"},
             {"label": "Decreasing", "value": "decrease"},
             {"label": "Static", "value": "static"},
@@ -190,34 +202,42 @@ def _build_frequencies_space(corpus, table, config):
     sort_drop = html.Div(sort_drop, style=style.TSTYLE)
     max_row, max_col = config["table_size"]
     table = table.iloc[:max_row, :max_col]
-    columns, data = _update_frequencies(table, deletable=False)
+    columns, data = _update_frequencies(table, False, False)
 
     # modify the style_index used for other tables to just work for this index
     style_index = style.FILE_INDEX
     style_index["if"]["column_id"] = table.index.name
-    freq_table = dash_table.DataTable(
-        id="freq-table",
-        columns=columns,
-        data=data,
-        editable=True,
-        style_cell=style.HORIZONTAL_PAD_5,
-        filter_action="native",
-        sort_action="native",
-        sort_mode="multi",
-        row_deletable=False,
-        selected_rows=[],
-        page_current=0,
-        page_size=config["page_size"],
-        page_action="none",
-        fixed_rows={"headers": True, "data": 0},
-        virtualization=True,
-        style_table={"maxHeight": "2000px"},
-        style_header=style.BOLD_DARK,
-        style_cell_conditional=style.LEFT_ALIGN,
-        style_data_conditional=[style_index] + style.STRIPES,
-        merge_duplicate_headers=True,
-        export_format='xlsx',
-        export_headers='display',
+    freq_table = dcc.Loading(
+        type="default",
+        children=[
+            dash_table.DataTable(
+                id="freq-table",
+                columns=columns,
+                data=data,
+                editable=True,
+                style_cell={
+                    **style.HORIZONTAL_PAD_5,
+                    **{"maxWidth": "145px", "minWidth": "60px"},
+                },
+                filter_action="native",
+                sort_action="native",
+                sort_mode="multi",
+                row_deletable=False,
+                selected_rows=[],
+                page_current=0,
+                page_size=config["page_size"],
+                page_action="none",
+                fixed_rows={"headers": True, "data": 0},
+                virtualization=True,
+                style_table={"maxHeight": "1000px"},
+                style_header=style.BOLD_DARK,
+                style_cell_conditional=style.LEFT_ALIGN,
+                style_data_conditional=[style_index] + style.STRIPES,
+                merge_duplicate_headers=True,
+                export_format="xlsx",
+                export_headers="display",
+            )
+        ],
     )
 
     sty = {"width": "20%", **style.CELL_MIDDLE_35, **style.MARGIN_5_MONO}
@@ -225,22 +245,37 @@ def _build_frequencies_space(corpus, table, config):
     multi = html.Span(
         children=[
             daq.BooleanSwitch(
+                theme=DAQ_THEME,
                 id="multiindex-switch",
                 on=False,
                 disabled=True,
                 style={**style.MARGIN_5_MONO, **style.TSTYLE},
             ),
             html.Div(
-                id="multiindex-text",
+                id="multiindex-text", style={**style.MARGIN_5_MONO, **style.TSTYLE}
+            ),
+        ],
+        style={**style.CELL_MIDDLE_35, **style.TSTYLE},
+    )
+    content = html.Span(
+        children=[
+            daq.BooleanSwitch(
+                theme={**DAQ_THEME, **{"primary": "#47d153"}},
+                id="content-table-switch",
+                on=False,
+                style={**style.MARGIN_5_MONO, **style.TSTYLE},
+            ),
+            html.Div(
+                children="Show content, not frequency",
                 style={**style.MARGIN_5_MONO, **style.TSTYLE},
             ),
         ],
-        style={**style.CELL_MIDDLE_35, **style.TSTYLE}
+        style={**style.CELL_MIDDLE_35, **style.TSTYLE},
     )
 
     gen = "Generate table"
     generate = html.Button(gen, id="table-button", style=sty)
-    top = html.Div([show_check, subcorpora_drop, multi])
+    top = html.Div([show_check, subcorpora_drop, multi, content])
     bottom = html.Div([sort_drop, relative_drop, generate])
     toolbar = html.Div([top, bottom], style=style.VERTICAL_MARGINS)
     div = html.Div([toolbar, freq_table])
@@ -273,7 +308,17 @@ def _build_concordance_space(df, config):
     if "speaker" in df.columns:
         meta.append("speaker")
 
-    df = df.just.x.NOUN.conc(metadata=meta, window=(100, 100))
+    # do an initial search, potentially from corpora.json
+    # default to, get nouns
+    if config.get("initial_query"):
+        query = json.loads(config["initial_query"])
+    else:
+        query = {"target": "x", "query": "NOUN"}
+
+    print(f"Making concordance for {config['corpus_name']} ...")
+    df = getattr(df.just, query["target"])(query["query"])
+    df = df.conc(metadata=meta, window=(100, 100))
+    print("Done!")
 
     just = ["left", "match", "right", "file", "s", "i"]
     if "speaker" in df.columns:
@@ -281,7 +326,7 @@ def _build_concordance_space(df, config):
     df = df[just]
     columns = [
         {
-            "name": SHORT_TO_COL_NAME.get(i, i),
+            "name": _capitalize_first(SHORT_TO_COL_NAME.get(i, i)),
             "id": i,
             "deletable": i not in ["left", "match", "right"],
             "hideable": True,
@@ -300,7 +345,7 @@ def _build_concordance_space(df, config):
                 columns=columns,
                 data=data,
                 editable=True,
-                style_cell=style.HORIZONTAL_PAD_5,
+                style_cell={**style.HORIZONTAL_PAD_5, **{"minWidth": "60px"}},
                 filter_action="native",
                 sort_action="native",
                 sort_mode="multi",
@@ -311,13 +356,14 @@ def _build_concordance_space(df, config):
                 page_current=0,
                 page_size=config["page_size"],
                 virtualization=True,
+                style_table={"maxHeight": "1000px"},
                 style_as_list_view=True,
                 style_header=style.BOLD_DARK,
                 style_cell_conditional=style.LEFT_ALIGN_CONC,
                 style_data_conditional=style_data,
                 merge_duplicate_headers=True,
-                export_format='xlsx',
-                export_headers='display',
+                export_format="xlsx",
+                export_headers="display",
             )
         ],
     )
@@ -357,6 +403,7 @@ def _build_chart_space(table, config):
             style=style.MARGIN_5_MONO,
         )
         transpose = daq.BooleanSwitch(
+            theme=DAQ_THEME,
             id=f"chart-transpose-{chart_num}",
             on=False,
             style={"verticalAlign": "middle"},
@@ -421,14 +468,17 @@ def make_explore_page(corpus, table, config, configs):
     concordance = _build_concordance_space(corpus, config)
     label = _make_search_name(config["corpus_name"], config["len"], dict())
     search_from = [dict(value=0, label=label)]
+    show = html.Button("Show", id="show-this-dataset", style=style.MARGIN_5_MONO)
     clear = html.Button("Clear history", id="clear-history", style=style.MARGIN_5_MONO)
+
+
     dropdown = dcc.Dropdown(
         id="search-from", options=search_from, value=0, disabled=True
     )
 
     drop_style = {
         "fontFamily": "monospace",
-        "width": "60%",
+        "width": "50%",
         **style.HORIZONTAL_PAD_5,
         **style.BLOCK_MIDDLE_35,
         **style.FRONT,
@@ -450,6 +500,7 @@ def make_explore_page(corpus, table, config, configs):
         dcc.ConfirmDialog(id="dialog-chart", message=""),
         dcc.ConfirmDialog(id="dialog-conc", message=""),
         html.Div(dropdown, style=drop_style),
+        html.Div(show, style=dict(width="10%", **style.BLOCK_MIDDLE_35)),
         html.Div(clear, style=dict(width="10%", **style.BLOCK_MIDDLE_35)),
     ]
     top_bit = html.Div(top_bit, style=style.VERTICAL_MARGINS)

@@ -5,23 +5,33 @@ buzzword explorer: callbacks
 import pandas as pd
 from buzz.dashview import _df_to_figure
 from buzz.exceptions import DataTypeError
+import dash
 from dash import no_update
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
-from .helpers import (_cast_query, _get_specs_and_corpus, _special_search,
-                      _translate_relative, _tuple_or_list, _update_concordance,
-                      _update_conll, _update_frequencies)
+from .helpers import (
+    _cast_query,
+    _get_specs_and_corpus,
+    _special_search,
+    _translate_relative,
+    _tuple_or_list,
+    _update_concordance,
+    _update_conll,
+    _update_frequencies,
+)
 from .main import CORPORA, INITIAL_TABLES, app
-from .strings import (_make_search_name, _make_table_name, _search_error,
-                      _table_error)
+from .strings import _make_search_name, _make_table_name, _search_error, _table_error
 
 # we can't keep tables in dcc.store, they are too big. so we keep all here with
 # a tuple that can identify them (ideally, even dealing with user sessions)
 FREQUENCY_TABLES = dict()
 
 
-@app.expanded_callback([Output("input-box", "placeholder"), Output("gram-select", "disabled")], [Input("search-target", "value")])
+@app.expanded_callback(
+    [Output("input-box", "placeholder"), Output("gram-select", "disabled")],
+    [Input("search-target", "value")],
+)
 def _correct_placeholder(value, **kwargs):
     """
     More accurate placeholder text when doing dependencies
@@ -30,7 +40,7 @@ def _correct_placeholder(value, **kwargs):
     mapped = {
         "t": "Enter Tgrep2 query...",
         "d": "Enter depgrep query",
-        "describe": "Enter depgrep query (e.g. l\"man\")"
+        "describe": 'Enter depgrep query (e.g. l"man")',
     }
     disable_gram = value in mapped
     return mapped.get(value, default), disable_gram
@@ -44,8 +54,9 @@ def _correct_placeholder(value, **kwargs):
         Output("tab-concordance", "style"),
     ],
     [Input("tabs", "value")],
+    [State("search-from", "value")],
 )
-def render_content(tab, **kwargs):
+def render_content(tab, search_from, **kwargs):
     """
     Tab display callback. If the user clicked this tab, show it, otherwise hide
     """
@@ -74,7 +85,9 @@ for i in range(1, 6):
             State("session-tables", "data"),
         ],
     )
-    def _new_chart(n_clicks, table_from, chart_type, top_n, transpose, session_tables, **kwargs):
+    def _new_chart(
+        n_clicks, table_from, chart_type, top_n, transpose, session_tables, **kwargs
+    ):
         """
         Make new chart by kind. Do it 5 times, once for each chart space
         """
@@ -118,8 +131,13 @@ def _on_load_callback(n_clicks, **kwargs):
         Output("conll-view", "row_deletable"),
         Output("session-search", "data"),
         Output("session-clicks-clear", "data"),
+        Output("session-clicks-show", "data"),
     ],
-    [Input("search-button", "n_clicks"), Input("clear-history", "n_clicks")],
+    [
+        Input("search-button", "n_clicks"),
+        Input("clear-history", "n_clicks"),
+        Input("show-this-dataset", "n_clicks"),
+    ],
     [
         State("search-from", "value"),
         State("skip-switch", "on"),
@@ -130,12 +148,14 @@ def _on_load_callback(n_clicks, **kwargs):
         State("session-configs", "data"),
         State("session-search", "data"),
         State("session-clicks-clear", "data"),
+        State("session-clicks-show", "data"),
         State("slug", "title"),
     ],
 )
 def _new_search(
     n_clicks,
     cleared,
+    show_dataset,
     search_from,
     skip,
     col,
@@ -145,8 +165,9 @@ def _new_search(
     conf,
     session_search,
     session_clicks_clear,
+    session_clicks_show,
     url,
-    **kwargs
+    **kwargs,
 ):
     """
     Callback when a new search is submitted
@@ -155,7 +176,7 @@ def _new_search(
     """
     # the first callback, before anything is loaded
     if n_clicks is None:
-        return [no_update] * 10
+        return [no_update] * 11
 
     slug = url.rstrip("/").split("/")[-1]
     conf = conf[slug]
@@ -164,9 +185,40 @@ def _new_search(
 
     specs, corpus = _get_specs_and_corpus(search_from, session_search, CORPORA, slug)
 
+    # user clicked the show button, show search_from
+    if show_dataset and show_dataset != session_clicks_show:
+        session_clicks_show = show_dataset
+        editable = bool(search_from)
+        cols, data = _update_conll(corpus, editable, drop_govs=add_governor)
+        return [
+            cols,
+            data,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            session_clicks_show,
+        ]
+
     msg = _search_error(col, search_string)
     if msg:
-        return [no_update, no_update, no_update, no_update, False, True, msg, False, no_update, no_update]
+        return [
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            False,
+            True,
+            msg,
+            False,
+            no_update,
+            no_update,
+            no_update,
+        ]
 
     new_value = len(session_search) + 1
 
@@ -201,6 +253,7 @@ def _new_search(
             False,
             session_search,
             session_clicks_clear,
+            session_clicks_show,
         )
 
     found_results = True
@@ -259,6 +312,7 @@ def _new_search(
         True,
         session_search,
         session_clicks_clear,
+        session_clicks_show,
     )
 
 
@@ -275,7 +329,6 @@ def _new_search(
         Output("dialog-table", "displayed"),
         Output("dialog-table", "message"),
         Output("freq-table", "row_deletable"),
-        Output("download-link", "href"),
         Output("session-tables", "data"),
         Output("session-clicks-table", "data"),
     ],
@@ -293,6 +346,7 @@ def _new_search(
         State("relative-for-table", "value"),
         State("sort-for-table", "value"),
         State("multiindex-switch", "on"),
+        State("content-table-switch", "on"),
         State("chart-from-1", "options"),
         State("chart-from-1", "value"),
         State("session-configs", "data"),
@@ -314,6 +368,7 @@ def _new_table(
     relkey,
     sort,
     multiindex_columns,
+    content_table,
     table_from_options,
     nv1,
     conf,
@@ -321,14 +376,14 @@ def _new_table(
     session_tables,
     session_click_table,
     url,
-    **kwargs
+    **kwargs,
 ):
     """
     Callback when a new freq table is generated. Same logic as new_search.
     """
     # do nothing if not yet loaded
     if n_clicks is None:
-        return [no_update] * 14
+        raise PreventUpdate
 
     slug = url.rstrip("/").split("/")[-1]
     conf = conf[slug]
@@ -357,7 +412,16 @@ def _new_table(
             updating = True
 
     msg = _table_error(show, subcorpora, updating)
-    this_table_list = [specs, list(show), subcorpora, relative, keyness, sort]
+    this_table_list = [
+        specs,
+        list(show),
+        subcorpora,
+        relative,
+        keyness,
+        sort,
+        multiindex_columns,
+        content_table,
+    ]
     this_table_tuple = _tuple_or_list(this_table_list, tuple)
 
     # if table already made, use that one
@@ -387,13 +451,15 @@ def _new_table(
             table = INITIAL_TABLES[slug]
     else:
         # generate table
-        table = corpus.table(
+        method = "table" if not content_table else "content_table"
+        table = getattr(corpus, method)(
             show=show,
             subcorpora=subcorpora,
             relative=relative if relative != "corpus" else CORPORA[slug],
             keyness=keyness,
             sort=sort,
-            multiindex_columns=multiindex_columns
+            multiindex_columns=multiindex_columns,
+            show_frequencies=relative is not False and relative is not None,
         )
         # round df if floats are used
         if relative is not False or keyness:
@@ -412,11 +478,9 @@ def _new_table(
     else:
         max_row, max_col = conf["table_size"]
         tab = table.iloc[:max_row, :max_col]
-        cols, data = _update_frequencies(tab, deletable=True)
+        cols, data = _update_frequencies(tab, True, content_table)
 
-    csv_path = "todo"
-
-    if not msg and not updating:
+    if not msg and not updating and not content_table:
         table_name = _make_table_name(this_table_list)
         option = dict(value=idx, label=table_name)
         table_from_options.append(option)
@@ -432,7 +496,6 @@ def _new_table(
         bool(msg),
         msg,
         row_deletable,
-        csv_path,
         session_tables,
         session_click_table,
     )
@@ -469,6 +532,10 @@ def _new_conc(n_clicks, show, search_from, conf, session_search, url, **kwargs):
     if not show:
         return no_update, no_update, True, msg
 
+    if not search_from:
+        msg = "Cannot concordance whole corpus. Do a search first."
+        return no_update, no_update, True, msg
+
     specs, corpus = _get_specs_and_corpus(search_from, session_search, CORPORA, slug)
 
     met = ["file", "s", "i"]
@@ -483,12 +550,20 @@ def _new_conc(n_clicks, show, search_from, conf, session_search, url, **kwargs):
     return cols, data, bool(msg), msg
 
 
-@app.expanded_callback(Output("matching-text", "children"), [Input("skip-switch", "on")])
+@app.expanded_callback(
+    [Output("matching-text", "children"), Output("skip-switch", "className")],
+    [Input("skip-switch", "on")],
+)
 def _matching_not_matching(on, **kwargs):
-    return "matching" if not on else "not matching"
+    text = "matching" if not on else "not matching"
+    classname = "colour-off" if not on else "colour-on"
+    return text, classname
 
 
-@app.expanded_callback([Output("multiindex-text", "children"), Output("multiindex-switch", "disabled")], [Input("multiindex-switch", "on"), Input("show-for-table", "value")])
+@app.expanded_callback(
+    [Output("multiindex-text", "children"), Output("multiindex-switch", "disabled")],
+    [Input("multiindex-switch", "on"), Input("show-for-table", "value")],
+)
 def _multiindex(on, show, **kwargs):
     if not show or len(show) < 2:
         return "", True

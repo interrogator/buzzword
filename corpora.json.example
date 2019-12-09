@@ -5,15 +5,18 @@
     "path": "dtrt/do-the-right-thing-parsed",
     "desc": "Script of Spike Lee's 1989 drama, with various speaker and scene annotations",
     "length": 17713,
-    "drop_columns": ["voice_over", "camera_angle"],
+    "drop_columns": ["voice_over", "camera_angle", "text", "parse"],
     "disabled": false,
     "date": "1989",
     "load": true,
-    "url": "https://en.wikipedia.org/wiki/Do_the_Right_Thing"
+    "url": "https://en.wikipedia.org/wiki/Do_the_Right_Thing",
+    "initial_table": {"show": "x", "subcorpora": "file"},
+    "initial_query": {"target": "x", "query": "VERB"}
   },
   "Unabomber Manifesto" : {
     "slug": "manifesto",
     "language": "English",
+    "drop_columns": ["text", "parse"],
     "path": "unabomber/manifesto-parsed",
     "desc": "Text of the Unabomber's manifesto",
     "length": 37347,
