@@ -4,12 +4,12 @@ buzzword explorer: callbacks
 
 import dash
 import pandas as pd
-from buzz.dashview import _df_to_figure
 from buzz.exceptions import DataTypeError
 from dash import no_update
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
+from .chart import _df_to_figure
 from .helpers import (_cast_query, _get_specs_and_corpus, _special_search,
                       _translate_relative, _tuple_or_list, _update_concordance,
                       _update_conll, _update_frequencies)
@@ -75,10 +75,20 @@ for i in range(1, 6):
             State(f"chart-top-n-{i}", "value"),
             State(f"chart-transpose-{i}", "on"),
             State("session-tables", "data"),
+            State("session-configs", "data"),
+            State("slug", "title"),
         ],
     )
     def _new_chart(
-        n_clicks, table_from, chart_type, top_n, transpose, session_tables, **kwargs
+        n_clicks,
+        table_from,
+        chart_type,
+        top_n,
+        transpose,
+        session_tables,
+        conf,
+        slug,
+        **kwargs,
     ):
         """
         Make new chart by kind. Do it 5 times, once for each chart space
@@ -88,8 +98,13 @@ for i in range(1, 6):
             return no_update
         # get correct dataset to chart
 
-        this_table = session_tables[str(table_from)]
-        df = FREQUENCY_TABLES[_tuple_or_list(this_table, tuple)]
+        conf = conf[slug]
+
+        if str(table_from) in session_tables:
+            this_table = session_tables[str(table_from)]
+            df = FREQUENCY_TABLES[_tuple_or_list(this_table, tuple)]
+        else:
+            df = INITIAL_TABLES[slug]
 
         # transpose and cut down items to plot
         if transpose:
@@ -158,7 +173,7 @@ def _new_search(
     session_search,
     session_clicks_clear,
     session_clicks_show,
-    url,
+    slug,
     **kwargs,
 ):
     """
@@ -170,7 +185,6 @@ def _new_search(
     if n_clicks is None:
         return [no_update] * 11
 
-    slug = url.rstrip("/").split("/")[-1]
     conf = conf[slug]
     add_governor = conf["add_governor"]
     max_row, max_col = conf["table_size"]
@@ -368,7 +382,7 @@ def _new_table(
     session_search,
     session_tables,
     session_click_table,
-    url,
+    slug,
     **kwargs,
 ):
     """
@@ -378,7 +392,6 @@ def _new_table(
     if n_clicks is None:
         raise PreventUpdate
 
-    slug = url.rstrip("/").split("/")[-1]
     conf = conf[slug]
 
     # because no option below can return initial table, rows can now be deleted
@@ -511,14 +524,13 @@ def _new_table(
         State("slug", "title"),
     ],
 )
-def _new_conc(n_clicks, show, search_from, conf, session_search, url, **kwargs):
+def _new_conc(n_clicks, show, search_from, conf, session_search, slug, **kwargs):
     """
     Callback for concordance. We just pick what to show and where from...
     """
     if n_clicks is None:
         return [no_update] * 4
 
-    slug = url.rstrip("/").split("/")[-1]
     conf = conf[slug]
 
     # easy validation!

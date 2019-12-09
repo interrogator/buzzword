@@ -1,6 +1,17 @@
+import numpy as np
+import plotly.express as px
+import plotly.figure_factory as ff
 import plotly.graph_objects as go
 
-CHART_TYPES = {"line", "bar", "heatmap", "area", "stacked_bar"}  # "pie"
+CHART_TYPES = {
+    "line",
+    "bar",
+    "heatmap",
+    "area",
+    "stacked_bar",
+    "distplot",
+    "stacked_distplot",
+}  # "pie"
 
 
 def _bar_chart(row):
@@ -24,6 +35,13 @@ def _area_chart(row):
     )
 
 
+def _distplot(df):
+    data = df.T.values
+    labels = df.columns
+    result = ff.create_distplot(data, labels)
+    return result["data"], result["layout"]
+
+
 def _heatmap(df):
     return [go.Heatmap(z=df.T.values, x=list(df.index), y=list(df.columns))]
 
@@ -38,12 +56,22 @@ def _df_to_figure(df, kind="bar"):
         heatmap=_heatmap,
         area=_area_chart,
         stacked_bar=_bar_chart,
+        distplot=_distplot,
+        stacked_distplot=_distplot,
     )
     plotter = plotters[kind]
 
-    datapoints = plotter(df) if kind == "heatmap" else df.T.apply(plotter)
+    layout = {}
+    if kind == "heatmap":
+        datapoints = plotter(df)
+    elif kind.endswith("distplot"):
+        datapoints, layout = plotter(df)
+    else:
+        datapoints = df.apply(plotter)
 
-    layout = dict(width=1300)
-    if kind == "stacked_bar":
+    layout["width"] = 1300
+
+    if kind.startswith("stacked"):
         layout["barmode"] = "stack"
+
     return dict(data=datapoints, layout=layout)
