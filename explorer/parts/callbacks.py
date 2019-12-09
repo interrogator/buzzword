@@ -2,26 +2,20 @@
 buzzword explorer: callbacks
 """
 
+import dash
 import pandas as pd
 from buzz.dashview import _df_to_figure
 from buzz.exceptions import DataTypeError
-import dash
 from dash import no_update
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
-from .helpers import (
-    _cast_query,
-    _get_specs_and_corpus,
-    _special_search,
-    _translate_relative,
-    _tuple_or_list,
-    _update_concordance,
-    _update_conll,
-    _update_frequencies,
-)
+from .helpers import (_cast_query, _get_specs_and_corpus, _special_search,
+                      _translate_relative, _tuple_or_list, _update_concordance,
+                      _update_conll, _update_frequencies)
 from .main import CORPORA, INITIAL_TABLES, app
-from .strings import _make_search_name, _make_table_name, _search_error, _table_error
+from .strings import (_make_search_name, _make_table_name, _search_error,
+                      _table_error)
 
 # we can't keep tables in dcc.store, they are too big. so we keep all here with
 # a tuple that can identify them (ideally, even dealing with user sessions)
@@ -60,8 +54,6 @@ def render_content(tab, search_from, **kwargs):
     """
     Tab display callback. If the user clicked this tab, show it, otherwise hide
     """
-    if tab is None:
-        tab = "dataset"
     outputs = []
     for i in ["dataset", "frequencies", "chart", "concordance"]:
         if tab == i:
@@ -320,6 +312,7 @@ def _new_search(
     [
         Output("freq-table", "columns"),
         Output("freq-table", "data"),
+        Output("freq-table", "editable"),
         Output("chart-from-1", "value"),
         Output("chart-from-1", "options"),
         Output("chart-from-2", "options"),
@@ -487,6 +480,7 @@ def _new_table(
     return (
         cols,
         data,
+        True,
         idx,
         table_from_options,
         table_from_options,

@@ -133,9 +133,9 @@ def _update_frequencies(df, deletable, content_table):
 
     columns = [
         {
-            "name": [x.strip('_') for x in i],
+            "name": [x.strip("_") for x in i],
             "id": "-".join(i),
-            "deletable": ['_' + x in names for x in i],
+            "deletable": ["_" + x in names for x in i],
             "hideable": True,
         }
         for i in df.columns

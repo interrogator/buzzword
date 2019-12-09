@@ -2,15 +2,16 @@
 buzzword explorer: build the explore page and its tabs
 """
 import json
+
 import dash_core_components as dcc
 import dash_daq as daq
 import dash_html_components as html
 import dash_table
 from buzz.constants import SHORT_TO_COL_NAME
 from buzz.corpus import Corpus
-from buzz.dashview import CHART_TYPES, _df_to_figure
 
 from . import style
+from .chart import CHART_TYPES, _df_to_figure
 from .helpers import _drop_cols_for_datatable, _get_cols, _update_frequencies
 from .strings import _capitalize_first, _make_search_name, _make_table_name
 
@@ -201,8 +202,10 @@ def _build_frequencies_space(corpus, table, config):
     )
     sort_drop = html.Div(sort_drop, style=style.TSTYLE)
     max_row, max_col = config["table_size"]
+    print(f"Making {max_row}x{max_col} table for {config['corpus_name']} ...")
     table = table.iloc[:max_row, :max_col]
     columns, data = _update_frequencies(table, False, False)
+    print("Done!")
 
     # modify the style_index used for other tables to just work for this index
     style_index = style.FILE_INDEX
@@ -214,7 +217,7 @@ def _build_frequencies_space(corpus, table, config):
                 id="freq-table",
                 columns=columns,
                 data=data,
-                editable=True,
+                editable=False,
                 style_cell={
                     **style.HORIZONTAL_PAD_5,
                     **{"maxWidth": "145px", "minWidth": "60px"},
@@ -466,11 +469,10 @@ def make_explore_page(corpus, table, config, configs):
     frequencies = _build_frequencies_space(corpus, table, config)
     chart = _build_chart_space(table, config)
     concordance = _build_concordance_space(corpus, config)
-    label = _make_search_name(config["corpus_name"], config["len"], dict())
+    label = _make_search_name(config["corpus_name"], config["length"], dict())
     search_from = [dict(value=0, label=label)]
     show = html.Button("Show", id="show-this-dataset", style=style.MARGIN_5_MONO)
     clear = html.Button("Clear history", id="clear-history", style=style.MARGIN_5_MONO)
-
 
     dropdown = dcc.Dropdown(
         id="search-from", options=search_from, value=0, disabled=True
