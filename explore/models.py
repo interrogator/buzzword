@@ -16,6 +16,9 @@ class Language(models.Model):
         return self.name
 
 class Corpus(models.Model):
+    class Meta:
+        verbose_name_plural = "Corpora" # can't tolerate "Corpuss"
+
     slug = models.SlugField(
         max_length=255, unique=True
     )  # this can't be null because a name needs to exist
