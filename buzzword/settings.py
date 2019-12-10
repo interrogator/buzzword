@@ -34,17 +34,18 @@ ALLOWED_HOSTS = ["127.0.0.1", "0.0.0.0", "localhost", "127.0.0.1:8000"]
 # Application definition
 
 INSTALLED_APPS = [
-    "dpd_static_support",
-    "start.apps.StartConfig",
-    "explore.apps.ExploreConfig",
-    "django_plotly_dash.apps.DjangoPlotlyDashConfig",
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
-    "accounts",
+    'dpd_static_support',
+    'start.apps.StartConfig',
+    'explore.apps.ExploreConfig',
+    'django_plotly_dash.apps.DjangoPlotlyDashConfig',
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'guardian',
+    'accounts',
 ]
 
 STATICFILES_FINDERS = [
@@ -137,6 +138,10 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
 ]
 
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'guardian.backends.ObjectPermissionBackend',
+)
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
