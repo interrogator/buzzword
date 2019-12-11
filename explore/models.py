@@ -3,6 +3,9 @@ import datetime
 from django.db import models
 
 from explorer.parts.strings import _slug_from_name
+    
+# difference between blank and null:    
+# https://docs.djangoproject.com/en/3.0/ref/models/fields/#blank
 
 def _string_or_none(jsonfield):
     if not jsonfield:
@@ -25,16 +28,17 @@ class Corpus(models.Model):
     name = models.CharField(max_length=255)
     language = models.ForeignKey(Language, on_delete=models.SET_NULL, null=True)
     path = models.TextField()
-    desc = models.TextField(default="")
+    desc = models.TextField(default="", blank=True)
     length = models.BigIntegerField(null=True)
     add_governor = models.BooleanField(null=True)
     # drop_columns = array -> needs to be relation
     disabled = models.BooleanField(default=False)
-    date = models.DateField(null=True)
+    date = models.DateField(null=True, blank=True)
     load = models.BooleanField(default=True)
-    url = models.URLField(max_length=255, null=True)
-    initial_query = models.TextField(null=True)
-    initial_table = models.TextField(null=True)
+    url = models.URLField(max_length=255, null=True, blank=True)
+    initial_query = models.TextField(null=True, blank=True)
+    initial_table = models.TextField(null=True, blank=True)
+    parsed = models.BooleanField(default=False)
 
     @classmethod
     def from_json(cls, jsondata, corpus_name):
@@ -80,6 +84,7 @@ class Corpus(models.Model):
             url=url,
             initial_query=initial_query,
             initial_table=initial_table,
+            parsed=True, # assuming all files that are provided this way are already parsed
         )
         corp.save()
 

@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from explorer.parts.main import app, load_layout
 from django import forms
 from explore.models import Corpus
@@ -18,6 +18,10 @@ def _store_corpus_file(corpus_file, slug):
         for chunk in corpus_file.chunks():
             storage.write(chunk)
     return path
+
+def _start_parse_corpus_job(corpus):
+    # todo: implement this function
+    pass
 
 def explore(request, slug):
     app = load_layout(slug)
@@ -43,6 +47,7 @@ def upload_corpus(request):
             corpus.slug = slug
             corpus.path = path
             corpus.save()
+            _start_parse_corpus_job(corpus)
             return redirect("/")
     else:
         form = UploadCorpusForm()
