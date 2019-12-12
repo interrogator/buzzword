@@ -206,7 +206,7 @@ def convert(epub, metafile=None):
     part_number = 0
     part_paths = []
 
-    not_chapters = {"copyright", "cover", "contents", "editor's note", "editors' note", "editor’s note", title.lower()}
+    not_chapters = {"copyright", "cover", "cover-page", "contents", "editor's note", "editors' note", "editor’s note", title.lower()}
 
     is_part = {"epub3_p", "epub_p"}
     is_chapter = {"epub_c", "epub3_c", "-h-", "index_split_"}
@@ -241,6 +241,18 @@ def convert(epub, metafile=None):
             chapter_number += 1
             numfilled = str(chapter_number).zfill(3)
             safe_name = make_safe_name(chapter_name)
+            if safe_name in {
+                "cover-page",
+                "other-books-by-this-author",
+                "title-page",
+                "dedication",
+                "about",
+                "map",
+                "epigraph",
+                "acknowledgements",
+                "about-the-author"
+            }:
+                continue
             meta.update(dict(chapter_name=chapter_name, chapter_number=chapter_number))
             meta_string = make_meta_element(meta)
             chapter_path = f"{numfilled}-{safe_name}"
