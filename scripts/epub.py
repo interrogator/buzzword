@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import json
 import os
 import sys
 import urllib
@@ -80,12 +81,14 @@ class BookParser:
         parser.EndElementHandler = self.endElement
         parser.CharacterDataHandler = self.characters
         parser.Parse(self.xml, 1)
+        print('NC', self.ncx)
         return self.title, self.author, self.ncx
 
 
 class NavPoint:
-    def __init__(self, id=None, playorder=None, level=0, content=None, text=None):
+    def __init__(self, id=None, playorder=None, level=0, content=None, text=None, classy=None):
         self.id = id
+        self.cls = classy
         self.content = content
         self.playorder = playorder
         self.level = level
@@ -103,7 +106,7 @@ class TocParser:
     def startElement(self, name, attributes):
         if name == "navPoint":
             level = len(self.stack)
-            self.currentNP = NavPoint(attributes["id"], attributes["playOrder"], level)
+            self.currentNP = NavPoint(attributes["id"], attributes["playOrder"], level, classy=attributes.get("class"))
             self.stack.append(self.currentNP)
             self.toc.append(self.currentNP)
         elif name == "content":
@@ -140,6 +143,7 @@ def make_meta_element(metadata):
         meta += f"{k.replace('_', '-')}={v} "
     return meta + "/>"
 
+
 def post_process(text):
     out = []
     header = False
@@ -152,7 +156,6 @@ def post_process(text):
         if header:
             if "</meta" in line:
                 header = False
-            latest = out[-1]
             out[-1] += line
         else:
             out.append(line)
@@ -160,7 +163,13 @@ def post_process(text):
     return '\n'.join(out)
 
 
-def convert(epub):
+def convert(epub, metafile=None):
+
+    text_meta = dict()
+    if metafile:
+        with open(metafile, "r") as fo:
+            text_meta = json.loads(fo.read())
+
     print("Processing %s ..." % epub)
     # open zip
     file = zipfile.ZipFile(epub, "r")
@@ -180,7 +189,10 @@ def convert(epub):
     toc = TocParser(file.read(ops + ncx)).parseToc()
 
     # make corpus directory
-    outdir = os.path.join('out', make_safe_name(title))
+    safe_title = make_safe_name(title)
+    if metafile and safe_title in text_meta:
+        meta.update(text_meta[safe_title])
+    outdir = os.path.join('out', safe_title)
     os.makedirs(outdir)
 
     # hold data in here
@@ -196,10 +208,22 @@ def convert(epub):
 
     not_chapters = {"copyright", "cover", "contents", "editor's note", "editors' note", "editor’s note", title.lower()}
 
+    is_part = {"epub3_p", "epub_p"}
+    is_chapter = {"epub_c", "epub3_c", "-h-", "index_split_"}
+
+    has_no_chapters = True
+    for t in toc:
+        if not t.level:
+            continue
+        if t.content.startswith("ch") or any(i in t.content for i in is_chapter):
+            has_no_chapters = False
+            break
+
     # iterate over components
     for t in toc:
+        print("ID", t.level, t.cls, t.content, t.id)
         # make folder for each part
-        if "epub_p" in t.content:
+        if t.content.startswith("part") or any(i in t.content for i in is_part) and "epub_prl" not in t.content:
             part_number += 1
             part_name = t.text.strip()
             numfilled = str(part_number).zfill(3)
@@ -210,7 +234,7 @@ def convert(epub):
             meta.update(dict(part_name=part_name, part_number=part_number))
             part_paths.append(part_path)
         # make file containing chapter
-        elif "epub_c" in t.content or "-h-" in t.content:
+        if t.content.startswith("ch") or any(i in t.content for i in is_chapter) or has_no_chapters or t.cls == "chapter":
             chapter_name = t.text.strip().strip('.')
             if chapter_name.lower() in not_chapters:
                 continue
@@ -230,6 +254,7 @@ def convert(epub):
             text = html_parser.handle(html.decode("utf-8"))
 
             text = post_process(text)
+            # print('TEXT', text[:1000])
 
             with open(chapter_path, "w") as fo:
                 fo.write(meta_string + "\n")
@@ -237,6 +262,8 @@ def convert(epub):
 
 
 if __name__ == "__main__":
-    filenames = glob(sys.argv[1])
+    filenames = glob(sys.argv[-1])
+    metafile = sys.argv[1]
+    metafile = metafile if metafile != "none" else None
     for filename in filenames:
-        convert(filename)
+        convert(filename, metafile)
