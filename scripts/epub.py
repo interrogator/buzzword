@@ -140,6 +140,25 @@ def make_meta_element(metadata):
         meta += f"{k.replace('_', '-')}={v} "
     return meta + "/>"
 
+def post_process(text):
+    out = []
+    header = False
+    lines = text.splitlines()
+    for line in lines:
+        if "<meta header=true" in line:
+            header = True
+            out.append("\n" + line)
+            continue
+        if header:
+            if "</meta" in line:
+                header = False
+            latest = out[-1]
+            out[-1] += line
+        else:
+            out.append(line)
+
+    return '\n'.join(out)
+
 
 def convert(epub):
     print("Processing %s ..." % epub)
@@ -161,7 +180,7 @@ def convert(epub):
     toc = TocParser(file.read(ops + ncx)).parseToc()
 
     # make corpus directory
-    outdir = make_safe_name(title)
+    outdir = os.path.join('out', make_safe_name(title))
     os.makedirs(outdir)
 
     # hold data in here
@@ -180,7 +199,6 @@ def convert(epub):
     # iterate over components
     for t in toc:
         # make folder for each part
-        print("T", t.content)
         if "epub_p" in t.content:
             part_number += 1
             part_name = t.text.strip()
@@ -210,7 +228,8 @@ def convert(epub):
             html = file.read(ops + t.content.split("#")[0])
             # todo: split out the chapter title, or no
             text = html_parser.handle(html.decode("utf-8"))
-            print(text[:1000])
+
+            text = post_process(text)
 
             with open(chapter_path, "w") as fo:
                 fo.write(meta_string + "\n")
