@@ -4,17 +4,17 @@
 import os
 import sys
 import urllib
-import zipfile
-
 import xml.parsers.expat
-import html2text
+import zipfile
 from glob import glob
+
+import html2text
 
 
 def make_safe_name(name):
     safe_name = name.replace(" ", "-").lower()
     safe_name = "".join(i for i in safe_name if i.isalnum() or i in {"-", "_"}).lower()
-    return urllib.parse.quote_plus(safe_name)
+    return safe_name
 
 
 class ContainerParser:
@@ -169,15 +169,18 @@ def convert(epub):
 
     html_parser = html2text.HTML2Text()
     html_parser.body_width = 0  # no shitty wrapping
+    html_parser.ignore_images = True
+    html_parser.ignore_links = True
     chapter_number = 0
     part_number = 0
     part_paths = []
 
-    not_chapters = {"copyright", "cover"}
+    not_chapters = {"copyright", "cover", "contents", "editor's note", "editors' note", "editor’s note", title.lower()}
 
     # iterate over components
     for t in toc:
         # make folder for each part
+        print("T", t.content)
         if "epub_p" in t.content:
             part_number += 1
             part_name = t.text.strip()
@@ -189,8 +192,8 @@ def convert(epub):
             meta.update(dict(part_name=part_name, part_number=part_number))
             part_paths.append(part_path)
         # make file containing chapter
-        elif "epub_c" in t.content:
-            chapter_name = t.text.strip()
+        elif "epub_c" in t.content or "-h-" in t.content:
+            chapter_name = t.text.strip().strip('.')
             if chapter_name.lower() in not_chapters:
                 continue
             chapter_number += 1
@@ -198,17 +201,16 @@ def convert(epub):
             safe_name = make_safe_name(chapter_name)
             meta.update(dict(chapter_name=chapter_name, chapter_number=chapter_number))
             meta_string = make_meta_element(meta)
+            chapter_path = f"{numfilled}-{safe_name}"
             if part_paths:
-                part_path = part_paths[-1]
-                chapter_path = f"{numfilled}-{safe_name}"
-                chapter_path = os.path.join(part_path, chapter_path + ".txt")
+                chapter_path = os.path.join(part_paths[-1], chapter_path + ".txt")
             else:
-                part_path = None
-                chapter_path = os.path.join(outdir, chapter_name)
+                chapter_path = os.path.join(outdir, chapter_path + ".txt")
 
             html = file.read(ops + t.content.split("#")[0])
             # todo: split out the chapter title, or no
             text = html_parser.handle(html.decode("utf-8"))
+            print(text[:1000])
 
             with open(chapter_path, "w") as fo:
                 fo.write(meta_string + "\n")
