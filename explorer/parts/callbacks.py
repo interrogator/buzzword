@@ -301,8 +301,9 @@ def _new_search(
 
     if not msg:
         name = _make_search_name(this_search, len(corpus), session_search)
-        option = dict(value=new_value, label=name)
-        search_from_options.append(option)
+        new_option = dict(value=new_value, label=name)
+        index_for_option = next(i for i, s in enumerate(search_from_options) if s["value"] == search_from)
+        search_from_options.insert(index_for_option+1, new_option)
     elif exists:
         new_value = exists[-3]
     else:
