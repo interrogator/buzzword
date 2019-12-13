@@ -48,7 +48,8 @@ class Corpus(models.Model):
             return corp
         except cls.DoesNotExist:
             pass
-        language = jsondata.get("language")
+        language = Language(name=jsondata.get("language"))
+        language.save()
         path = jsondata.get("path")
         desc = jsondata.get("desc", "")
         length = jsondata.get("length")
