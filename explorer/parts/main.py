@@ -105,7 +105,7 @@ def load_layout(slug, set_and_register=True):
 
 def load_corpora():
     global CORPUS_META, CORPORA, INITIAL_TABLES, CORPORA_CONFIGS
-
+    print(f"Using corpus configuration at: {GLOBAL_CONFIG.get('corpora_file')}")
     CORPUS_META = _get_corpora_meta(GLOBAL_CONFIG.get("corpora_file"))
     CORPORA, INITIAL_TABLES, CORPORA_CONFIGS = _get_corpora(CORPUS_META)
 

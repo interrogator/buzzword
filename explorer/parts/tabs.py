@@ -62,7 +62,7 @@ def _build_dataset_space(df, config):
             value="w",
             # title="Select the column you wish to search (e.g. word/lemma/POS) "
             # + ", or query language (e.g. Tgrep2, Depgrep)",
-            style={"width": "200px", "fontFamily": "monospace", **style.FRONT},
+            style={"width": "200px", "fontFamily": "monospace", **style.NEAR_FRONT},
         ),
         # the matching/not matching button and its text
         html.Div(
@@ -318,8 +318,11 @@ def _build_concordance_space(df, config):
     else:
         query = {"target": "x", "query": "NOUN"}
 
-    print(f"Making concordance for {config['corpus_name']} ...")
+    max_conc = config.get("max_conc", -1)
+    print(f"Making concordance (max {max_conc}) for {config['corpus_name']} ...")
     df = getattr(df.just, query["target"])(query["query"])
+    if max_conc != -1:
+        df = df.iloc[:max_conc]
     df = df.conc(metadata=meta, window=(100, 100))
     print("Done!")
 
@@ -471,7 +474,7 @@ def make_explore_page(corpus, table, config, configs):
     concordance = _build_concordance_space(corpus, config)
     label = _make_search_name(config["corpus_name"], config["length"], dict())
     search_from = [dict(value=0, label=label)]
-    show = html.Button("Show", id="show-this-dataset", style=style.MARGIN_5_MONO)
+    show = html.Button("Show", id="show-this-dataset", style={**style.MARGIN_5_MONO, **style.FRONT})
     clear = html.Button("Clear history", id="clear-history", style=style.MARGIN_5_MONO)
 
     dropdown = dcc.Dropdown(
