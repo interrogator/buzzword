@@ -35,7 +35,6 @@ def configure_buzzword():
         debug=os.getenv("BUZZWORD_DEBUG", True) in trues,
         load=os.getenv("BUZZWORD_LOAD", True) in trues,
         add_governor=os.getenv("BUZZWORD_ADD_GOVERNOR", False) in trues,
-        title=os.getenv("BUZZWORD_TITLE"),
         page_size=int(os.getenv("BUZZWORD_PAGE_SIZE", 25)),
         max_conc=int(os.getenv("BUZZWORD_MAX_CONC", -1)),
         max_dataset_rows=max_dataset_rows,
