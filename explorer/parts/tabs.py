@@ -304,8 +304,9 @@ def _build_concordance_space(df, config):
     toolbar = [html.Div(i, style=tstyle) for i in [show_check, update]]
     conc_space = html.Div(toolbar, style=style.VERTICAL_MARGINS)
 
+    # todo, not respected for some reason?
     max_row, max_col = config["table_size"]
-    # df = df.iloc[:max_row, :max_col]
+    max_conc = config.get("max_conc", -1)
 
     meta = ["file", "s", "i"]
     if "speaker" in df.columns:
@@ -318,12 +319,9 @@ def _build_concordance_space(df, config):
     else:
         query = {"target": "x", "query": "NOUN"}
 
-    max_conc = config.get("max_conc", -1)
     print(f"Making concordance (max {max_conc}) for {config['corpus_name']} ...")
     df = getattr(df.just, query["target"])(query["query"])
-    if max_conc != -1:
-        df = df.iloc[:max_conc]
-    df = df.conc(metadata=meta, window=(100, 100))
+    df = df.conc(metadata=meta, window=(100, 100), n=max_conc)
     print("Done!")
 
     just = ["left", "match", "right", "file", "s", "i"]
