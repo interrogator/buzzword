@@ -40,27 +40,28 @@ def _correct_placeholder(value, **kwargs):
     return mapped.get(value, default), disable_gram
 
 
-@app.expanded_callback(
-    [
-        Output("tab-dataset", "style"),
-        Output("tab-frequencies", "style"),
-        Output("tab-chart", "style"),
-        Output("tab-concordance", "style"),
-    ],
-    [Input("tabs", "value")],
-    [State("search-from", "value")],
-)
-def render_content(tab, search_from, **kwargs):
-    """
-    Tab display callback. If the user clicked this tab, show it, otherwise hide
-    """
-    outputs = []
-    for i in ["dataset", "frequencies", "chart", "concordance"]:
-        if tab == i:
-            outputs.append({"display": "block"})
-        else:
-            outputs.append({"display": "none"})
-    return outputs
+while False:
+    @app.expanded_callback(
+        [
+            Output("tab-dataset", "style"),
+            Output("tab-frequencies", "style"),
+            Output("tab-chart", "style"),
+            Output("tab-concordance", "style"),
+        ],
+        [Input("tabs", "value")],
+        [State("search-from", "value")],
+    )
+    def render_content(tab, search_from, **kwargs):
+        """
+        Tab display callback. If the user clicked this tab, show it, otherwise hide
+        """
+        outputs = []
+        for i in ["dataset", "frequencies", "chart", "concordance"]:
+            if tab == i:
+                outputs.append({"display": "block"})
+            else:
+                outputs.append({"display": "none"})
+        return outputs
 
 
 # one for each chart space

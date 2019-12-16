@@ -3,6 +3,7 @@ buzzword explorer: build the explore page and its tabs
 """
 import json
 
+import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_daq as daq
 import dash_html_components as html
@@ -85,7 +86,7 @@ def _build_dataset_space(df, config):
             id="input-box",
             type="text",
             placeholder="Enter regular expression search query...",
-            size="80",
+            size="42",
             style=style.MARGIN_5_MONO,
         ),
         dcc.Dropdown(
@@ -130,7 +131,7 @@ def _build_dataset_space(df, config):
         page_size=config["page_size"],
         # style_as_list_view=True,
         virtualization=True,
-        style_table={"maxHeight": "1000px"},
+        style_table={"maxHeight": "34vh"},
         fixed_rows={"headers": True, "data": 0},
         style_header=style.BOLD_DARK,
         style_cell_conditional=style.LEFT_ALIGN,
@@ -232,7 +233,7 @@ def _build_frequencies_space(corpus, table, config):
                 page_action="none",
                 fixed_rows={"headers": True, "data": 0},
                 virtualization=True,
-                style_table={"maxHeight": "1000px"},
+                style_table={"maxHeight": "34vh"},
                 style_header=style.BOLD_DARK,
                 style_cell_conditional=style.LEFT_ALIGN,
                 style_data_conditional=[style_index] + style.STRIPES,
@@ -360,7 +361,7 @@ def _build_concordance_space(df, config):
                 page_current=0,
                 page_size=config["page_size"],
                 virtualization=True,
-                style_table={"maxHeight": "1000px"},
+                style_table={"maxHeight": "34vh"},
                 style_as_list_view=True,
                 style_header=style.BOLD_DARK,
                 style_cell_conditional=style.LEFT_ALIGN_CONC,
@@ -446,7 +447,6 @@ def _build_chart_space(table, config):
         chart_data = dict(
             id=f"chart-{chart_num}",
             figure=figure,
-            style={"height": "60vh", "width": "95vw"},
         )
         chart = dcc.Loading(type="default", children=[dcc.Graph(**chart_data)])
         chart_space = html.Div([toolbar, chart])
@@ -508,41 +508,29 @@ def make_explore_page(corpus, table, config, configs):
     ]
     top_bit = html.Div(top_bit, style=style.VERTICAL_MARGINS)
 
-    tab_headers = dcc.Tabs(
-        id="tabs",
-        value="dataset",
-        style={
-            "lineHeight": 0,
-            "fontFamily": "monospace",
-            "font": "12px Arial",
-            "fontWeight": 600,
-            "color": "#555555",
-            "paddingLeft": "10px",
-            "paddingRight": "10px",
-        },
-        children=[
-            dcc.Tab(label="DATASET", value="dataset"),
-            dcc.Tab(label="FREQUENCIES", value="frequencies"),
-            dcc.Tab(label="CHART", value="chart"),
-            dcc.Tab(label="CONCORDANCE", value="concordance"),
-        ],
-    )
+
     blk = {"display": "block", **style.HORIZONTAL_PAD_5}
     conll_display = html.Div(id="display-dataset", children=[dataset])
-    hide = {"visibility": "hidden"}
+    hide = {}
 
-    tab_contents = [
-        html.Div(
-            children=[
-                html.Div(id="tab-dataset", style=blk, children=[conll_display]),
-                html.Div(id="tab-frequencies", style=hide, children=[frequencies]),
-                html.Div(id="tab-chart", style=hide, children=[chart]),
-                html.Div(id="tab-concordance", style=hide, children=[concordance]),
+    tab_contents = html.Div(
+    [
+        dbc.Row(
+            [
+                dbc.Col(html.Div(id="tab-dataset", style=blk, children=[conll_display]), width=6),
+                dbc.Col(html.Div(id="tab-frequencies", style=hide, children=[frequencies]), width=6),
+            ]
+        ),
+                dbc.Row(
+                    [
+                        dbc.Col(html.Div(id="tab-chart", style=hide, children=[chart]), width=6),
+                        dbc.Col(html.Div(id="tab-concordance", style=hide, children=[concordance]), width=6),
+                    ]
+                ),
             ]
         )
-    ]
 
     pad = {"paddingLeft": "10px", "paddingRight": "10px"}
     tab_contents = html.Div(id="tab-contents", children=tab_contents)
-    children = [slug, _make_storage(configs), top_bit, tab_headers, tab_contents]
+    children = [slug, _make_storage(configs), top_bit, tab_contents]
     return html.Div(id="everything", children=children, style=pad)
