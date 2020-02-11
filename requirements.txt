@@ -1,4 +1,4 @@
-django==3.0.0
+django==3.0.3
 #django-guardian==2.1.0
 git+git://github.com/l0rb/django-guardian@devel#egg=django-guardian
 django-plotly-dash==1.1.3
