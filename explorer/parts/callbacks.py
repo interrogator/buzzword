@@ -2,7 +2,6 @@
 buzzword explorer: callbacks
 """
 
-import dash
 import pandas as pd
 from buzz.exceptions import DataTypeError
 from dash import no_update
@@ -34,7 +33,7 @@ def _correct_placeholder(value, **kwargs):
     mapped = {
         "t": "Enter Tgrep2 query...",
         "d": "Enter depgrep query",
-        "describe": 'Enter depgrep query (e.g. l"man")',
+        "describe": 'Enter depgrep query (e.g. l"man" = f"nsubj")',
     }
     disable_gram = value in mapped
     return mapped.get(value, default), disable_gram
@@ -242,9 +241,10 @@ def _new_search(
     if cleared and cleared != session_clicks_clear:
         session_search.clear()
         corpus = CORPORA[slug]
+        corpus_size = len(corpus)
         corpus = corpus.iloc[:max_row, :max_col]
         cols, data = _update_conll(corpus, False, drop_govs=add_governor)
-        name = _make_search_name(conf["corpus_name"], len(corpus), session_search)
+        name = _make_search_name(conf["corpus_name"], corpus_size, session_search)
         search_from = [dict(value=0, label=name)]
         # set number of clicks at last moment
         session_clicks_clear = cleared
@@ -303,7 +303,7 @@ def _new_search(
         name = _make_search_name(this_search, len(corpus), session_search)
         new_option = dict(value=new_value, label=name)
         index_for_option = next(i for i, s in enumerate(search_from_options) if s["value"] == search_from)
-        search_from_options.insert(index_for_option+1, new_option)
+        search_from_options.insert(index_for_option + 1, new_option)
     elif exists:
         new_value = exists[-3]
     else:
@@ -568,11 +568,11 @@ def _matching_not_matching(on, **kwargs):
 
 
 @app.expanded_callback(
-    [Output("multiindex-text", "children"), Output("multiindex-switch", "disabled")],
-    [Input("multiindex-switch", "on"), Input("show-for-table", "value")],
+    [Output("multiindex-switch", "disabled"), Output("multiindex-switch", "on")],
+    [Input("multiindex-switch", "n_clicks"), Input("show-for-table", "value")],
+    [State("multiindex-switch", "on")]
 )
-def _multiindex(on, show, **kwargs):
+def _multiindex(_, show, on, **kwargs):
     if not show or len(show) < 2:
-        return "", True
-    text = "Join columns" if not on else "Multiple column levels"
-    return text, False
+        return True, False
+    return False, on

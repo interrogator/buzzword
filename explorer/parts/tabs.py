@@ -54,7 +54,7 @@ def _build_dataset_space(df, config):
     df = _drop_cols_for_datatable(df, config["add_governor"])
     df = df.reset_index()
     # no file extensions
-    df["file"] = df["file"].str.replace(".txt.conll", "", regex=False)
+    df["file"] = df["file"].str.replace(".txt.conllu", "", regex=False)
     max_row, max_col = config["table_size"]
     df = df.iloc[:max_row, :max_col]
     pieces = [
@@ -257,7 +257,12 @@ def _build_frequencies_space(corpus, table, config):
                 style={**style.MARGIN_5_MONO, **style.TSTYLE},
             ),
             html.Div(
-                id="multiindex-text", style={**style.MARGIN_5_MONO, **style.TSTYLE}
+                children="Multicolumn mode",
+                id="multiindex-text",
+                style={**style.MARGIN_5_MONO,
+                       **style.TSTYLE,
+                       **{"whiteSpace": "nowrap"}
+                       }
             ),
         ],
         style={**style.CELL_MIDDLE_35, **style.TSTYLE},
@@ -299,7 +304,7 @@ def _build_concordance_space(df, config):
         placeholder="Features to show",
         id="show-for-conc",
         options=cols,
-        style={**style.MARGIN_5_MONO, **style.FRONT},
+        style={**style.MARGIN_5_MONO, **style.NEAR_FRONT},
     )
     update = html.Button("Update", id="update-conc", style=style.MARGIN_5_MONO)
     tstyle = dict(width="100%", **style.CELL_MIDDLE_35)
@@ -475,7 +480,9 @@ def make_explore_page(corpus, table, config, configs):
     label = _make_search_name(config["corpus_name"], config["length"], dict())
     search_from = [dict(value=0, label=label)]
     show = html.Button("Show", id="show-this-dataset", style={**style.MARGIN_5_MONO, **style.FRONT})
+    show.title = "Show the selected corpus or search result in the Dataset tab"
     clear = html.Button("Clear history", id="clear-history", style=style.MARGIN_5_MONO)
+    clear.title = "Delete all searches and frequency tables"
 
     dropdown = dcc.Dropdown(
         id="search-from", options=search_from, value=0, disabled=True
