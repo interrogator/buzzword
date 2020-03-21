@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}buzzword: upload corpus{% endblock %}
+{% block title %}buzzword: upload{% endblock %}
 
 
 {% block content %}
@@ -8,12 +8,15 @@
 <table class="table">
 <form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
+    <div style="margin-top: 100px">
+    <h2>Upload a plaintext corpus</h2>
     {{ form.as_table }}
     <tr>
         <td>
-            <button type="submit" class="btn btn-primary">upload corpus</button>
+            <button type="submit" class="btn btn-primary">Upload</button>
         </td>
     </tr>
+</div>
 </form>
 </table>
 

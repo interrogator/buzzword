@@ -1,11 +1,13 @@
-from django.shortcuts import render, redirect
-from explorer.parts.main import app, load_layout
 from django import forms
+from django.shortcuts import redirect, render
 from explore.models import Corpus
+from explorer.parts.main import load_layout
 from explorer.parts.strings import _slug_from_name
+
 
 def _make_path(slug):
     return f"storage/{slug}"
+
 
 def _store_corpus_file(corpus_file, slug):
     """
@@ -19,21 +21,24 @@ def _store_corpus_file(corpus_file, slug):
             storage.write(chunk)
     return path
 
+
 def _start_parse_corpus_job(corpus):
     # todo: implement this function
     pass
 
+
 def explore(request, slug):
-    app = load_layout(slug)
+    load_layout(slug)
     return render(request, "explore/explore.html")
 
-def upload_corpus(request):
+
+def upload(request):
     class UploadCorpusForm(forms.ModelForm):
         class Meta:
             model = Corpus
             fields = ["name", "desc", "language", "date", "url"]
         corpus_file = forms.FileField()
-    
+
     if request.method == "POST":
         form = UploadCorpusForm(request.POST, request.FILES)
         if form.is_valid():
@@ -52,6 +57,6 @@ def upload_corpus(request):
     else:
         form = UploadCorpusForm()
 
-    return render(request, "explore/upload_corpus.html", {
-        "form": form,
-    })
+    form = {"form": form}
+
+    return render(request, "explore/upload.html", form)
