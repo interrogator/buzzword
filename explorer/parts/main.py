@@ -11,7 +11,6 @@ from django_plotly_dash import DjangoDash
 from .configure import configure_buzzword
 from .helpers import (_get_corpora_meta, _get_corpus, _get_initial_table,
                       _preprocess_corpus, register_callbacks)
-from .strings import _slug_from_name
 from .tabs import make_explore_page
 
 app = DjangoDash("buzzword", suppress_callback_exceptions=True)

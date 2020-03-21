@@ -10,7 +10,7 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read().strip()
 
 
-ASSETS = "buzzword/parts/assets"
+ASSETS = "buzzword/static"
 DOCS = "docs"
 
 assets = [os.path.join(ASSETS, i) for i in os.listdir(ASSETS)]
@@ -26,11 +26,11 @@ setup(
     author="Danny McDonald",
     include_package_data=True,
     zip_safe=False,
-    packages=["buzzword", "docs", "buzzword/parts"],
-    package_dir={"buzzword/parts/assets": "buzzword/parts/assets", "docs": "docs"},
+    packages=["buzzword", "docs", "explorer/parts"],
+    package_dir={"explorer/parts/assets": "explorer/parts/assets", "docs": "docs"},
     scripts=["bin/buzzword", "bin/buzzword-create"],
     package_data={"buzzword/parts": assets, "docs": docs},
-    data_files=[("buzzword/parts/assets", assets), ("docs", docs)],
+    data_files=[("explorer/parts/assets", assets), ("docs", docs)],
     author_email="daniel.mcdonald@uzh.ch",
     license="MIT",
     keywords=[],

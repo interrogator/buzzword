@@ -1,12 +1,10 @@
 import os
-
-from django.contrib.staticfiles.management.commands.runserver import Command as RunServerCommand
-import explorer.parts.main
-
-
 from importlib import import_module
 
+import explorer.parts.main
 from django.apps import apps
+from django.contrib.staticfiles.management.commands.runserver import \
+    Command as RunServerCommand
 from django.core.management.base import BaseCommand, CommandError
 from django.core.management.color import no_style
 from django.core.management.sql import emit_post_migrate_signal, sql_flush
@@ -15,9 +13,9 @@ from django.db import DEFAULT_DB_ALIAS, connections
 
 class Command(RunServerCommand):
 
-	#def __init__(self, *args, **kwargs):
-	#	super().__init__(self, *args, **kwargs)
-   
+    # def __init__(self, *args, **kwargs):
+    #   super().__init__(self, *args, **kwargs)
+
     def run(self, **options):
 
         database = options.get('database', DEFAULT_DB_ALIAS)

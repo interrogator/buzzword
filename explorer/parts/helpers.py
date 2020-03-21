@@ -175,6 +175,8 @@ def _update_conll(df, deletable, drop_govs):
     df = _drop_cols_for_datatable(df, drop_govs)
     col_order = ["file", "s", "i"] + list(df.columns)
     df = df.reset_index()
+    # do not show file extension
+    df["file"] = df["file"].str.replace(".txt.conll", "", regex=False)
     df = df[[i for i in col_order if i is not None]]
     cannot_delete = {"s", "i"}
     columns = [

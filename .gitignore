@@ -1,3 +1,5 @@
+*.feather
+
 do-the-right-thing-norm.txt
 unparsed.txt
 dist/

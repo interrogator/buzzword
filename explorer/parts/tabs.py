@@ -53,6 +53,8 @@ def _build_dataset_space(df, config):
     cols = extra + cols
     df = _drop_cols_for_datatable(df, config["add_governor"])
     df = df.reset_index()
+    # no file extensions
+    df["file"] = df["file"].str.replace(".txt.conll", "", regex=False)
     max_row, max_col = config["table_size"]
     df = df.iloc[:max_row, :max_col]
     pieces = [
@@ -85,7 +87,7 @@ def _build_dataset_space(df, config):
             id="input-box",
             type="text",
             placeholder="Enter regular expression search query...",
-            size="80",
+            size="60",
             style=style.MARGIN_5_MONO,
         ),
         dcc.Dropdown(
