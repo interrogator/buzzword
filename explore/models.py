@@ -1,13 +1,13 @@
 import datetime
 import json
 
-# difference between blank and null:
-# https://docs.djangoproject.com/en/3.0/ref/models/fields/#blank
-from buzz.constants import LANGUAGES
+from buzz.constants import BENEPAR_LANGUAGES
 from django.db import models
 from explorer.parts.strings import _slug_from_name
 
-LANGUAGE_CHOICES = [(v, k) for k, v in LANGUAGES.items()]
+# get language choices from buzz. we use benepar because SPACY_LANGUAGES
+# contains information about which parser model to use, we don't want that
+LANGUAGE_CHOICES = [(v, k) for k, v in sorted(BENEPAR_LANGUAGES.items())]
 
 
 def _string_or_none(jsonfield):
