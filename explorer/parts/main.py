@@ -70,7 +70,7 @@ def _get_corpora(corpus_meta, multiprocess=False):
         if conf["load"]:
             print("Loading corpus into memory: {} ...".format(corpus.name))
             opts = dict(add_governor=conf["add_governor"], multiprocess=multiprocess)
-            buzz_corpus = buzz_corpus.load(**ops)
+            buzz_corpus = buzz_corpus.load(**opts)
             buzz_corpus = _preprocess_corpus(buzz_corpus, **conf)
         else:
             print(f"NOT loading corpus into memory: {corpus.name} ...")
