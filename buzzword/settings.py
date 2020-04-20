@@ -18,6 +18,8 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 50000000
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# static files in here
+STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
@@ -34,18 +36,18 @@ ALLOWED_HOSTS = ["127.0.0.1", "0.0.0.0", "localhost", "127.0.0.1:8000"]
 # Application definition
 
 INSTALLED_APPS = [
-    'dpd_static_support',
-    'start.apps.StartConfig',
-    'explore.apps.ExploreConfig',
-    'django_plotly_dash.apps.DjangoPlotlyDashConfig',
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'guardian',
-    'accounts',
+    "dpd_static_support",
+    "start.apps.StartConfig",
+    "explore.apps.ExploreConfig",
+    "django_plotly_dash.apps.DjangoPlotlyDashConfig",
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "guardian",
+    "accounts",
 ]
 
 STATICFILES_FINDERS = [
@@ -139,8 +141,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
-    'guardian.backends.ObjectPermissionBackend',
+    "django.contrib.auth.backends.ModelBackend",
+    "guardian.backends.ObjectPermissionBackend",
 )
 
 # Internationalization
