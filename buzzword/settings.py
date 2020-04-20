@@ -19,7 +19,7 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 50000000
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # static files in here
-STATIC_ROOT = os.path.join(BASE_DIR, "static/")
+# STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
