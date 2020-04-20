@@ -52,7 +52,7 @@ def _get_corpus_config(corpus, global_conf):
     return conf
 
 
-def _get_corpora(corpus_meta):
+def _get_corpora(corpus_meta, multiprocess=False):
     """
     Load in all available corpora and make their initial tables
 
@@ -69,7 +69,8 @@ def _get_corpora(corpus_meta):
         conf = _get_corpus_config(corpus, GLOBAL_CONFIG)
         if conf["load"]:
             print("Loading corpus into memory: {} ...".format(corpus.name))
-            buzz_corpus = buzz_corpus.load(add_governor=conf["add_governor"])
+            opts = dict(add_governor=conf["add_governor"], multiprocess=multiprocess)
+            buzz_corpus = buzz_corpus.load(**ops)
             buzz_corpus = _preprocess_corpus(buzz_corpus, **conf)
         else:
             print(f"NOT loading corpus into memory: {corpus.name} ...")
