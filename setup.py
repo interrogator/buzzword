@@ -37,17 +37,17 @@ setup(
     install_requires=[
         "buzz>=3.0.10",
         "python-dotenv==0.10.3",
-        "flask==1.1.1",
-        "dash==1.1.1",
-        "dash-core-components==1.1.1",
-        "dash-html-components==1.0.0",
-        "dash-renderer==1.0.0",
-        "dash-table==4.1.0",
+        "flask==1.1.2",
+        "dash==1.9.1",
+        "dash-core-components==1.8.1",
+        "dash-html-components==1.0.2",
+        "dash-renderer==1.2.4",
+        "dash-table==4.6.1",
         "dash-daq==0.1.7",
     ],
     classifiers=[
         "Programming Language :: Python",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
-    ]
+    ],
 )
