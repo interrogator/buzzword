@@ -101,9 +101,10 @@ def load_layout(slug, set_and_register=True, django=True):
 
     conf = CORPORA_CONFIGS[slug]
     # store the default explore for each corpus in a dict for speed
-    if slug in LAYOUTS:
-        layout = LAYOUTS[slug]
-    else:
+    # if slug in LAYOUTS:
+    #    layout = LAYOUTS[slug]
+    # else:
+    if True:
         corpus = _get_corpus(slug)
         table = _get_initial_table(slug, conf)
         conf["length"] = conf.get("length", len(corpus))
