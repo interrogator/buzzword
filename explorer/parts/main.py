@@ -9,8 +9,13 @@ from buzz.corpus import Corpus
 from django_plotly_dash import DjangoDash
 
 from .configure import configure_buzzword
-from .helpers import (_get_corpora_meta, _get_corpus, _get_initial_table,
-                      _preprocess_corpus, register_callbacks)
+from .helpers import (
+    _get_corpora_meta,
+    _get_corpus,
+    _get_initial_table,
+    _preprocess_corpus,
+    register_callbacks,
+)
 from .tabs import make_explore_page
 
 app = DjangoDash("buzzword", suppress_callback_exceptions=True)
@@ -80,12 +85,19 @@ def _get_corpora(corpus_meta):
     return corpora, tables, corpora_config
 
 
-def load_layout(slug, set_and_register=True):
+def load_layout(slug, set_and_register=True, django=True):
     """
     Django can import this function to set the correct dataset on explore page
 
     Return app instance, just in case django has a use for it.
     """
+    if django:
+        global CORPUS_META, CORPORA, INITIAL_TABLES, CORPORA_CONFIGS
+        corfile = GLOBAL_CONFIG.get("corpora_file")
+        print(f"Using django corpus configuration at: {corfile}")
+        CORPUS_META = _get_corpora_meta(GLOBAL_CONFIG.get("corpora_file"))
+        CORPORA, INITIAL_TABLES, CORPORA_CONFIGS = _get_corpora(CORPUS_META)
+
     conf = CORPORA_CONFIGS[slug]
     # store the default explore for each corpus in a dict for speed
     if slug in LAYOUTS:
