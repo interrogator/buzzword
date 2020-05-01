@@ -36,9 +36,11 @@ setup(
     keywords=[],
     install_requires=[
         "buzz>=3.0.10",
+        "django==3.0.5",
         "python-dotenv==0.10.3",
+        "django-plotly-dash==1.3.1",
         "flask==1.1.2",
-        "dash==1.11.0",
+        "dash==1.10.0",
         "dash-core-components==1.9.1",
         "dash-html-components==1.0.3",
         "dash-daq==0.5.0",
