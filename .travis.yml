@@ -1,9 +1,6 @@
 language: python
 python:
   - "3.7"
-  - "3.8"
-  - "3.8-dev"  # 3.8 development branch
-  - "nightly"  # nightly build
 # command to install dependencies
 install:
   - git clone https://github.com/interrogator/buzz && cd buzz && python setup.py install && cd ..
