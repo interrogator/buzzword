@@ -10,10 +10,12 @@ jobs:
   include:
     - stage: build
       script:
-        - pip install buzz[word]
+        - git clone https://github.com/interrogator/buzz && cd buzz && python setup.py install && cd ..
+        - python setup.py install
     - stage: static-checks
       script:
-        - echo "Nothing to do yet."
+        - flake8 .
+        - black .
     - stage: test
       script:  # coverage
         - coverage run -m unittest
