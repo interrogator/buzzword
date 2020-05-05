@@ -35,7 +35,7 @@ setup(
     license="MIT",
     keywords=["nlp", "linguistics", "corpora"],
     install_requires=[
-        "buzz>=3.0.12",
+        "buzz>=3.1.3",
         "django==3.0.5",
         "python-dotenv==0.10.3",
         "django-plotly-dash==1.3.1",
