@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-
-# Generate an example project
-
-python -m buzzword.create $@
