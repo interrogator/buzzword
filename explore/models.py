@@ -1,13 +1,15 @@
 import datetime
 import json
 
-from buzz.constants import BENEPAR_LANGUAGES
+from buzz.constants import LANGUAGES, AVAILABLE_MODELS
 from django.db import models
 from explorer.parts.strings import _slug_from_name
 
 # get language choices from buzz. we use benepar because SPACY_LANGUAGES
 # contains information about which parser model to use, we don't want that
-LANGUAGE_CHOICES = [(v, k) for k, v in sorted(BENEPAR_LANGUAGES.items())]
+LANGUAGE_CHOICES = [
+    (v, k) for k, v in sorted(LANGUAGES.items()) if v in AVAILABLE_MODELS
+]
 
 
 def _string_or_none(jsonfield):
@@ -31,7 +33,9 @@ class Corpus(models.Model):
         max_length=255, unique=True
     )  # this can't be null because a name needs to exist
     name = models.CharField(max_length=255)
-    language = models.ForeignKey(Language, on_delete=models.SET_NULL, null=True, choices=LANGUAGE_CHOICES)
+    language = models.ForeignKey(
+        Language, on_delete=models.SET_NULL, null=True, choices=LANGUAGE_CHOICES
+    )
     path = models.TextField()
     desc = models.TextField(default="", blank=True)
     length = models.BigIntegerField(null=True)
