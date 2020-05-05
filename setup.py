@@ -1,6 +1,6 @@
 import os
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 def read(fname):
@@ -27,10 +27,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     scripts=["bin/buzzword", "bin/create"],
-    packages=["buzzword", "docs", "explorer/parts"],
-    package_dir={"explorer/parts/assets": "explorer/parts/assets", "docs": "docs"},
-    package_data={"buzzword/parts": assets, "docs": docs},
-    data_files=[("explorer/parts/assets", assets), ("docs", docs)],
+    packages=find_packages(),
     author_email="daniel.mcdonald@uzh.ch",
     license="MIT",
     keywords=["nlp", "linguistics", "corpora"],
@@ -46,6 +43,7 @@ setup(
         "dash-daq==0.5.0",
         "dash-renderer==1.3.0",
         "dash-table==4.6.2",
+        "dpd_static_support==0.0.5",
     ],
     classifiers=[
         "Programming Language :: Python",
