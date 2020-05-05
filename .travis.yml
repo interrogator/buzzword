@@ -1,11 +1,11 @@
 language: python
 python:
   - "3.7"
-  - "pypy3"
 # command to install dependencies
 install:
   - pip install tensorflow spacy
   - pip install git+https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.2.0/en_core_web_sm-2.2.0.tar.gz
+  - python -m spacy download en_core_web_sm
   - git clone https://github.com/interrogator/buzz && cd buzz && python setup.py install && cd ..
   - python setup.py install       
 # command to run tests
