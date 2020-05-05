@@ -8,31 +8,51 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Corpus',
+            name="Corpus",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('slug', models.SlugField(max_length=255)),
-                ('language', models.CharField(max_length=255)),
-                ('path', models.TextField()),
-                ('desc', models.TextField(default='')),
-                ('len', models.BigIntegerField()),
-                ('diabled', models.BooleanField(default=False)),
-                ('date', models.DateField()),
-                ('load', models.BooleanField(default=True)),
-                ('url', models.URLField(max_length=255)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("slug", models.SlugField(max_length=255)),
+                ("language", models.CharField(max_length=255)),
+                ("path", models.TextField()),
+                ("desc", models.TextField(default="")),
+                ("len", models.BigIntegerField()),
+                ("diabled", models.BooleanField(default=False)),
+                ("date", models.DateField()),
+                ("load", models.BooleanField(default=True)),
+                ("url", models.URLField(max_length=255)),
             ],
         ),
         migrations.CreateModel(
-            name='DropColumn',
+            name="DropColumn",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('column_name', models.CharField(max_length=255)),
-                ('corpus', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='explore.Corpus')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("column_name", models.CharField(max_length=255)),
+                (
+                    "corpus",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="explore.Corpus"
+                    ),
+                ),
             ],
         ),
     ]

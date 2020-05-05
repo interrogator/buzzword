@@ -37,6 +37,7 @@ def upload(request):
         class Meta:
             model = Corpus
             fields = ["name", "desc", "language", "date", "url"]
+
         corpus_file = forms.FileField()
 
     if request.method == "POST":
@@ -45,8 +46,9 @@ def upload(request):
             slug = _slug_from_name(form.cleaned_data["name"])
             try:
                 path = _store_corpus_file(request.FILES["corpus_file"], slug)
-            except:
-                # TODO: was not able to store corpus file. possibly duplicate slug. handle gracefully
+            except Exception:
+                # TODO: was not able to store corpus file. possibly duplicate slug.
+                # handle gracefully
                 raise
             corpus = form.save(commit=False)
             corpus.slug = slug

@@ -7,13 +7,27 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('explore', '0008_corpus_parsed'),
+        ("explore", "0008_corpus_parsed"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='corpus',
-            name='language',
-            field=models.ForeignKey(choices=[('nl', 'Dutch'), ('en', 'English'), ('fr', 'French'), ('de', 'German'), ('el', 'Greek'), ('it', 'Italian'), ('pt', 'Portuguese'), ('es', 'Spanish')], null=True, on_delete=django.db.models.deletion.SET_NULL, to='explore.Language'),
+            model_name="corpus",
+            name="language",
+            field=models.ForeignKey(
+                choices=[
+                    ("nl", "Dutch"),
+                    ("en", "English"),
+                    ("fr", "French"),
+                    ("de", "German"),
+                    ("el", "Greek"),
+                    ("it", "Italian"),
+                    ("pt", "Portuguese"),
+                    ("es", "Spanish"),
+                ],
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="explore.Language",
+            ),
         ),
     ]

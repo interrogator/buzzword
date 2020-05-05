@@ -9,12 +9,18 @@ from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
 from .chart import _df_to_figure
-from .helpers import (_cast_query, _get_specs_and_corpus, _special_search,
-                      _translate_relative, _tuple_or_list, _update_concordance,
-                      _update_conll, _update_frequencies)
+from .helpers import (
+    _cast_query,
+    _get_specs_and_corpus,
+    _special_search,
+    _translate_relative,
+    _tuple_or_list,
+    _update_concordance,
+    _update_conll,
+    _update_frequencies,
+)
 from .main import CORPORA, INITIAL_TABLES, app
-from .strings import (_make_search_name, _make_table_name, _search_error,
-                      _table_error)
+from .strings import _make_search_name, _make_table_name, _search_error, _table_error
 
 # we can't keep tables in dcc.store, they are too big. so we keep all here with
 # a tuple that can identify them (ideally, even dealing with user sessions)
@@ -302,7 +308,9 @@ def _new_search(
     if not msg:
         name = _make_search_name(this_search, len(corpus), session_search)
         new_option = dict(value=new_value, label=name)
-        index_for_option = next(i for i, s in enumerate(search_from_options) if s["value"] == search_from)
+        index_for_option = next(
+            i for i, s in enumerate(search_from_options) if s["value"] == search_from
+        )
         search_from_options.insert(index_for_option + 1, new_option)
     elif exists:
         new_value = exists[-3]
@@ -472,7 +480,8 @@ def _new_table(
         if relative is not False or keyness:
             table = table.round(2)
 
-        # cannot hash a corpus, which relative may be. none will denote corpus as reference
+        # cannot hash a corpus, which relative may be.
+        # none will denote corpus as reference
         if isinstance(relative, pd.DataFrame):
             relative = None
 
@@ -570,7 +579,7 @@ def _matching_not_matching(on, **kwargs):
 @app.expanded_callback(
     [Output("multiindex-switch", "disabled"), Output("multiindex-switch", "on")],
     [Input("multiindex-switch", "n_clicks"), Input("show-for-table", "value")],
-    [State("multiindex-switch", "on")]
+    [State("multiindex-switch", "on")],
 )
 def _multiindex(_, show, on, **kwargs):
     if not show or len(show) < 2:

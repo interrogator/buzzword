@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('explore', '0007_auto_20191211_1501'),
+        ("explore", "0007_auto_20191211_1501"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='corpus',
-            name='parsed',
+            model_name="corpus",
+            name="parsed",
             field=models.BooleanField(default=False),
         ),
     ]

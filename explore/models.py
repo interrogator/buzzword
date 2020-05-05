@@ -72,10 +72,10 @@ class Corpus(models.Model):
         has_error = False
         if not path:
             has_error = True
-            logging.error("no path = no good")
+            # logging.error("no path = no good")
         if not language:
             has_error = True
-            logging.error("language missing")
+            # logging.error("language missing")
         if has_error:
             raise Exception(
                 "some problem with loading corpus from json. check error log"
@@ -94,7 +94,7 @@ class Corpus(models.Model):
             url=url,
             initial_query=initial_query,
             initial_table=initial_table,
-            parsed=True,  # assuming all files that are provided this way are already parsed
+            parsed=True,  # assuming all files provided this way are already parsed
         )
         corp.save()
 

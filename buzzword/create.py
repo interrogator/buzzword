@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# flake8: noqa
+
 """
 buzzword: make a workspace for buzzword in the current directory
 
@@ -57,6 +59,7 @@ CORPORA = f"""
     }}
 }}
 """
+
 
 CORPUS = """
 <meta doc-type="joke" rating=6.50 speaker="NARRATOR"/>

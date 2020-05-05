@@ -74,7 +74,7 @@ def _get_corpora(corpus_meta, multiprocess=False):
             buzz_corpus = _preprocess_corpus(buzz_corpus, **conf)
         else:
             print(f"NOT loading corpus into memory: {corpus.name} ...")
-        if getattr(corpus, "initial_table"):
+        if getattr(corpus, "initial_table", False):
             display = json.loads(corpus.initial_table)
         else:
             display = dict(show="p", subcorpora="file")

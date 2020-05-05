@@ -259,10 +259,11 @@ def _build_frequencies_space(corpus, table, config):
             html.Div(
                 children="Multicolumn mode",
                 id="multiindex-text",
-                style={**style.MARGIN_5_MONO,
-                       **style.TSTYLE,
-                       **{"whiteSpace": "nowrap"}
-                       }
+                style={
+                    **style.MARGIN_5_MONO,
+                    **style.TSTYLE,
+                    **{"whiteSpace": "nowrap"},
+                },
             ),
         ],
         style={**style.CELL_MIDDLE_35, **style.TSTYLE},
@@ -346,7 +347,10 @@ def _build_concordance_space(df, config):
     ]
     style_data = [style.STRIPES[0], style.INDEX[0]] + style.CONC_LMR
     data = df.to_dict("rows")
-    rule = "display: inline; white-space: inherit; overflow: inherit; text-overflow: inherit;"
+    rule = (
+        "display: inline; white-space: inherit; "
+        + "overflow: inherit; text-overflow: inherit;"
+    )
     conc = dcc.Loading(
         type="default",
         children=[
@@ -479,7 +483,9 @@ def make_explore_page(corpus, table, config, configs):
     concordance = _build_concordance_space(corpus, config)
     label = _make_search_name(config["corpus_name"], config["length"], dict())
     search_from = [dict(value=0, label=label)]
-    show = html.Button("Show", id="show-this-dataset", style={**style.MARGIN_5_MONO, **style.FRONT})
+    show = html.Button(
+        "Show", id="show-this-dataset", style={**style.MARGIN_5_MONO, **style.FRONT}
+    )
     show.title = "Show the selected corpus or search result in the Dataset tab"
     clear = html.Button("Clear history", id="clear-history", style=style.MARGIN_5_MONO)
     clear.title = "Delete all searches and frequency tables"

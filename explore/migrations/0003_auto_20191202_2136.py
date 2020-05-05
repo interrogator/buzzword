@@ -6,13 +6,9 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('explore', '0002_auto_20191202_1431'),
+        ("explore", "0002_auto_20191202_1431"),
     ]
 
     operations = [
-        migrations.RenameField(
-            model_name='corpus',
-            old_name='len',
-            new_name='length',
-        ),
+        migrations.RenameField(model_name="corpus", old_name="len", new_name="length",),
     ]

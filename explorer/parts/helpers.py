@@ -266,7 +266,7 @@ def register_callbacks():
     """
     Control when callbacks get registered
     """
-    from . import callbacks
+    from . import callbacks  # noqa: F401
 
 
 def _get_corpora_json_contents(corpora_file):

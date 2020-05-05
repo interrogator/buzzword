@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('explore', '0003_auto_20191202_2136'),
+        ("explore", "0003_auto_20191202_2136"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='corpus',
-            name='initial_query',
+            model_name="corpus",
+            name="initial_query",
             field=models.TextField(null=True),
         ),
         migrations.AddField(
-            model_name='corpus',
-            name='initial_table',
+            model_name="corpus",
+            name="initial_table",
             field=models.TextField(null=True),
         ),
     ]
