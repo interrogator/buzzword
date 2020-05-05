@@ -1,28 +1,15 @@
-dist: xenial
 language: python
 python:
-  - '3.7'
-stages:
-  - install
-  - build
-  - static-checks
-  - test
-jobs:
-  include:
-    - stage: install
-      script:
-        - git clone https://github.com/interrogator/buzz && cd buzz && python setup.py install && cd ..
-        - python setup.py install        
-    - stage: build
-      script:
-        - git clone https://github.com/interrogator/buzz && cd buzz && python setup.py install && cd ..
-        - python setup.py install
-    - stage: static-checks
-      script:
-        - flake8 .
-        - black .
-    - stage: test
-      script:  # coverage
-        - coverage run -m unittest
-        - coverage report
-        - codecov
+  - "3.7"
+  - "3.8"
+  - "3.8-dev"  # 3.8 development branch
+  - "nightly"  # nightly build
+# command to install dependencies
+install:
+  - git clone https://github.com/interrogator/buzz && cd buzz && python setup.py install && cd ..
+  - python setup.py install       
+# command to run tests
+script:
+  - black .
+  - flake8 .
+  - coverage run -m unittest
