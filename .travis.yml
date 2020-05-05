@@ -10,8 +10,7 @@ jobs:
   include:
     - stage: build
       script:
-        - pip install git+http://github.com/interrogator/tabview.git#egg=tabview-1.4.5
-        - python setup.py install
+        - pip install buzz[word]
     - stage: static-checks
       script:
         - echo "Nothing to do yet."
