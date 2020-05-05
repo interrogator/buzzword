@@ -1,8 +1,10 @@
 language: python
 python:
   - "3.7"
+  - "pypy3"
 # command to install dependencies
 install:
+  - pip install tensorflow
   - git clone https://github.com/interrogator/buzz && cd buzz && python setup.py install && cd ..
   - python setup.py install       
 # command to run tests
