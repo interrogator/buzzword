@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}buzzword: compare{% endblock %}
+{% block content %}
+<object data={% static 'testpage.pdf' %} type="application/pdf">
+    <embed src={% static 'testpage.pdf' %} type="application/pdf" />
+</object>
+<p>{{ plaintext }}</p>
+
+<h2>Markdown thing here?</h2>
+<form method="POST" action="">{% csrf_token %}
+    {{ form }}
+</form>
+
+{{ form.media }}
+
+{% load static %}
+{% include "comparenav.html" %}
+{% endblock %}
+
+

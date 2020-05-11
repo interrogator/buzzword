@@ -6,7 +6,9 @@ from django.urls import include, path
 urlpatterns = [
     path("", include("start.urls")),
     path("", include("accounts.urls")),
+    path("compare/", include("compare.urls")),
     path("explore/", include("explore.urls")),
+    path(r"markdownx/", include("markdownx.urls")),
     path("admin/", admin.site.urls),
     path("resources/", include("django_plotly_dash.urls")),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

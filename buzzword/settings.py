@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "guardian",
     "accounts",
+    "markdownx",
 ]
 
 STATICFILES_FINDERS = [
