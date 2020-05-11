@@ -1,6 +1,15 @@
 from django import forms
-from markdownx.fields import MarkdownxFormField
+
+from martor.fields import MartorFormField
+from .models import Post
 
 
-class OCRResult(forms.Form):
-    content = MarkdownxFormField()
+class SimpleForm(forms.Form):
+    title = forms.CharField(widget=forms.TextInput())
+    description = MartorFormField()
+
+
+class PostForm(forms.ModelForm):
+    class Meta:
+        model = Post
+        fields = "__all__"

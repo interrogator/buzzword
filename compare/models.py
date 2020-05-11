@@ -1,7 +1,8 @@
 from django.db import models
-from markdownx.models import MarkdownxField
+from martor.models import MartorField
 
 
-class OCRText(models.Model):
-    content = MarkdownxField()
-    commit_msg = models.TextField(blank=True)
+class Post(models.Model):
+    title = models.CharField(max_length=200)
+    description = MartorField()
+    wiki = MartorField()

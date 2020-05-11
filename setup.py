@@ -41,7 +41,6 @@ setup(
         "dash==1.10.0",
         "django-plotly-dash==1.3.1",
         "django==3.0.5",
-        "django-markdownx==3.0.1",
         "dpd_static_support==0.0.5",
         "flask==1.1.2",
         "python-dotenv==0.10.3",
