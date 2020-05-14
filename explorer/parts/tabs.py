@@ -90,6 +90,22 @@ def _build_dataset_space(df, config):
             size="60",
             style=style.MARGIN_5_MONO,
         ),
+        html.Div(
+            id="regex-box",
+            children=[
+                daq.BooleanSwitch(
+                    theme=DAQ_THEME,
+                    className="colour-off",
+                    id="use-regex",
+                    on=False,
+                    style={"verticalAlign": "top", **style.MARGIN_5_MONO},
+                ),
+                html.Div(
+                    id="regex-text",
+                    style={"verticalAlign": "bottom", **style.MARGIN_5_MONO},
+                ),
+            ],
+        ),
         dcc.Dropdown(
             id="gram-select",
             options=grams,

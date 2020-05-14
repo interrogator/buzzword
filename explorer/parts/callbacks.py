@@ -155,6 +155,7 @@ def _on_load_callback(n_clicks, **kwargs):
         State("skip-switch", "on"),
         State("search-target", "value"),
         State("input-box", "value"),
+        State("use-regex", "on"),
         State("gram-select", "value"),
         State("search-from", "options"),
         State("session-configs", "data"),
@@ -172,6 +173,7 @@ def _new_search(
     skip,
     col,
     search_string,
+    no_use_regex,
     gram_select,
     search_from_options,
     conf,
@@ -282,8 +284,14 @@ def _new_search(
         elif col not in {"t", "d", "describe"}:
             search = _cast_query(search_string, col)
             method = "just" if not skip else "skip"
+            print("USING no REGEX", no_use_regex)
+            if not no_use_regex:
+                extra = dict(regex=False, exact_match=True)
+            else:
+                extra = dict()
+
             try:
-                df = getattr(getattr(corpus, method), col)(search)
+                df = getattr(getattr(corpus, method), col)(search, **extra)
             # todo: tell the user the problem?
             except DataTypeError:
                 df = df.iloc[:0, :0]
@@ -572,6 +580,16 @@ def _new_conc(n_clicks, show, search_from, conf, session_search, slug, **kwargs)
 )
 def _matching_not_matching(on, **kwargs):
     text = "matching" if not on else "not matching"
+    classname = "colour-off" if not on else "colour-on"
+    return text, classname
+
+
+@app.expanded_callback(
+    [Output("regex-text", "children"), Output("use-regex", "className")],
+    [Input("use-regex", "on")],
+)
+def _use_regex(on, **kwargs):
+    text = "simple" if not on else "regex"
     classname = "colour-off" if not on else "colour-on"
     return text, classname
 
