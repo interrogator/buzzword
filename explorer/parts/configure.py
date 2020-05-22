@@ -15,7 +15,7 @@ def configure_buzzword():
     trues = {"1", "true", "True", "Y", "y", "yes", True}
     env_path = os.path.abspath(".env")
     if not os.path.isfile(env_path):
-        raise ValueError(f'Please configure {env_path}')
+        raise ValueError(f"Please configure {env_path}")
     load_dotenv(dotenv_path=env_path)
     drop_columns = os.getenv("BUZZWORD_DROP_COLUMNS")
     if drop_columns:
@@ -35,10 +35,10 @@ def configure_buzzword():
         debug=os.getenv("BUZZWORD_DEBUG", True) in trues,
         load=os.getenv("BUZZWORD_LOAD", True) in trues,
         add_governor=os.getenv("BUZZWORD_ADD_GOVERNOR", False) in trues,
-        title=os.getenv("BUZZWORD_TITLE"),
         page_size=int(os.getenv("BUZZWORD_PAGE_SIZE", 25)),
+        max_conc=int(os.getenv("BUZZWORD_MAX_CONC", -1)),
         max_dataset_rows=max_dataset_rows,
         drop_columns=drop_columns,
         table_size=table_size,
-        load_layouts=os.getenv("BUZZWORD_LOAD_LAYOUTS", True) in trues
+        load_layouts=os.getenv("BUZZWORD_LOAD_LAYOUTS", True) in trues,
     )

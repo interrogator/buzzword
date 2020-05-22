@@ -111,11 +111,12 @@ def _table_error(show, subcorpora, updating):
         errors.append("No choice made for feature to use as columns.")
     # this is now allowed ... can probably remove this function if
     # we don't do any extra validations.
-    # if not subcorpora:
-    #     errors.append("No choice made for feature to use as index")
+    if not subcorpora:
+        errors.append("No choice made for feature to use as index.")
     if not errors:
         return ""
-    return "* " + "\n* ".join(errors)
+    plural = "s" if len(errors) > 1 else ""
+    return f"Error{plural}\n* " + "\n* ".join(errors)
 
 
 def _capitalize_first(s):

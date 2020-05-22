@@ -9,9 +9,13 @@ from buzz.corpus import Corpus
 from django_plotly_dash import DjangoDash
 
 from .configure import configure_buzzword
-from .helpers import (_get_corpora_meta, _get_corpus, _get_initial_table,
-                      _preprocess_corpus, register_callbacks)
-from .strings import _slug_from_name
+from .helpers import (
+    _get_corpora_meta,
+    _get_corpus,
+    _get_initial_table,
+    _preprocess_corpus,
+    register_callbacks,
+)
 from .tabs import make_explore_page
 
 app = DjangoDash("buzzword", suppress_callback_exceptions=True)
@@ -48,7 +52,7 @@ def _get_corpus_config(corpus, global_conf):
     return conf
 
 
-def _get_corpora(corpus_meta):
+def _get_corpora(corpus_meta, multiprocess=False):
     """
     Load in all available corpora and make their initial tables
 
@@ -65,11 +69,12 @@ def _get_corpora(corpus_meta):
         conf = _get_corpus_config(corpus, GLOBAL_CONFIG)
         if conf["load"]:
             print("Loading corpus into memory: {} ...".format(corpus.name))
-            buzz_corpus = buzz_corpus.load(add_governor=conf["add_governor"])
+            opts = dict(add_governor=conf["add_governor"], multiprocess=multiprocess)
+            buzz_corpus = buzz_corpus.load(**opts)
             buzz_corpus = _preprocess_corpus(buzz_corpus, **conf)
         else:
             print(f"NOT loading corpus into memory: {corpus.name} ...")
-        if getattr(corpus, "initial_table"):
+        if getattr(corpus, "initial_table", False):
             display = json.loads(corpus.initial_table)
         else:
             display = dict(show="p", subcorpora="file")
@@ -81,17 +86,25 @@ def _get_corpora(corpus_meta):
     return corpora, tables, corpora_config
 
 
-def load_layout(slug, set_and_register=True):
+def load_layout(slug, set_and_register=True, django=True):
     """
     Django can import this function to set the correct dataset on explore page
 
     Return app instance, just in case django has a use for it.
     """
+    if django:
+        global CORPUS_META, CORPORA, INITIAL_TABLES, CORPORA_CONFIGS
+        corfile = GLOBAL_CONFIG.get("corpora_file")
+        print(f"Using django corpus configuration at: {corfile}")
+        CORPUS_META = _get_corpora_meta(GLOBAL_CONFIG.get("corpora_file"))
+        CORPORA, INITIAL_TABLES, CORPORA_CONFIGS = _get_corpora(CORPUS_META)
+
     conf = CORPORA_CONFIGS[slug]
     # store the default explore for each corpus in a dict for speed
-    if slug in LAYOUTS:
-        layout = LAYOUTS[slug]
-    else:
+    # if slug in LAYOUTS:
+    #    layout = LAYOUTS[slug]
+    # else:
+    if True:
         corpus = _get_corpus(slug)
         table = _get_initial_table(slug, conf)
         conf["length"] = conf.get("length", len(corpus))
@@ -105,7 +118,7 @@ def load_layout(slug, set_and_register=True):
 
 def load_corpora():
     global CORPUS_META, CORPORA, INITIAL_TABLES, CORPORA_CONFIGS
-
+    print(f"Using corpus configuration at: {GLOBAL_CONFIG.get('corpora_file')}")
     CORPUS_META = _get_corpora_meta(GLOBAL_CONFIG.get("corpora_file"))
     CORPORA, INITIAL_TABLES, CORPORA_CONFIGS = _get_corpora(CORPUS_META)
 

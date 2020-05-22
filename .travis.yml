@@ -1,22 +1,15 @@
-dist: xenial
 language: python
 python:
-  - '3.7'
-stages:
-  - build
-  - static-checks
-  - test
-jobs:
-  include:
-    - stage: build
-      script:
-        - pip install git+http://github.com/interrogator/tabview.git#egg=tabview-1.4.5
-        - python setup.py install
-    - stage: static-checks
-      script:
-        - echo "Nothing to do yet."
-    - stage: test
-      script:  # coverage
-        - coverage run -m unittest
-        - coverage report
-        - codecov
+  - "3.7"
+# command to install dependencies
+install:
+  - pip install tensorflow spacy
+  - pip install git+https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.2.0/en_core_web_sm-2.2.0.tar.gz
+  - python -m spacy download en_core_web_sm
+  - git clone https://github.com/interrogator/buzz && cd buzz && python setup.py install && cd ..
+  - python setup.py install       
+# command to run tests
+script:
+  - black .
+  - flake8 .
+  - coverage run -m unittest

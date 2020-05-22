@@ -2,7 +2,6 @@
 buzzword explorer: callbacks
 """
 
-import dash
 import pandas as pd
 from buzz.exceptions import DataTypeError
 from dash import no_update
@@ -10,12 +9,18 @@ from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
 from .chart import _df_to_figure
-from .helpers import (_cast_query, _get_specs_and_corpus, _special_search,
-                      _translate_relative, _tuple_or_list, _update_concordance,
-                      _update_conll, _update_frequencies)
+from .helpers import (
+    _cast_query,
+    _get_specs_and_corpus,
+    _special_search,
+    _translate_relative,
+    _tuple_or_list,
+    _update_concordance,
+    _update_conll,
+    _update_frequencies,
+)
 from .main import CORPORA, INITIAL_TABLES, app
-from .strings import (_make_search_name, _make_table_name, _search_error,
-                      _table_error)
+from .strings import _make_search_name, _make_table_name, _search_error, _table_error
 
 # we can't keep tables in dcc.store, they are too big. so we keep all here with
 # a tuple that can identify them (ideally, even dealing with user sessions)
@@ -34,7 +39,7 @@ def _correct_placeholder(value, **kwargs):
     mapped = {
         "t": "Enter Tgrep2 query...",
         "d": "Enter depgrep query",
-        "describe": 'Enter depgrep query (e.g. l"man")',
+        "describe": 'Enter depgrep query (e.g. l"man" = f"nsubj")',
     }
     disable_gram = value in mapped
     return mapped.get(value, default), disable_gram
@@ -242,9 +247,10 @@ def _new_search(
     if cleared and cleared != session_clicks_clear:
         session_search.clear()
         corpus = CORPORA[slug]
+        corpus_size = len(corpus)
         corpus = corpus.iloc[:max_row, :max_col]
         cols, data = _update_conll(corpus, False, drop_govs=add_governor)
-        name = _make_search_name(conf["corpus_name"], len(corpus), session_search)
+        name = _make_search_name(conf["corpus_name"], corpus_size, session_search)
         search_from = [dict(value=0, label=name)]
         # set number of clicks at last moment
         session_clicks_clear = cleared
@@ -301,8 +307,11 @@ def _new_search(
 
     if not msg:
         name = _make_search_name(this_search, len(corpus), session_search)
-        option = dict(value=new_value, label=name)
-        search_from_options.append(option)
+        new_option = dict(value=new_value, label=name)
+        index_for_option = next(
+            i for i, s in enumerate(search_from_options) if s["value"] == search_from
+        )
+        search_from_options.insert(index_for_option + 1, new_option)
     elif exists:
         new_value = exists[-3]
     else:
@@ -471,7 +480,8 @@ def _new_table(
         if relative is not False or keyness:
             table = table.round(2)
 
-        # cannot hash a corpus, which relative may be. none will denote corpus as reference
+        # cannot hash a corpus, which relative may be.
+        # none will denote corpus as reference
         if isinstance(relative, pd.DataFrame):
             relative = None
 
@@ -567,11 +577,11 @@ def _matching_not_matching(on, **kwargs):
 
 
 @app.expanded_callback(
-    [Output("multiindex-text", "children"), Output("multiindex-switch", "disabled")],
-    [Input("multiindex-switch", "on"), Input("show-for-table", "value")],
+    [Output("multiindex-switch", "disabled"), Output("multiindex-switch", "on")],
+    [Input("multiindex-switch", "n_clicks"), Input("show-for-table", "value")],
+    [State("multiindex-switch", "on")],
 )
-def _multiindex(on, show, **kwargs):
+def _multiindex(_, show, on, **kwargs):
     if not show or len(show) < 2:
-        return "", True
-    text = "Join columns" if not on else "Multiple column levels"
-    return text, False
+        return True, False
+    return False, on

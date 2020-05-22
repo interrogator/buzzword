@@ -1,12 +1,14 @@
-from django.shortcuts import render, redirect
-from explorer.parts.main import app, load_layout
 from django import forms
+from django.shortcuts import redirect, render
 from explore.models import Corpus
+from explorer.parts.main import load_layout
 from explorer.parts.strings import _slug_from_name
 from guardian.shortcuts import assign_perm
 
+
 def _make_path(slug):
     return f"storage/{slug}"
+
 
 def _store_corpus_file(corpus_file, slug):
     """
@@ -20,29 +22,34 @@ def _store_corpus_file(corpus_file, slug):
             storage.write(chunk)
     return path
 
+
 def _start_parse_corpus_job(corpus):
     # todo: implement this function
     pass
 
+
 def explore(request, slug):
-    app = load_layout(slug)
+    load_layout(slug)
     return render(request, "explore/explore.html")
 
-def upload_corpus(request):
+
+def upload(request):
     class UploadCorpusForm(forms.ModelForm):
         class Meta:
             model = Corpus
             fields = ["name", "desc", "language", "date", "url"]
+
         corpus_file = forms.FileField()
-    
+
     if request.method == "POST":
         form = UploadCorpusForm(request.POST, request.FILES)
         if form.is_valid():
             slug = _slug_from_name(form.cleaned_data["name"])
             try:
                 path = _store_corpus_file(request.FILES["corpus_file"], slug)
-            except:
-                # TODO: was not able to store corpus file. possibly duplicate slug. handle gracefully
+            except Exception:
+                # TODO: was not able to store corpus file. possibly duplicate slug.
+                # handle gracefully
                 raise
             corpus = form.save(commit=False)
             corpus.slug = slug
@@ -54,6 +61,6 @@ def upload_corpus(request):
     else:
         form = UploadCorpusForm()
 
-    return render(request, "explore/upload_corpus.html", {
-        "form": form,
-    })
+    form = {"form": form}
+
+    return render(request, "explore/upload.html", form)

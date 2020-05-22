@@ -6,33 +6,33 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('explore', '0006_transfer_language'),
+        ("explore", "0006_transfer_language"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='corpus',
-            name='date',
+            model_name="corpus",
+            name="date",
             field=models.DateField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='corpus',
-            name='desc',
-            field=models.TextField(blank=True, default=''),
+            model_name="corpus",
+            name="desc",
+            field=models.TextField(blank=True, default=""),
         ),
         migrations.AlterField(
-            model_name='corpus',
-            name='initial_query',
+            model_name="corpus",
+            name="initial_query",
             field=models.TextField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='corpus',
-            name='initial_table',
+            model_name="corpus",
+            name="initial_table",
             field=models.TextField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='corpus',
-            name='url',
+            model_name="corpus",
+            name="url",
             field=models.URLField(blank=True, max_length=255, null=True),
         ),
     ]

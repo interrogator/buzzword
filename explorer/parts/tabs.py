@@ -53,6 +53,8 @@ def _build_dataset_space(df, config):
     cols = extra + cols
     df = _drop_cols_for_datatable(df, config["add_governor"])
     df = df.reset_index()
+    # no file extensions
+    df["file"] = df["file"].str.replace(".txt.conllu", "", regex=False)
     max_row, max_col = config["table_size"]
     df = df.iloc[:max_row, :max_col]
     pieces = [
@@ -62,7 +64,7 @@ def _build_dataset_space(df, config):
             value="w",
             # title="Select the column you wish to search (e.g. word/lemma/POS) "
             # + ", or query language (e.g. Tgrep2, Depgrep)",
-            style={"width": "200px", "fontFamily": "monospace", **style.FRONT},
+            style={"width": "200px", "fontFamily": "monospace", **style.NEAR_FRONT},
         ),
         # the matching/not matching button and its text
         html.Div(
@@ -85,7 +87,7 @@ def _build_dataset_space(df, config):
             id="input-box",
             type="text",
             placeholder="Enter regular expression search query...",
-            size="80",
+            size="60",
             style=style.MARGIN_5_MONO,
         ),
         dcc.Dropdown(
@@ -255,7 +257,13 @@ def _build_frequencies_space(corpus, table, config):
                 style={**style.MARGIN_5_MONO, **style.TSTYLE},
             ),
             html.Div(
-                id="multiindex-text", style={**style.MARGIN_5_MONO, **style.TSTYLE}
+                children="Multicolumn mode",
+                id="multiindex-text",
+                style={
+                    **style.MARGIN_5_MONO,
+                    **style.TSTYLE,
+                    **{"whiteSpace": "nowrap"},
+                },
             ),
         ],
         style={**style.CELL_MIDDLE_35, **style.TSTYLE},
@@ -297,15 +305,16 @@ def _build_concordance_space(df, config):
         placeholder="Features to show",
         id="show-for-conc",
         options=cols,
-        style={**style.MARGIN_5_MONO, **style.FRONT},
+        style={**style.MARGIN_5_MONO, **style.NEAR_FRONT},
     )
     update = html.Button("Update", id="update-conc", style=style.MARGIN_5_MONO)
     tstyle = dict(width="100%", **style.CELL_MIDDLE_35)
     toolbar = [html.Div(i, style=tstyle) for i in [show_check, update]]
     conc_space = html.Div(toolbar, style=style.VERTICAL_MARGINS)
 
+    # todo, not respected for some reason?
     max_row, max_col = config["table_size"]
-    # df = df.iloc[:max_row, :max_col]
+    max_conc = config.get("max_conc", -1)
 
     meta = ["file", "s", "i"]
     if "speaker" in df.columns:
@@ -318,9 +327,9 @@ def _build_concordance_space(df, config):
     else:
         query = {"target": "x", "query": "NOUN"}
 
-    print(f"Making concordance for {config['corpus_name']} ...")
+    print(f"Making concordance (max {max_conc}) for {config['corpus_name']} ...")
     df = getattr(df.just, query["target"])(query["query"])
-    df = df.conc(metadata=meta, window=(100, 100))
+    df = df.conc(metadata=meta, window=(100, 100), n=max_conc)
     print("Done!")
 
     just = ["left", "match", "right", "file", "s", "i"]
@@ -338,7 +347,10 @@ def _build_concordance_space(df, config):
     ]
     style_data = [style.STRIPES[0], style.INDEX[0]] + style.CONC_LMR
     data = df.to_dict("rows")
-    rule = "display: inline; white-space: inherit; overflow: inherit; text-overflow: inherit;"
+    rule = (
+        "display: inline; white-space: inherit; "
+        + "overflow: inherit; text-overflow: inherit;"
+    )
     conc = dcc.Loading(
         type="default",
         children=[
@@ -471,8 +483,12 @@ def make_explore_page(corpus, table, config, configs):
     concordance = _build_concordance_space(corpus, config)
     label = _make_search_name(config["corpus_name"], config["length"], dict())
     search_from = [dict(value=0, label=label)]
-    show = html.Button("Show", id="show-this-dataset", style=style.MARGIN_5_MONO)
+    show = html.Button(
+        "Show", id="show-this-dataset", style={**style.MARGIN_5_MONO, **style.FRONT}
+    )
+    show.title = "Show the selected corpus or search result in the Dataset tab"
     clear = html.Button("Clear history", id="clear-history", style=style.MARGIN_5_MONO)
+    clear.title = "Delete all searches and frequency tables"
 
     dropdown = dcc.Dropdown(
         id="search-from", options=search_from, value=0, disabled=True

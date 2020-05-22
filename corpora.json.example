@@ -1,7 +1,7 @@
 {
   "Do the Right Thing": {
     "slug": "do-the-right-thing",
-    "language": "English",
+    "language": "en",
     "path": "dtrt/do-the-right-thing-parsed",
     "desc": "Script of Spike Lee's 1989 drama, with various speaker and scene annotations",
     "length": 17713,
@@ -15,7 +15,7 @@
   },
   "Unabomber Manifesto" : {
     "slug": "manifesto",
-    "language": "English",
+    "language": "en",
     "drop_columns": ["text", "parse"],
     "path": "unabomber/manifesto-parsed",
     "desc": "Text of the Unabomber's manifesto",

@@ -2,6 +2,7 @@
 
 from django.db import migrations
 
+
 def transfer_lang(apps, schema_editor):
     Corpus = apps.get_model("explore", "Corpus")
     Language = apps.get_model("explore", "Language")
@@ -11,6 +12,7 @@ def transfer_lang(apps, schema_editor):
         corpus.save()
         language.save()
 
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -19,13 +21,8 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(transfer_lang),
-        migrations.RemoveField(
-            model_name="corpus",
-            name="language"
-        ),
+        migrations.RemoveField(model_name="corpus", name="language"),
         migrations.RenameField(
-            model_name="corpus",
-            old_name="language_link",
-            new_name="language",
+            model_name="corpus", old_name="language_link", new_name="language",
         ),
     ]
