@@ -1,7 +1,7 @@
 FROM python:3.7-slim-buster
 
 RUN apt-get update && \
-    apt-get install -y git build-essential
+    apt-get install -y git build-essential nginx
 
 WORKDIR /
 
@@ -24,4 +24,9 @@ RUN \
 
 RUN python manage.py migrate
 
-CMD python manage.py runserver 0.0.0.0:8000
+RUN \
+    pip install uwsgi && \
+    ln -s /buzzword/buzzword_nginx.conf /etc/nginx/sites-enabled/
+
+#CMD python manage.py runserver 0.0.0.0:8000
+CMD service nginx start && uwsgi --ini /buzzword/uwsgi-docker.ini
