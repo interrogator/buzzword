@@ -26,8 +26,7 @@ RUN python manage.py migrate
 
 RUN \
     pip install uwsgi && \
-    ln -s /buzzword/buzzword_nginx.conf /etc/nginx/sites-enabled/ && \
-    service nginx stop && service nginx start
+    ln -s /buzzword/buzzword_nginx.conf /etc/nginx/sites-enabled/
 
 #CMD python manage.py runserver 0.0.0.0:8000
-CMD uwsgi --ini /buzzword/uwsgi-docker.ini
+CMD service nginx start && uwsgi --ini /buzzword/uwsgi-docker.ini
