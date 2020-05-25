@@ -9,7 +9,7 @@
     {% if messages %}
         <ul class="messages">
             {% for message in messages %}
-                <div class="alert alert-dismissible fade show alert-info" role="alert">{{ message }}
+                <div class="alert alert-dismissible fade show alert-{{ message.tags }}" role="alert">{{ message }}
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -31,7 +31,7 @@
         <div class="col-sm">
             <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
-                <div>
+                <div style="height:400vh;">
                     {{ form.description }}
                     <div class="float-right">
                         Describe your changes: 
