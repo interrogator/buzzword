@@ -10,7 +10,7 @@ from .views import (
 )
 
 urlpatterns = [
-    path("", browse_collection, name="browse_collection"),
+    path("<str:slug>/", browse_collection, name="browse_collection"),
     path("simple-form/", simple_form_view, name="simple_form"),
     path("post-form/", post_form_view, name="post_form"),
     path("test-markdownify/", test_markdownify, name="test_markdownify"),

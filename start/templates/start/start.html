@@ -13,6 +13,9 @@
 <br>
 {% for corpus in corpora %}
     <a href="explore/{{ corpus.slug }}">{{ corpus.name }}</a>
+    {% if corpus.pdfs %}
+        <a href="compare/{{ corpus.slug }}">Compare/correct: {{ corpus.name }}</a>
+    {% endif %}
     <br>
 {% endfor %}
 
