@@ -239,7 +239,8 @@ def _get_initial_table(slug, config):
     corpus = _get_corpus(slug)
     default = dict(show="p", subcorpora="file")
     if "initial_table" in config:
-        default = json.loads(config["initial_table"])
+        if config["initial_table"]:  # `None` and empty string are not good defaults
+            default = json.loads(config["initial_table"])
     return corpus.table(**default)
 
 
