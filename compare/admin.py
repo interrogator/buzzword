@@ -8,7 +8,7 @@ from .models import Post
 
 
 class PostAdmin(admin.ModelAdmin):
-    list_display = ["title", "id"]
+    list_display = ["commit_msg", "description"]
     formfield_overrides = {
         MartorField: {"widget": AdminMartorWidget},
         models.TextField: {"widget": AdminMartorWidget},

@@ -5,6 +5,19 @@
 {% block content %}
 
 <div style="margin-top:100px;">
+
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <div class="alert alert-dismissible fade show alert-info" role="alert">{{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
     <div class="container">
       <div class="row">
         <div class="col-sm">
@@ -16,10 +29,17 @@
             </div>
         </div>
         <div class="col-sm">
-            <div>
-                {{ form.description }}
-                <button type="submit" class="btn btn-primary">Update</button>
-            </div>
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div>
+                    {{ form.description }}
+                    <div class="float-right">
+                        Describe your changes: 
+                        {{ form.commit_msg }}
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </div>
+                </div>
+            </form>
         </div>
       </div>
     </div>

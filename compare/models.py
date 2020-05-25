@@ -3,9 +3,8 @@ from martor.models import MartorField
 
 
 class Post(models.Model):
-    title = models.CharField(max_length=200)
     description = MartorField()
-    wiki = MartorField()
+    commit_msg = models.CharField(max_length=200, blank=True)
 
 
 class PDF(models.Model):

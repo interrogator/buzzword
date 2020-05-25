@@ -24,7 +24,6 @@ def get_raw_text_for_ocr(slug, pdf_file):
     corpath = os.path.join("static", "plaintexts", slug)
     text_version = os.path.basename(pdf_file.replace(".pdf", ".txt"))
     corfile = os.path.join(corpath, text_version)
-    print("GETTING PLAINTEXT", slug, pdf_file, corpath, corfile)
     with open(corfile, "r") as fo:
         data = fo.read()
     return data

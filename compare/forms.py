@@ -4,9 +4,9 @@ from martor.fields import MartorFormField
 from .models import Post
 
 
-class SimpleForm(forms.Form):
-    title = forms.CharField(widget=forms.TextInput())
+class SubmitForm(forms.Form):
     description = MartorFormField()
+    commit_msg = forms.CharField(widget=forms.TextInput())
 
 
 class PostForm(forms.ModelForm):
