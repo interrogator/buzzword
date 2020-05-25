@@ -209,6 +209,7 @@ PLOTLY_DASH = {
 
 
 STATIC_URL = "/static/"
+STATICFILES_DIRS = ["static"]
 MEDIA_URL = "/media/"
 STATIC_ROOT = os.path.join(tempfile.gettempdir(), "buzzword_static")
 MEDIA_ROOT = os.path.join(tempfile.gettempdir(), "buzzword_media")
