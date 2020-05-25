@@ -48,7 +48,7 @@ class Corpus(models.Model):
     initial_query = models.TextField(null=True, blank=True)
     initial_table = models.TextField(null=True, blank=True)
     parsed = models.BooleanField(default=False)
-    pdfs = models.TextField(null=True, blank=True)
+    pdfs = models.BooleanField(null=True, default=False)
 
     @classmethod
     def from_json(cls, jsondata, corpus_name):

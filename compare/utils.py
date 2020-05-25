@@ -28,3 +28,11 @@ def get_raw_text_for_ocr(slug, pdf_file):
     with open(corfile, "r") as fo:
         data = fo.read()
     return data
+
+
+def _get_pdf_paths(slug):
+    pdfs_path = os.path.join("static", "pdfs", slug + "-pdfs")
+    pdfs = [
+        os.path.join(pdfs_path, i) for i in os.listdir(pdfs_path) if i.endswith(".pdf")
+    ]
+    return list(sorted(pdfs))

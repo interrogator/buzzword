@@ -6,29 +6,38 @@ from django.http import FileResponse, Http404, HttpResponse
 from django.template import loader
 from .models import Post
 from .forms import PostForm, SimpleForm
-from .utils import filepath_for_pdf, markdown_to_buzz_input, get_raw_text_for_ocr
+from .utils import (
+    filepath_for_pdf,
+    markdown_to_buzz_input,
+    get_raw_text_for_ocr,
+    _get_pdf_paths,
+)
 from django.contrib.auth.decorators import login_required
 
 
-def _get_pdfs(slug):
-    pdfs_path = os.path.join("static", "pdfs", slug + "-pdfs")
-    pdfs = [
-        os.path.join(pdfs_path, i) for i in os.listdir(pdfs_path) if i.endswith(".pdf")
-    ]
-    return pdfs
+from django.core.paginator import Paginator
+from django.shortcuts import render
+
+from .models import PDF
 
 
 def browse_collection(request, slug):
-    pdfs = _get_pdfs(slug)
-    pdf_file = pdfs[0]  # static root ... do this better
+    contact_list = PDF.objects.all()
+    paginator = Paginator(contact_list, 1)
+    page_number = request.GET.get("page", 1)
+    page_number = int(page_number)
+    page_obj = paginator.get_page(page_number)
+    pdfs = _get_pdf_paths(slug)
+    pdf_file = pdfs[int(page_number) - 1]  # static root ... do this better
     template = loader.get_template("compare/sidetoside.html")
     plaintext = get_raw_text_for_ocr(slug, pdf_file)
     initial_textbox = dict(description=plaintext)
-    print("LOADED", pdf_file, plaintext)
+    form = PostForm(initial={"description": plaintext})
     context = {
         "pdf_filepath": "/" + pdf_file,
         "file_showing": filepath_for_pdf(pdf_file),
-        "form": PostForm(),
+        "form": form,
+        "page_obj": page_obj,
     }
     if request.method == "POST":
         form = CompareForm(request.POST)

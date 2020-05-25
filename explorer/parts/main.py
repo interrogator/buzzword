@@ -18,6 +18,8 @@ from .helpers import (
 )
 from .tabs import make_explore_page
 
+from compare.load import load_pdfs
+
 app = DjangoDash("buzzword", suppress_callback_exceptions=True)
 
 GLOBAL_CONFIG = configure_buzzword()
@@ -40,6 +42,7 @@ def _get_corpus_config(corpus, global_conf):
         "slug",
         "initial_table",
         "initial_query",
+        "pdfs",
     }
     is_json_data = {"initial_table", "initial_query"}
     for setting in settings:
@@ -78,6 +81,8 @@ def _get_corpora(corpus_meta, multiprocess=False):
             display = json.loads(corpus.initial_table)
         else:
             display = dict(show="p", subcorpora="file")
+        if conf["pdfs"]:
+            load_pdfs(corpus)
         print(f"Generating an initial table for {corpus.name} using {display}")
         initial_table = buzz_corpus.table(**display)
         corpora[corpus.slug] = buzz_corpus
