@@ -56,9 +56,10 @@ def browse_collection(request, slug):
                 "No change information provided; doing nothing",
             )
 
+        new_text = form.cleaned_data["description"]
+        commit = form.cleaned_data["commit_msg"]
+
         if form.is_valid():
-            new_text = form.cleaned_data["description"]
-            commit = form.cleaned_data["commit_msg"]
             buzz_raw_text = markdown_to_buzz_input(new_text)
             # todo: handle submitted changes properly
             updated = OCRUpdate(slug=slug, commit_msg=commit, text=new_text, pdf=pdf)
@@ -67,8 +68,14 @@ def browse_collection(request, slug):
             msg = "Text successfully updated"
             if commit:
                 # timestamp = datetime.fromtimestamp(updated.timestamp)
-                msg = f"{msg}: {commit} ({updated.timestamp})"
+                msg = f"{msg}: {commit} ({str(updated.timestamp).split('.', 1)[0]})"
             messages.add_message(request, messages.SUCCESS, msg)
-        else:
-            messages.add_message(request, messages.WARNING, "Invalid form.")
+        if not commit:
+            # i think this is the only possible invalid
+            msg = "Please provide a short description of your changes before updating"
+        if not new_text:
+            messages.add_message(request, messages.ERROR, msg)
+            # i think this is the only possible invalid
+            msg = "No text submitted. Mark blank files with \"<meta blank='true'/>\""
+            messages.add_message(request, messages.ERROR, msg)
     return HttpResponse(template.render(context, request))
