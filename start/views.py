@@ -3,7 +3,7 @@ import explore.models
 
 
 def start(request):
-    context = {
-        "corpora": explore.models.Corpus.objects.filter(disabled=False, load=True)
-    }
+    navbar = request.GET.get("navbar", "home")
+    corpora = explore.models.Corpus.objects.filter(disabled=False, load=True)
+    context = {"corpora": corpora, "navbar": navbar}
     return render(request, "start/start.html", context)

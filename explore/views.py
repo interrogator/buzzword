@@ -53,6 +53,6 @@ def upload(request):
     else:
         form = UploadCorpusForm()
 
-    form = {"form": form}
+    context = {"form": form, "navbar": "upload"}
 
-    return render(request, "explore/upload.html", form)
+    return render(request, "explore/upload.html", context)
