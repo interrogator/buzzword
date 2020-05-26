@@ -1,82 +1,97 @@
 import os
 from datetime import datetime
-from django.shortcuts import render, redirect
 
-from django.http import FileResponse, Http404, HttpResponse
+from django.contrib import messages
+from django.contrib.messages import get_messages
+
+from django.core.paginator import Paginator
+from django.http import FileResponse, HttpResponse
+from django.shortcuts import render
 from django.template import loader
-from .models import Post
+
+
 from .forms import PostForm, SubmitForm
 from .utils import (
     markdown_to_buzz_input,
     get_raw_text_for_ocr,
-    _get_pdf_paths,
+    _get_tif_paths,
 )
-from django.contrib.auth.decorators import login_required
 
-
-from django.core.paginator import Paginator
-from django.shortcuts import render
+import pyocr
 
 from .models import PDF, OCRUpdate
+from explore.models import Corpus
 
-from django.contrib import messages
+
+def _make_message(request, level, msg):
+    """
+    Just add the message once
+    """
+    if msg not in [m.message for m in get_messages(request)]:
+        messages.add_message(request, level, msg)
 
 
 def browse_collection(request, slug):
+    """
+    Main compare/correct view, showing PDF beside its OCR output
+
+    Use Django's pagination for handling PDFs
+    Use martor for the markdown editor
+    """
+    lang = Corpus.objects.get(slug=slug).language.name
     all_pdfs = PDF.objects.all()
     paginator = Paginator(all_pdfs, 1)
     page_number = request.GET.get("page", 1)
     page_number = int(page_number)
     page_obj = paginator.get_page(page_number)
-    # can i get without second lookup using paginator?
-    pdf = PDF.objects.get(slug=slug, num=page_number - 1)
+    pdf = all_pdfs.get(slug=slug, num=page_number - 1)
     pdf_path = pdf.path
     template = loader.get_template("compare/sidetoside.html")
-    plaintext = get_raw_text_for_ocr(slug, pdf)
+
+    this_pdf = OCRUpdate.objects.filter(pdf=pdf)
+    plaintext = this_pdf.latest("timestamp").text
+
     initial_textbox = dict(description=plaintext)
-    commit = f"Update {os.path.splitext(os.path.basename(pdf_path))[0]}"
-    form = PostForm(initial={"description": plaintext, "commit_msg": commit})
+    default_commit = f"Update {os.path.splitext(os.path.basename(pdf_path))[0]}"
+    form = PostForm(initial={"description": plaintext, "commit_msg": default_commit})
     context = {
-        "pdf_filepath": "/" + pdf_path,
-        # "file_showing": filepath_for_pdf(pdf),
+        "pdf_filepath": "/" + pdf_path.replace(".tif", ".pdf"),
         "form": form,
         "page_obj": page_obj,
     }
+    # if the user has tried to update the OCR text
     if request.method == "POST":
+        error = False
         form = SubmitForm(request.POST)
         new_text = form["description"].value()
         commit_msg = form["commit_msg"].value()
+
         if new_text.strip() == plaintext.strip():
-            messages.add_message(
-                request, messages.WARNING, "No changes made; doing nothing"
-            )
-        elif not commit_msg:
-            messages.add_message(
-                request,
-                messages.WARNING,
-                "No change information provided; doing nothing",
-            )
+            error = "No changes made -- doing nothing"
+            _make_message(request, messages.WARNING, error)
 
-        new_text = form.cleaned_data["description"]
-        commit = form.cleaned_data["commit_msg"]
-
-        if form.is_valid():
+        # success case: update the db
+        if form.is_valid() and not error:
+            new_text = form.cleaned_data["description"]
+            commit = form.cleaned_data["commit_msg"]
             buzz_raw_text = markdown_to_buzz_input(new_text)
             # todo: handle submitted changes properly
             updated = OCRUpdate(slug=slug, commit_msg=commit, text=new_text, pdf=pdf)
             updated.save()
-            context["form"] = PostForm(initial={"description": new_text})
+            initial = {"description": new_text, "commit_msg": default_commit}
+            context["form"] = PostForm(initial=initial)
             msg = "Text successfully updated"
             if commit:
-                # timestamp = datetime.fromtimestamp(updated.timestamp)
                 msg = f"{msg}: {commit} ({str(updated.timestamp).split('.', 1)[0]})"
-            messages.add_message(request, messages.SUCCESS, msg)
-        if not commit:
-            # i think this is the only possible invalid
-            msg = "Please provide a short description of your changes before updating"
-        if not new_text:
-            messages.add_message(request, messages.ERROR, msg)
-            # i think this is the only possible invalid
-            msg = "No text submitted. Mark blank files with \"<meta blank='true'/>\""
-            messages.add_message(request, messages.ERROR, msg)
+            _make_message(request, messages.SUCCESS, msg)
+        else:
+            # user must enter commit msg (but default is provided so it's easy)
+            if not commit_msg:
+                msg = "Please provide a description of your changes before updating"
+                _make_message(request, messages.WARNING, msg)
+            if not new_text:
+                # i think this is the only possible invalid
+                msg = 'No text submitted. Mark blank files with <meta blank="true"/>'
+                _make_message(request, messages.WARNING, msg)
+
     return HttpResponse(template.render(context, request))

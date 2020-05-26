@@ -5,7 +5,7 @@ from .models import Post
 
 
 class SubmitForm(forms.Form):
-    description = MartorFormField()
+    description = forms.CharField()
     commit_msg = forms.CharField(widget=forms.TextInput())
 
 

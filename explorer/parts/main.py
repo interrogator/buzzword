@@ -18,7 +18,7 @@ from .helpers import (
 )
 from .tabs import make_explore_page
 
-from compare.load import load_pdfs
+from compare.load import load_tif_pdf_plaintext
 
 app = DjangoDash("buzzword", suppress_callback_exceptions=True)
 
@@ -82,7 +82,7 @@ def _get_corpora(corpus_meta, multiprocess=False):
         else:
             display = dict(show="p", subcorpora="file")
         if conf["pdfs"]:
-            load_pdfs(corpus)
+            load_tif_pdf_plaintext(corpus)
         print(f"Generating an initial table for {corpus.name} using {display}")
         initial_table = buzz_corpus.table(**display)
         corpora[corpus.slug] = buzz_corpus

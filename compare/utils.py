@@ -31,9 +31,9 @@ def get_raw_text_for_ocr(slug, pdf):
     return data
 
 
-def _get_pdf_paths(slug):
-    pdfs_path = os.path.join("static", "pdfs", slug + "-pdfs")
-    pdfs = [
-        os.path.join(pdfs_path, i) for i in os.listdir(pdfs_path) if i.endswith(".pdf")
+def _get_tif_paths(slug):
+    tifs_path = os.path.join("static", "tifs", slug + "-tifs")
+    tifs = [
+        os.path.join(tifs_path, i) for i in os.listdir(tifs_path) if i.endswith(".tif")
     ]
-    return list(sorted(pdfs))
+    return list(sorted(tifs))
