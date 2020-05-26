@@ -29,6 +29,8 @@ def load_tif_pdf_plaintext(corpus):
     via pyocr/tesseract
 
     todo: configure multilingual support
+    todo: save as little as possible here, as OCR is slow!
+
     """
     tif_paths = _get_tif_paths(corpus.slug)
     ocr_engine, lang_chosen = _get_ocr_engine(corpus.language.name)
@@ -37,9 +39,12 @@ def load_tif_pdf_plaintext(corpus):
         pdf_path = tif_path.replace(".tif", ".pdf")
         name = os.path.basename(tif_path)
         name = os.path.splitext(name)[0]
+        # make pdf if need be
         if not os.path.isfile(pdf_path):
             image = Image.open(tif_path)
             image.save(pdf_path)
+
+        # todo: use get_or_create
         pdf = PDF(name=name, num=i, path=pdf_path, slug=corpus.slug)
         tif = TIF(name=name, num=i, path=tif_path, slug=corpus.slug)
         try:
@@ -47,13 +52,14 @@ def load_tif_pdf_plaintext(corpus):
             tif.save()
             print(f"({i+1}/{tot}) Storing PDF/TIF in DB: {pdf.path}")
 
-            # if there is already an OCRUpdate for this PDF, we don't need to run again
+            # if there is already an OCRUpdate for this PDF, not much left to do
             try:
                 exists = OCRUpdate.objects.get(pdf=pdf)
                 continue
             except ObjectDoesNotExist:
                 pass
 
+            # there is no OCRUpdate for this code; therefore we need to build and save it
             plaintext = ocr_engine.image_to_string(
                 Image.open(tif_path),
                 lang=lang_chosen,
@@ -64,6 +70,7 @@ def load_tif_pdf_plaintext(corpus):
             )
             print(f"Storing OCR result for {tif_path} in DB...")
             ocr.save()
+            # store the result as buzz plaintext corpus for parsing
             store_buzz_raw(plaintext, corpus.slug, pdf_path)
         except IntegrityError:
             print(f"Exists in DB: {pdf.path} /// {tif.path}")
