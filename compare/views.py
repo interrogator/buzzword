@@ -34,7 +34,8 @@ def browse_collection(request, slug):
     template = loader.get_template("compare/sidetoside.html")
     plaintext = get_raw_text_for_ocr(slug, pdf)
     initial_textbox = dict(description=plaintext)
-    form = PostForm(initial={"description": plaintext})
+    commit = f"Update {os.path.splitext(os.path.basename(pdf_path))[0]}"
+    form = PostForm(initial={"description": plaintext, "commit_msg": commit})
     context = {
         "pdf_filepath": "/" + pdf_path,
         # "file_showing": filepath_for_pdf(pdf),
