@@ -60,3 +60,8 @@ p, ul, ol {
 .colour-on div div div {
     background: #a32424;
 }
+
+.martor-field{
+    width:100%;
+    height:350px !important;
+    min-height:100px}

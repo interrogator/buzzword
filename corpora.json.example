@@ -12,6 +12,7 @@
     "url": "https://en.wikipedia.org/wiki/Do_the_Right_Thing",
     "initial_table": {"show": "x", "subcorpora": "file"},
     "initial_query": {"target": "x", "query": "VERB"}
+    "pdfs": null
   },
   "Unabomber Manifesto" : {
     "slug": "manifesto",
@@ -25,5 +26,6 @@
     "date": "1995",
     "load": true,
     "url": "https://en.wikipedia.org/wiki/Ted_Kaczynski#Industrial_Society_and_Its_Future"
+    "pdfs": null
   }
 }

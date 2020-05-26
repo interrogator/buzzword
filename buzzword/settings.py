@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 import os
+import tempfile
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
 
@@ -18,8 +19,6 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 50000000
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# static files in here
-# STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
@@ -39,6 +38,7 @@ INSTALLED_APPS = [
     "dpd_static_support",
     "start.apps.StartConfig",
     "explore.apps.ExploreConfig",
+    "compare.apps.CompareConfig",
     "django_plotly_dash.apps.DjangoPlotlyDashConfig",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "guardian",
     "accounts",
+    "martor",
 ]
 
 STATICFILES_FINDERS = [
@@ -116,6 +117,33 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "buzzword.wsgi.application"
 
+# from https://github.com/agusmakmun/django-markdown-editor
+MARTOR_ENABLE_CONFIGS = {
+    "emoji": False,  # to enable/disable emoji icons.
+    "imgur": False,  # to enable/disable imgur/custom uploader.
+    "mention": False,  # to enable/disable mention
+    "jquery": False,  # to include/revoke jquery (require for admin default django)
+    "living": False,  # to enable/disable live updates in preview
+    "spellcheck": False,  # to enable/disable spellcheck in form textareas
+    "hljs": False,  # to enable/disable hljs highlighting in preview
+}
+# don't know why it wants bools as strings...
+MARTOR_ENABLE_CONFIGS = {k: str(v).lower() for k, v in MARTOR_ENABLE_CONFIGS.items()}
+
+MARTOR_MARKDOWN_EXTENSIONS = [
+    "markdown.extensions.extra",
+    "markdown.extensions.nl2br",
+    #'markdown.extensions.smarty',
+    #'markdown.extensions.fenced_code',
+    # Custom markdown extensions.
+    #'martor.extensions.urlize',
+    #'martor.extensions.del_ins',    # ~~strikethrough~~ and ++underscores++
+    #'martor.extensions.mention',    # to parse markdown mention
+    #'martor.extensions.emoji',      # to parse markdown emoji
+    #'martor.extensions.mdx_video',  # to parse embed/iframe video
+]
+
+# CSRF_COOKIE_HTTPONLY = False
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
@@ -160,14 +188,6 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/2.2/howto/static-files/
-PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
-
-STATICFILES_DIRS = (os.path.join(PROJECT_ROOT, "static"),)
-STATIC_URL = "/static/"
-
 PLOTLY_DASH = {
     # Route used for the message pipe websocket connection
     "ws_route": "dpd/ws/channel",
@@ -186,3 +206,10 @@ PLOTLY_DASH = {
     # Flag controlling local serving of assets
     "serve_locally": False,
 }
+
+
+STATIC_URL = "/static/"
+STATICFILES_DIRS = ["static"]
+MEDIA_URL = "/media/"
+STATIC_ROOT = os.path.join(tempfile.gettempdir(), "buzzword_static")
+MEDIA_ROOT = os.path.join(tempfile.gettempdir(), "buzzword_media")

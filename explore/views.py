@@ -3,6 +3,7 @@ from django.shortcuts import redirect, render
 from explore.models import Corpus
 from explorer.parts.main import load_layout
 from explorer.parts.strings import _slug_from_name
+from .forms import UploadCorpusForm
 
 
 def _make_path(slug):
@@ -33,13 +34,6 @@ def explore(request, slug):
 
 
 def upload(request):
-    class UploadCorpusForm(forms.ModelForm):
-        class Meta:
-            model = Corpus
-            fields = ["name", "desc", "language", "date", "url"]
-
-        corpus_file = forms.FileField()
-
     if request.method == "POST":
         form = UploadCorpusForm(request.POST, request.FILES)
         if form.is_valid():

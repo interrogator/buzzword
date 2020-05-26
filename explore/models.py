@@ -48,6 +48,7 @@ class Corpus(models.Model):
     initial_query = models.TextField(null=True, blank=True)
     initial_table = models.TextField(null=True, blank=True)
     parsed = models.BooleanField(default=False)
+    pdfs = models.BooleanField(null=True, default=False)
 
     @classmethod
     def from_json(cls, jsondata, corpus_name):
@@ -66,6 +67,7 @@ class Corpus(models.Model):
         date = datetime.datetime.strptime(jsondata.get("date", "1900"), "%Y").date()
         load = jsondata.get("load", True)
         url = jsondata.get("url")
+        pdfs = jsondata.get("pdfs")
         initial_query = _string_or_none(jsondata.get("initial_query"))
         initial_table = _string_or_none(jsondata.get("initial_table"))
 
@@ -95,6 +97,7 @@ class Corpus(models.Model):
             initial_query=initial_query,
             initial_table=initial_table,
             parsed=True,  # assuming all files provided this way are already parsed
+            pdfs=pdfs,
         )
         corp.save()
 
