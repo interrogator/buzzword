@@ -1,7 +1,8 @@
 import os
-from .utils import _get_tif_paths
+from .utils import _get_tif_paths, store_buzz_raw
 from .models import PDF, OCRUpdate, TIF
 from django.db import IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 import pyocr
 
@@ -9,39 +10,60 @@ from PIL import Image
 
 
 def _get_ocr_engine(lang):
+    """
+    todo: handle english and other spacy languages
+
+    * add to tessdata
+    * make a mapping of language names to tess models
+    """
     tools = pyocr.get_available_tools()
-    print("tools", tools)
     tool = tools[0]
     langs = tool.get_available_languages()
-    print("Available languages: %s" % ", ".join(langs))
     lang = langs[0]
     return tool, "deu_frak2"
 
 
 def load_tif_pdf_plaintext(corpus):
-    paths = _get_tif_paths(corpus.slug)
+    """
+    From TIF files, convert to PDF for display, and get OCR
+    via pyocr/tesseract
+
+    todo: configure multilingual support
+    """
+    tif_paths = _get_tif_paths(corpus.slug)
     ocr_engine, lang_chosen = _get_ocr_engine(corpus.language.name)
-    for i, path in enumerate(paths):
-        name = os.path.basename(path)
+    tot = len(tif_paths)
+    for i, tif_path in enumerate(tif_paths):
+        pdf_path = tif_path.replace(".tif", ".pdf")
+        name = os.path.basename(tif_path)
         name = os.path.splitext(name)[0]
-        image = Image.open(path)
-        pdf_path = path.replace(".tif", ".pdf")
-        image.save(pdf_path)
+        if not os.path.isfile(pdf_path):
+            image = Image.open(tif_path)
+            image.save(pdf_path)
         pdf = PDF(name=name, num=i, path=pdf_path, slug=corpus.slug)
-        tif = TIF(name=name, num=i, path=path, slug=corpus.slug)
+        tif = TIF(name=name, num=i, path=tif_path, slug=corpus.slug)
         try:
             pdf.save()
             tif.save()
-            print(f"Storing PDF/TIF in DB: {pdf.path}")
+            print(f"({i+1}/{tot}) Storing PDF/TIF in DB: {pdf.path}")
+
+            # if there is already an OCRUpdate for this PDF, we don't need to run again
+            try:
+                exists = OCRUpdate.objects.get(pdf=pdf)
+                continue
+            except ObjectDoesNotExist:
+                pass
+
             plaintext = ocr_engine.image_to_string(
-                Image.open(path),
+                Image.open(tif_path),
                 lang=lang_chosen,
                 builder=pyocr.builders.TextBuilder(),
             )
             ocr = OCRUpdate(
                 slug=corpus.slug, commit_msg="OCR result", text=plaintext, pdf=pdf
             )
-            print(f"Storing OCR result in DB: {plaintext[:100]}...")
+            print(f"Storing OCR result for {tif_path} in DB...")
             ocr.save()
+            store_buzz_raw(plaintext, corpus.slug, pdf_path)
         except IntegrityError:
             print(f"Exists in DB: {pdf.path} /// {tif.path}")

@@ -9,17 +9,12 @@ from django.http import FileResponse, HttpResponse
 from django.shortcuts import render
 from django.template import loader
 
-
-from .forms import PostForm, SubmitForm
-from .utils import (
-    markdown_to_buzz_input,
-    get_raw_text_for_ocr,
-    _get_tif_paths,
-)
-
 import pyocr
 
+from .forms import PostForm, SubmitForm
 from .models import PDF, OCRUpdate
+from .utils import markdown_to_buzz_input, _get_tif_paths, store_buzz_raw
+
 from explore.models import Corpus
 
 
@@ -38,7 +33,8 @@ def browse_collection(request, slug):
     Use Django's pagination for handling PDFs
     Use martor for the markdown editor
     """
-    lang = Corpus.objects.get(slug=slug).language.name
+    corpus = Corpus.objects.get(slug=slug)
+    lang = corpus.language.name
     all_pdfs = PDF.objects.all()
     paginator = Paginator(all_pdfs, 1)
     page_number = request.GET.get("page", 1)
@@ -74,7 +70,8 @@ def browse_collection(request, slug):
         if form.is_valid() and not error:
             new_text = form.cleaned_data["description"]
             commit = form.cleaned_data["commit_msg"]
-            buzz_raw_text = markdown_to_buzz_input(new_text)
+            buzz_raw_text = markdown_to_buzz_input(new_text, slug)
+            store_buzz_raw(buzz_raw_text, slug, pdf_path)
             # todo: handle submitted changes properly
             updated = OCRUpdate(slug=slug, commit_msg=commit, text=new_text, pdf=pdf)
             updated.save()
