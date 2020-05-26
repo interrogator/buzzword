@@ -37,7 +37,7 @@ def store_buzz_raw(raw, slug, pdf_path, corpus_path=None):
     """
     # todo: should it go into static?
     base = f"uploads/{slug}"
-    os.makedirs(base, exists_ok=True)
+    os.makedirs(base, exist_ok=True)
     filename = os.path.basename(pdf_path).replace(".pdf", ".txt")
     with open(os.path.join(base, filename), "w") as fo:
         fo.write(raw)
