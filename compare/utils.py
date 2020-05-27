@@ -5,8 +5,11 @@ import os
 import re
 
 from buzz import Corpus as BuzzCorpus
+from django.conf import settings
+
 from explore.models import Corpus
 from .models import OCRUpdate, PDF
+
 
 # from django.core.exceptions import ObjectDoesNotExist
 
@@ -76,5 +79,69 @@ def dump_latest():
 
 
 def _is_meaningful(plaintext):
+    """
+    Determine if an OCR page contains something worthwhile
+    """
     found = re.findall(MEANINGFUL, plaintext)
     return len(found) >= THRESHOLD
+
+
+def _handle_page_numbers(text):
+    """
+    Attempt to make page-level metadata containing page and header
+    """
+    # if no handling, just return text
+    if settings.COMPARE_HANDLE_PAGE_NUMBERS is False:
+        return text
+    # get first and maybe last line as list
+    lines = [i.strip() for i in text.splitlines() if i.strip()]
+    if not lines:
+        return text
+    if len(lines) == 1:
+        lines = [lines[0]]
+    else:
+        lines = [lines[0], lines[-1]]
+
+    # if we find page_number, it goes here
+    page_number = None
+    # page number lines to remove if set to remove
+    ix_to_delete = set()
+    # if we find a header beside the page number it goes here
+    header = ""
+    # lines is just the first and last, stripped
+    for i, line in enumerate(lines):
+        # if it's numerical, we found it. either store for deletion
+        # or remember it as page_number
+        if line.isnumerical():
+            if settings.COMPARE_HANDLE_PAGE_NUMBERS is None:
+                ix_to_delete.add(i)
+                continue
+            else:
+                page_number = line
+                ix_to_delete.add(i)
+                break
+        # maybe there's a header beside the page number
+        sublines = [(ii, n) for ii, n in enumerate(line.split())]
+        for ix, part in sublines:
+            # if there is a numerical part in the page numbering,
+            if part.strip().isnumerical():
+                # then get that from the sublist
+                page_number = sublines.pop(ix).strip()
+        # if we're on header, not footer, we may have a header!
+        if not i:
+            header = " ".join(sublines)
+        # footer via: elif i == 1: ...
+
+    # build header if we have it
+    if header:
+        header = f'header="{header.strip()}"'
+
+    # settings todo: right now you only get header detection if page detection
+    # and if page number found!
+    if page_number is not None and settings.COMPARE_HANDLE_PAGE_NUMBERS:
+        form = f"<meta {header}page={page_number}/>\n"
+        return form + text
+
+    # if we want the page numbers REMOVED
+    cut = [x for i, x in enumerate(text.splitlines()) if i not in ix_to_delete]
+    return "\n".join(cut)

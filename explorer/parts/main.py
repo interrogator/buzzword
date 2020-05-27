@@ -18,7 +18,6 @@ from .helpers import (
 )
 from .tabs import make_explore_page
 
-from compare.load import load_tif_pdf_plaintext
 
 app = DjangoDash("buzzword", suppress_callback_exceptions=True)
 
@@ -81,8 +80,6 @@ def _get_corpora(corpus_meta, multiprocess=False):
             display = json.loads(corpus.initial_table)
         else:
             display = dict(show="p", subcorpora="file")
-        if conf["pdfs"]:
-            load_tif_pdf_plaintext(corpus)
         print(f"Generating an initial table for {corpus.name} using {display}")
         initial_table = buzz_corpus.table(**display)
         corpora[corpus.slug] = buzz_corpus
@@ -134,3 +131,4 @@ def load_corpora():
         for corpus in CORPUS_META:
             if not corpus.disabled:
                 load_layout(corpus.slug, set_and_register=False)
+    return CORPUS_META

@@ -1,5 +1,5 @@
 import os
-from .utils import _get_tif_paths, store_buzz_raw, _is_meaningful
+from .utils import _get_tif_paths, store_buzz_raw, _is_meaningful, _handle_page_numbers
 from .models import PDF, OCRUpdate, TIF
 from django.db import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
@@ -76,6 +76,9 @@ def load_tif_pdf_plaintext(corpus):
                 lang=lang_chosen,
                 builder=pyocr.builders.TextBuilder(),
             )
+
+            plaintext = _handle_page_numbers(plaintext)
+
             if not _is_meaningful(plaintext):
                 plaintext = '<meta blank="true"/>'
             ocr = OCRUpdate(

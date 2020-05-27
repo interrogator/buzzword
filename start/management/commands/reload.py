@@ -1,7 +1,8 @@
 import os
 from importlib import import_module
 
-import explorer.parts.main
+from explorer.parts.main import load_corpora
+from compare.load import load_tif_pdf_plaintext
 from django.apps import apps
 from django.contrib.staticfiles.management.commands.runserver import (
     Command as RunServerCommand,
@@ -58,6 +59,8 @@ class Command(RunServerCommand):
         if os.environ.get(
             "RUN_MAIN", False
         ):  # https://code.djangoproject.com/ticket/8085
-            explorer.parts.main.load_corpora()
-
+            corpus_meta = load_corpora()
+            for corpus in corpus_meta:
+                if corpus.pdfs:
+                    load_tif_pdf_plaintext(corpus)
         super().run(**options)
