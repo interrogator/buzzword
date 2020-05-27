@@ -213,3 +213,9 @@ STATICFILES_DIRS = ["static"]
 MEDIA_URL = "/media/"
 STATIC_ROOT = os.path.join(tempfile.gettempdir(), "buzzword_static")
 MEDIA_ROOT = os.path.join(tempfile.gettempdir(), "buzzword_media")
+
+
+# if true, do <meta page=n/>
+# if false, leave as is
+# if None, remove them
+COMPARE_HANDLE_PAGE_NUMBERS = True

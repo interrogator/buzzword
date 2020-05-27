@@ -44,8 +44,6 @@ def load_tif_pdf_plaintext(corpus):
             image = Image.open(tif_path)
             image.save(pdf_path)
 
-        PDF.objects.get(slug=corpus.slug, num=i)
-
         # todo: use get_or_create
         pdf, pdf_created = PDF.objects.get_or_create(
             name=name, num=i, path=pdf_path, slug=corpus.slug

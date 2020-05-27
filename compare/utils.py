@@ -112,7 +112,7 @@ def _handle_page_numbers(text):
     for i, line in enumerate(lines):
         # if it's numerical, we found it. either store for deletion
         # or remember it as page_number
-        if line.isnumerical():
+        if line.isnumeric():
             if settings.COMPARE_HANDLE_PAGE_NUMBERS is None:
                 ix_to_delete.add(i)
                 continue
@@ -120,28 +120,40 @@ def _handle_page_numbers(text):
                 page_number = line
                 ix_to_delete.add(i)
                 break
-        # maybe there's a header beside the page number
+        # maybe there's a header printbeside the page number
         sublines = [(ii, n) for ii, n in enumerate(line.split())]
         for ix, part in sublines:
             # if there is a numerical part in the page numbering,
-            if part.strip().isnumerical():
+            if part.strip().isnumeric():
                 # then get that from the sublist
-                page_number = sublines.pop(ix).strip()
+                page_number = sublines.pop(ix)[1].strip()
+                ix_to_delete.add(i)
+                break
         # if we're on header, not footer, we may have a header!
         if not i:
-            header = " ".join(sublines)
+            header = " ".join([x[-1] for x in sublines])
+            header = header.replace("'", "").replace('"', "")
+            header = "".join([x for x in header if x.isalnum() or x.isspace()])
+            if not header.strip():
+                header = None
+            else:
+                ix_to_delete.add(i)
         # footer via: elif i == 1: ...
 
     # build header if we have it
     if header:
-        header = f'header="{header.strip()}"'
+        header = f'header="{header.strip()}" '
 
     # settings todo: right now you only get header detection if page detection
     # and if page number found!
+    form = None
     if page_number is not None and settings.COMPARE_HANDLE_PAGE_NUMBERS:
-        form = f"<meta {header}page={page_number}/>\n"
-        return form + text
+        form = f"<meta {header}page={page_number} />\n"
+    elif header and page_number is None and settings.COMPARE_HANDLE_PAGE_NUMBERS:
+        form = f"<meta {header}/>\n"
 
     # if we want the page numbers REMOVED
     cut = [x for i, x in enumerate(text.splitlines()) if i not in ix_to_delete]
+    if form:
+        cut = [form] + cut
     return "\n".join(cut)
