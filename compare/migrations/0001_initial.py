@@ -8,16 +8,23 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='OCRText',
+            name="OCRText",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('content', martor.models.MartorField()),
-                ('commit_msg', models.CharField(blank=True, max_length=255)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("content", martor.models.MartorField()),
+                ("commit_msg", models.CharField(blank=True, max_length=255)),
             ],
         ),
     ]

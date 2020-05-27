@@ -133,14 +133,14 @@ MARTOR_ENABLE_CONFIGS = {k: str(v).lower() for k, v in MARTOR_ENABLE_CONFIGS.ite
 MARTOR_MARKDOWN_EXTENSIONS = [
     "markdown.extensions.extra",
     "markdown.extensions.nl2br",
-    #'markdown.extensions.smarty',
-    #'markdown.extensions.fenced_code',
-    # Custom markdown extensions.
-    #'martor.extensions.urlize',
-    #'martor.extensions.del_ins',    # ~~strikethrough~~ and ++underscores++
-    #'martor.extensions.mention',    # to parse markdown mention
-    #'martor.extensions.emoji',      # to parse markdown emoji
-    #'martor.extensions.mdx_video',  # to parse embed/iframe video
+    # 'markdown.extensions.smarty',
+    # 'markdown.extensions.fenced_code',
+    #  Custom markdown extensions.
+    # 'martor.extensions.urlize',
+    # 'martor.extensions.del_ins',    # ~~strikethrough~~ and ++underscores++
+    # 'martor.extensions.mention',    # to parse markdown mention
+    # 'martor.extensions.emoji',      # to parse markdown emoji
+    # 'martor.extensions.mdx_video',  # to parse embed/iframe video
 ]
 
 # CSRF_COOKIE_HTTPONLY = False

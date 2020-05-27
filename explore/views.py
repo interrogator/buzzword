@@ -1,6 +1,6 @@
-from django import forms
 from django.shortcuts import redirect, render
-from explore.models import Corpus
+
+# from explore.models import Corpus
 from explorer.parts.main import load_layout
 from explorer.parts.strings import _slug_from_name
 from .forms import UploadCorpusForm

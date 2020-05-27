@@ -6,12 +6,11 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('compare', '0005_auto_20200525_1902'),
+        ("compare", "0005_auto_20200525_1902"),
     ]
 
     operations = [
         migrations.AlterUniqueTogether(
-            name='ocrupdate',
-            unique_together={('slug', 'timestamp', 'pdf')},
+            name="ocrupdate", unique_together={("slug", "timestamp", "pdf")},
         ),
     ]

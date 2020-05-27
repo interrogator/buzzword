@@ -5,8 +5,9 @@ import os
 
 from buzz import Corpus as BuzzCorpus
 from explore.models import Corpus
-from .models import OCRUpdate
-from django.core.exceptions import ObjectDoesNotExist
+from .models import OCRUpdate, PDF
+
+# from django.core.exceptions import ObjectDoesNotExist
 
 
 def markdown_to_buzz_input(markdown):

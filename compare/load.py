@@ -18,8 +18,8 @@ def _get_ocr_engine(lang):
     """
     tools = pyocr.get_available_tools()
     tool = tools[0]
-    langs = tool.get_available_languages()
-    lang = langs[0]
+    # langs = tool.get_available_languages()
+    # lang = langs[0]
     return tool, "deu_frak2"
 
 
@@ -44,22 +44,30 @@ def load_tif_pdf_plaintext(corpus):
             image = Image.open(tif_path)
             image.save(pdf_path)
 
+        PDF.objects.get(slug=corpus.slug, num=i)
+
         # todo: use get_or_create
-        pdf = PDF(name=name, num=i, path=pdf_path, slug=corpus.slug)
-        tif = TIF(name=name, num=i, path=tif_path, slug=corpus.slug)
+        pdf = PDF.objects.get_or_create(
+            name=name, num=i, path=pdf_path, slug=corpus.slug
+        )
+        tif = TIF.objects.get_or_create(
+            name=name, num=i, path=tif_path, slug=corpus.slug
+        )
+
         try:
             pdf.save()
             tif.save()
+
             print(f"({i+1}/{tot}) Storing PDF/TIF in DB: {pdf.path}")
 
             # if there is already an OCRUpdate for this PDF, not much left to do
             try:
-                exists = OCRUpdate.objects.get(pdf=pdf)
+                OCRUpdate.objects.get(pdf=pdf)
                 continue
             except ObjectDoesNotExist:
                 pass
 
-            # there is no OCRUpdate for this code; therefore we need to build and save it
+            # there is no OCRUpdate for this code; therefore we build and save it
             plaintext = ocr_engine.image_to_string(
                 Image.open(tif_path),
                 lang=lang_chosen,

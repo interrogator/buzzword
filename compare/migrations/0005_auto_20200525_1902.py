@@ -7,35 +7,40 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('compare', '0004_auto_20200525_1446'),
+        ("compare", "0004_auto_20200525_1446"),
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='post',
-            name='title',
-        ),
-        migrations.RemoveField(
-            model_name='post',
-            name='wiki',
-        ),
+        migrations.RemoveField(model_name="post", name="title",),
+        migrations.RemoveField(model_name="post", name="wiki",),
         migrations.AddField(
-            model_name='post',
-            name='commit_msg',
+            model_name="post",
+            name="commit_msg",
             field=models.CharField(blank=True, max_length=200),
         ),
         migrations.CreateModel(
-            name='OCRUpdate',
+            name="OCRUpdate",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('slug', models.SlugField(max_length=255)),
-                ('commit_msg', models.CharField(blank=True, max_length=200)),
-                ('timestamp', models.DateTimeField(auto_now_add=True)),
-                ('text', models.TextField()),
-                ('pdf', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='compare.PDF')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("slug", models.SlugField(max_length=255)),
+                ("commit_msg", models.CharField(blank=True, max_length=200)),
+                ("timestamp", models.DateTimeField(auto_now_add=True)),
+                ("text", models.TextField()),
+                (
+                    "pdf",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT, to="compare.PDF"
+                    ),
+                ),
             ],
-            options={
-                'unique_together': {('slug', 'timestamp')},
-            },
+            options={"unique_together": {("slug", "timestamp")}},
         ),
     ]

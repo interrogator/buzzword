@@ -6,13 +6,11 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('compare', '0006_auto_20200525_1944'),
+        ("compare", "0006_auto_20200525_1944"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='ocrupdate',
-            name='text',
-            field=models.TextField(blank=True),
+            model_name="ocrupdate", name="text", field=models.TextField(blank=True),
         ),
     ]

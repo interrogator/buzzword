@@ -6,12 +6,9 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('compare', '0003_pdf'),
+        ("compare", "0003_pdf"),
     ]
 
     operations = [
-        migrations.AlterUniqueTogether(
-            name='pdf',
-            unique_together={('slug', 'num')},
-        ),
+        migrations.AlterUniqueTogether(name="pdf", unique_together={("slug", "num")},),
     ]

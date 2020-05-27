@@ -7,18 +7,16 @@ import martor.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('compare', '0007_auto_20200526_1300'),
+        ("compare", "0007_auto_20200526_1300"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='ocrupdate',
-            name='text',
-            field=models.TextField(),
+            model_name="ocrupdate", name="text", field=models.TextField(),
         ),
         migrations.AlterField(
-            model_name='post',
-            name='description',
+            model_name="post",
+            name="description",
             field=martor.models.MartorField(blank=True),
         ),
     ]

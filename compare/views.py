@@ -1,19 +1,15 @@
 import os
-from datetime import datetime
 
 from django.contrib import messages
 from django.contrib.messages import get_messages
 
 from django.core.paginator import Paginator
-from django.http import FileResponse, HttpResponse
-from django.shortcuts import render
+from django.http import HttpResponse
 from django.template import loader
-
-import pyocr
 
 from .forms import PostForm, SubmitForm
 from .models import PDF, OCRUpdate
-from .utils import markdown_to_buzz_input, _get_tif_paths, store_buzz_raw
+from .utils import markdown_to_buzz_input, store_buzz_raw
 
 from explore.models import Corpus
 
@@ -33,8 +29,8 @@ def browse_collection(request, slug):
     Use Django's pagination for handling PDFs
     Use martor for the markdown editor
     """
-    corpus = Corpus.objects.get(slug=slug)
-    lang = corpus.language.name
+    # corpus = Corpus.objects.get(slug=slug)
+    # lang = corpus.language.name
     all_pdfs = PDF.objects.all()
     paginator = Paginator(all_pdfs, 1)
     page_number = request.GET.get("page", 1)
@@ -47,7 +43,6 @@ def browse_collection(request, slug):
     this_pdf = OCRUpdate.objects.filter(pdf=pdf)
     plaintext = this_pdf.latest("timestamp").text
 
-    initial_textbox = dict(description=plaintext)
     default_commit = f"Update {os.path.splitext(os.path.basename(pdf_path))[0]}"
     form = PostForm(initial={"description": plaintext, "commit_msg": default_commit})
     context = {
