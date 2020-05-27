@@ -2,12 +2,17 @@
 Random utilities this app needs
 """
 import os
+import re
 
 from buzz import Corpus as BuzzCorpus
 from explore.models import Corpus
 from .models import OCRUpdate, PDF
 
 # from django.core.exceptions import ObjectDoesNotExist
+
+# there needs to be at least 3 occurrences of this pattern for a text to not be junk
+MEANINGFUL = r"[A-Za-z0-9]{3}"
+THRESHOLD = 3
 
 
 def markdown_to_buzz_input(markdown):
@@ -68,3 +73,8 @@ def dump_latest():
         corp.path = parsed.path
         corp.save()
         return parsed
+
+
+def _is_meaningful(plaintext):
+    found = re.findall(MEANINGFUL, plaintext)
+    return len(found) >= THRESHOLD

@@ -1,5 +1,5 @@
 import os
-from .utils import _get_tif_paths, store_buzz_raw
+from .utils import _get_tif_paths, store_buzz_raw, _is_meaningful
 from .models import PDF, OCRUpdate, TIF
 from django.db import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
@@ -47,10 +47,10 @@ def load_tif_pdf_plaintext(corpus):
         PDF.objects.get(slug=corpus.slug, num=i)
 
         # todo: use get_or_create
-        pdf = PDF.objects.get_or_create(
+        pdf, pdf_created = PDF.objects.get_or_create(
             name=name, num=i, path=pdf_path, slug=corpus.slug
         )
-        tif = TIF.objects.get_or_create(
+        tif, tif_created = TIF.objects.get_or_create(
             name=name, num=i, path=tif_path, slug=corpus.slug
         )
 
@@ -58,14 +58,17 @@ def load_tif_pdf_plaintext(corpus):
             pdf.save()
             tif.save()
 
-            print(f"({i+1}/{tot}) Storing PDF/TIF in DB: {pdf.path}")
+            print(f"({i+1}/{tot}) Stored PDF/TIF in DB: {pdf.path}")
 
             # if there is already an OCRUpdate for this PDF, not much left to do
             try:
                 OCRUpdate.objects.get(pdf=pdf)
+                print(f"OCRUpdate already found for {tif.path}")
                 continue
             except ObjectDoesNotExist:
                 pass
+
+            print(f"Doing OCR for {tif.path}")
 
             # there is no OCRUpdate for this code; therefore we build and save it
             plaintext = ocr_engine.image_to_string(
@@ -73,6 +76,8 @@ def load_tif_pdf_plaintext(corpus):
                 lang=lang_chosen,
                 builder=pyocr.builders.TextBuilder(),
             )
+            if not _is_meaningful(plaintext):
+                plaintext = '<meta blank="true"/>'
             ocr = OCRUpdate(
                 slug=corpus.slug, commit_msg="OCR result", text=plaintext, pdf=pdf
             )
