@@ -32,7 +32,7 @@ setup(
     license="MIT",
     keywords=["nlp", "linguistics", "corpora"],
     install_requires=[
-        "buzz>=3.1.3",
+        "buzz>=3.1.5",
         "dash-core-components==1.9.0",
         "dash-daq==0.5.0",
         "dash-html-components==1.0.3",
