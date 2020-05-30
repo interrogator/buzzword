@@ -32,7 +32,7 @@ setup(
     license="MIT",
     keywords=["nlp", "linguistics", "corpora"],
     install_requires=[
-        "buzz>=3.1.5",
+        "buzz>=4.0.0",
         "django-guardian==2.2.0",
         "martor==1.4.9",
         "pyocr==0.7.2",
