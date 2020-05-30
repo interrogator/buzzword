@@ -1,0 +1,49 @@
+{% load static %}
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+    <span>
+        <a class="navbar-brand" href="/">
+            <img height="42" src="/static/bolt.jpg" width="38" style="display: inline-block; vertical-align: middle; height: 35px;">
+            {{ corpus.name }}
+        </a>
+    </span>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
+            aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item {% if navbar == 'home' %}active{% endif %}">
+                <a class="nav-link" href="/">Home</a>
+            </li>
+            <li class="nav-item {% if navbar == 'compare' %}active{% endif %}">
+                <a class="nav-link" href="/compare/{{ corpus.slug }}">Browse/correct</a>
+            </li>
+            <li class="nav-item {% if navbar == 'explore' %}active{% endif %}">
+                <a class="nav-link" href="/explore/{{ corpus.slug }}">Explore/analyse</a>
+            </li>
+            <li class="nav-item {% if navbar == 'example' %}active{% endif %}">
+                <a class="nav-link" href="/example/{{ corpus.slug }}">Example investigation</a>
+            </li>
+            {% if not user.is_authenticated %}
+                <li class="nav-item {% if navbar == 'signup' %}active{% endif %}">
+                    <a class="nav-link" href="{% url 'signup' %}">Register</a>
+                </li>
+            {% endif %}
+        </ul>
+        {% if user.is_authenticated %}
+            <ul class="navbar-nav mr-right">
+                <li class="nav-item">
+                    <a class="nav-link">Logged in as {{ user.username }}</a>
+                </li>
+                <a class="btn btn-default" href="{% url 'logout' %}">Logout</a>
+            </ul>
+        {% else %}
+            <form class="form-inline my-2 my-lg-0" action="{% url 'login' %}" method="POST">
+                {% csrf_token %}
+                {{ login_form.as_p }}
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+        {% endif %}
+    </div>
+</nav>

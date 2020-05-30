@@ -2,15 +2,17 @@
 
 {% block title %}buzzword: home{% endblock %}
 
-
 {% block content %}
 
 <p>
-    On this page will be a navbar, introduction, table of corpora, and potentially the upload/parse space
+<strong>buzzword</strong> is a tool for creating and exploring language corpora.
+
 </p>
 <h2>Corpora</h2>
 <br>
-<br>
+<p>Some corpora have been produced via OCR over PDF files. For these corpora, it is possible to browse the original source texts, and to submit corrections to the OCR, which is often far from perfect, especially on old text.
+
+
 {% for corpus in corpora %}
     <a href="explore/{{ corpus.slug }}">{{ corpus.name }}</a>
     {% if corpus.pdfs %}
@@ -20,4 +22,3 @@
 {% endfor %}
 
 {% endblock %}
-

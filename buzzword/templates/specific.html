@@ -1,0 +1,26 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>{% block title %}buzzword: {{ corpus.name }}{% endblock %}</title>
+    <!-- tab icon -- could use a custom icon for this corpus! -->
+    <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="{% static 'bootstrap.min.css' %}"/>
+    <!-- Optional theme <link rel="stylesheet" href="{% static "bootstrap-theme.min.css" %}"/> -->
+  </head>
+  <body>
+  {% block body %}
+  {% include "specific_nav.html" %}
+  <div class="container" style="margin-top:56px"><!-- 56px is the height of the nav -->
+    {% block content %}
+    {% endblock %}
+    </div>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="{% static 'jquery.min.js' %}"/>
+    <script src="{% static 'popper.min.js' %}"/>
+    <script src="{% static 'bootstrap.min.js' %}"/>
+  {% endblock body %}
+  </body>
+</html>
