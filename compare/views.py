@@ -51,7 +51,8 @@ def browse_collection(request, slug):
         "form": form,
         "page_obj": page_obj,
         "specific_nav": spec == "true",
-        "corpus": Corpus.objects.get(slug=slug)
+        "corpus": Corpus.objects.get(slug=slug),
+        "navbar": "compare"
     }
     # if the user has tried to update the OCR text
     if request.method == "POST":

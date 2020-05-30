@@ -13,8 +13,7 @@
   <link rel="stylesheet" href="{% static 'custom.css' %}"/>
 </head>
 <body>
-{% include "nav.html" %}
-
+{% if specific_nav %} {% include "specific_nav.html" %} {% else %} {% include "nav.html" %} {% endif %}
 {% block content %}{% endblock %}
 
   <script type="text/javascript" src="{% static 'plugins/js/ace.js' %}"></script>
