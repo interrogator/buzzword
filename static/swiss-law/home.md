@@ -1,10 +1,13 @@
+<br><br>
 # Swiss legal history
 
 This site provides an interface for exploring the **Swiss Legal Texts** corpus, which contains Swiss laws written in German between (YEARS).
 
+> Table of 2x2 visualisations here for some visual appeal
+
 ## Browse the collection
 
-The texts have undergone Optical Character Recgonition, so that the data can be explored using digital methods. The OCR process is never perfect, expecially when dealing with older texts. Therefore, while browsing, you can see the current OCR results, and submit corrections if you see any mistakes.
+The texts have undergone [Optical Character Recognition](https://en.wikipedia.org/wiki/Optical_character_recognition), so that the data can be explored using digital methods. The OCR process is never perfect, expecially when dealing with older texts. Therefore, while browsing, you can see the current OCR results, and submit corrections if you see any mistakes.
 
 Using the [Guide for corrections](/guide.html), you can learn how to add metadata to the text
 

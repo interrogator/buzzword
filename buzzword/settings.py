@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "guardian",
     "accounts",
     "martor",
+    "markdownify"
 ]
 
 STATICFILES_FINDERS = [
@@ -219,3 +220,30 @@ MEDIA_ROOT = os.path.join(tempfile.gettempdir(), "buzzword_media")
 # if false, leave as is
 # if None, remove them
 COMPARE_HANDLE_PAGE_NUMBERS = True
+
+MARKDOWNIFY_MARKDOWN_EXTENSIONS = ['markdown.extensions.fenced_code',
+                                   'markdown.extensions.extra']
+
+MARKDOWNIFY_WHITELIST_STYLES = [
+    'color',
+    'font-weight',
+    'font-size',
+]
+
+MARKDOWNIFY_WHITELIST_TAGS = [
+  'a',
+  'h1',
+  'h2',
+  'h3',
+  'abbr',
+  'acronym',
+  'b',
+  'blockquote',
+  'em',
+  'i',
+  'li',
+  'ol',
+  'p',
+  'strong',
+  'ul'
+]

@@ -8,15 +8,15 @@
     <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="{% static 'bootstrap.min.css' %}"/>
-    <!-- Optional theme <link rel="stylesheet" href="{% static "bootstrap-theme.min.css" %}"/> -->
+    <link rel="stylesheet" href="{% static 'custom.css' %}"/>
   </head>
   <body>
   {% block body %}
   {% include "specific_nav.html" %}
-  <div class="container" style="margin-top:56px"><!-- 56px is the height of the nav -->
+  <div class="container" style="margin-top:100px"><!-- 56px is the height of the nav -->
     {% block content %}
     {% endblock %}
-    </div>
+  </div>
     <!-- Latest compiled and minified JavaScript -->
     <script src="{% static 'jquery.min.js' %}"/>
     <script src="{% static 'popper.min.js' %}"/>

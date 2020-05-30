@@ -32,4 +32,4 @@ def start_specific(request, slug):
     corpus = explore.models.Corpus.objects.get(slug=slug)
     content = _get_markdown_content(slug, navbar)
     context = {"corpus": corpus, "navbar": navbar, "content": content}
-    return render(request, f"start/start-{slug}.html", context)
+    return render(request, f"start/{slug}.html", context)
