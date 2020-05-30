@@ -33,6 +33,10 @@ setup(
     keywords=["nlp", "linguistics", "corpora"],
     install_requires=[
         "buzz>=3.1.5",
+        "django-guardian==2.2.0",
+        "martor==1.4.9",
+        "pyocr==0.7.2",
+        "whitenoise==4.1.4",
         "dash-core-components==1.9.0",
         "dash-daq==0.5.0",
         "dash-html-components==1.0.3",
