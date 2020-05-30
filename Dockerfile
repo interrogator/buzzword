@@ -1,7 +1,7 @@
 FROM python:3.7-slim-buster
 
 RUN apt-get update && \
-    apt-get install -y git build-essential nginx
+    apt-get install -y git build-essential nginx tesseract-ocr libtesseract-dev
 
 WORKDIR /
 
