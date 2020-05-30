@@ -50,7 +50,8 @@ def browse_collection(request, slug):
         "pdf_filepath": "/" + pdf_path.replace(".tif", ".pdf"),
         "form": form,
         "page_obj": page_obj,
-        "specific_nav": spec == "true" 
+        "specific_nav": spec == "true",
+        "corpus": Corpus.objects.get(slug=slug)
     }
     # if the user has tried to update the OCR text
     if request.method == "POST":
