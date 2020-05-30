@@ -6,7 +6,7 @@ For *buzzword* corpora, the main goal of making the corrections is to make a dig
 
 For this to work, corrections need to follow a set of guidelines. These are laid out below. All steps are designed to do one or more of the following:
 
-* Increase the accuracy of the parser that will eventually be run
+* Increase the accuracy of the parser that will eventually be run over the corrected dataset
 * Remove unuseful information
 * Add metadata features that can later be used when searching
 
@@ -83,7 +83,7 @@ At the top of pages, sometimes the current section title is printed. This should
 The following day, we ...
 ```
 
-If you need to be more precise, use a `<meta>` tag:
+If you need to be more precise, use a `<meta>` tag. If you don't want the text to be parsed, put it inside the XML tag like so:
 
 ```xml
 <meta section="Chapter two"></meta>
@@ -91,17 +91,29 @@ If you need to be more precise, use a `<meta>` tag:
 Text continues here...
 ```
 
-Note that **`<meta>` tags at the top of a page will be added to all text on that page**, aiding in the process of limiting searches to, or excluding, particular sections.
-
-## Page numbers
-
-These can generally be removed, or, if you want to be able to search using them, add a `<meta>` tag to the top of your page. In the example below, we add both a page feature and a section feature, both of which will be searchable in the resulting corpus.
+If you do want the text to be parsed, make sure it is outside of the tags:
 
 ```xml
-<meta page="6" section="Chapter two"/>
+<meta section=2>Chapter 2</meta>
 
 Text continues here...
 ```
+
+If a `<meta>` tag is the first line of the file, all subsequent data in the file will be tagged with its contents (i.e. it is taken to be a file-level tag). Later, this will aid in the process of limiting searches to, or excluding, particular sections.
+
+## Page numbers
+
+The best way to deal with page numbers is to include them inside a `<meta>` tag to the top of the page. In the example below, we add both a page feature and a section feature, both of which will be searchable in the resulting corpus.
+
+```xml
+<meta page="6" section="Chapter two" />
+
+Text continues here...
+```
+
+Putting the page number inside the XML means that it won't actually get parsed, which is good, as it isn't part of the language content of the document.
+
+By default, the tool tries to automatically locate page numbers and create the `<meta>` tag as the first line. However, it isn't perfect, especially when dealing with things like roman numerals. Feel free to correct any tags that may have been automatically generated.
 
 For page numbers in tables of contents, see below.
 
