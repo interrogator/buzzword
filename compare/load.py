@@ -1,5 +1,5 @@
 import os
-from .utils import _get_tif_paths, store_buzz_raw, _is_meaningful, _handle_page_numbers
+from .utils import store_buzz_raw, _is_meaningful, _handle_page_numbers
 from .models import PDF, OCRUpdate, TIF
 from django.db import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
@@ -8,6 +8,7 @@ import pyocr
 
 from PIL import Image
 
+from buzz import Collection
 
 def _get_ocr_engine(lang):
     """
@@ -32,11 +33,13 @@ def load_tif_pdf_plaintext(corpus):
     todo: save as little as possible here, as OCR is slow!
 
     """
-    tif_paths = _get_tif_paths(corpus.slug)
+    collection = Collection(corpus.path)
     ocr_engine, lang_chosen = _get_ocr_engine(corpus.language.name)
-    tot = len(tif_paths)
-    for i, tif_path in enumerate(tif_paths):
-        pdf_path = tif_path.replace(".tif", ".pdf")
+    tot = len(collection.tiff.files)
+    for i, tif_file in enumerate(collection.tiff.files):
+        tif_path = tif_file.path
+        pdf_path = tif_path.replace('/tiff/', "/pdf/").replace(".tif", ".pdf")
+        os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
         name = os.path.basename(tif_path)
         name = os.path.splitext(name)[0]
         # make pdf if need be
@@ -52,20 +55,36 @@ def load_tif_pdf_plaintext(corpus):
             name=name, num=i, path=tif_path, slug=corpus.slug
         )
 
-        try:
+        if pdf_created:
             pdf.save()
+        if tif_created:
             tif.save()
 
+        if pdf_created or tif_created:
             print(f"({i+1}/{tot}) Stored PDF/TIF in DB: {pdf.path}")
+        if not pdf_created and not tif_created:
+            print(f"Exists in DB: {pdf.path} /// {tif.path}")
 
-            # if there is already an OCRUpdate for this PDF, not much left to do
-            try:
-                OCRUpdate.objects.get(pdf=pdf)
-                print(f"OCRUpdate already found for {tif.path}")
-                continue
-            except ObjectDoesNotExist:
-                pass
+        # if there is already an OCRUpdate for this PDF, not much left to do
+        # todo: fallback to preprocessed/txt ?? otherwise every reload causes
+        # ocr to happen
+        try:
+            OCRUpdate.objects.get(pdf=pdf)
+            print(f"OCRUpdate already found for {tif.path}")
+            continue
+        except ObjectDoesNotExist:
+            pass
 
+        if collection.txt:
+            path = collection.txt.files[i].path
+            print(f"Text file exists at {path}; skipping OCR")
+            with open(path, "r") as fo:
+                plaintext = fo.read()
+            ocr = OCRUpdate(
+                slug=corpus.slug, commit_msg="OCR result", text=plaintext, pdf=pdf
+            )
+            ocr.save()
+        else:
             print(f"Doing OCR for {tif.path}")
 
             # there is no OCRUpdate for this code; therefore we build and save it
@@ -74,7 +93,6 @@ def load_tif_pdf_plaintext(corpus):
                 lang=lang_chosen,
                 builder=pyocr.builders.TextBuilder(),
             )
-
             plaintext = _handle_page_numbers(plaintext)
 
             if not _is_meaningful(plaintext):
@@ -86,5 +104,3 @@ def load_tif_pdf_plaintext(corpus):
             ocr.save()
             # store the result as buzz plaintext corpus for parsing
             store_buzz_raw(plaintext, corpus.slug, pdf_path)
-        except IntegrityError:
-            print(f"Exists in DB: {pdf.path} /// {tif.path}")

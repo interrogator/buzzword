@@ -5,6 +5,8 @@ from buzz.constants import LANGUAGES, AVAILABLE_MODELS
 from django.db import models
 from explorer.parts.strings import _slug_from_name
 
+from django.db import IntegrityError
+
 # get language choices from buzz. we use benepar because SPACY_LANGUAGES
 # contains information about which parser model to use, we don't want that
 LANGUAGE_CHOICES = [
@@ -19,7 +21,8 @@ def _string_or_none(jsonfield):
 
 
 class Language(models.Model):
-    name = models.CharField(max_length=255)
+    short = models.CharField(max_length=10)
+    name = models.CharField(max_length=255, unique=True)
 
     def __str__(self):
         return self.name
@@ -40,13 +43,13 @@ class Corpus(models.Model):
     desc = models.TextField(default="", blank=True)
     length = models.BigIntegerField(null=True)
     add_governor = models.BooleanField(null=True)
-    # drop_columns = array -> needs to be relation
     disabled = models.BooleanField(default=False)
     date = models.DateField(null=True, blank=True)
     load = models.BooleanField(default=True)
     url = models.URLField(max_length=255, null=True, blank=True)
     initial_query = models.TextField(null=True, blank=True)
     initial_table = models.TextField(null=True, blank=True)
+    drop_columns = models.TextField(null=True, blank=True)
     parsed = models.BooleanField(default=False)
     pdfs = models.BooleanField(null=True, default=False)
 
@@ -58,8 +61,7 @@ class Corpus(models.Model):
             return corp
         except cls.DoesNotExist:
             pass
-        language = Language(name=jsondata.get("language"))
-        language.save()
+        language = Language.objects.get(short=jsondata.get("language"))
         path = jsondata.get("path")
         desc = jsondata.get("desc", "")
         length = jsondata.get("length")
@@ -70,6 +72,7 @@ class Corpus(models.Model):
         pdfs = jsondata.get("pdfs")
         initial_query = _string_or_none(jsondata.get("initial_query"))
         initial_table = _string_or_none(jsondata.get("initial_table"))
+        drop_columns = _string_or_none(jsondata.get("drop_columns"))
 
         has_error = False
         if not path:
@@ -98,16 +101,8 @@ class Corpus(models.Model):
             initial_table=initial_table,
             parsed=True,  # assuming all files provided this way are already parsed
             pdfs=pdfs,
+            drop_columns=drop_columns
         )
         corp.save()
 
-        for drop_col in jsondata.get("drop_columns", []):
-            col = DropColumn(corpus=corp, column_name=drop_col)
-            col.save()
-
         return corp
-
-
-class DropColumn(models.Model):
-    corpus = models.ForeignKey(Corpus, on_delete=models.CASCADE)
-    column_name = models.CharField(max_length=255)

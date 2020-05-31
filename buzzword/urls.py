@@ -10,7 +10,7 @@ urlpatterns = (
         path("compare/", include("compare.urls")),
         path("explore/", include("explore.urls")),
         path("martor/", include("martor.urls")),
-        path("admin/", admin.site.urls),
+        path("admin/login/", admin.site.urls),
         path("resources/", include("django_plotly_dash.urls")),
     ]
     + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

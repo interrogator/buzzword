@@ -38,7 +38,8 @@ def browse_collection(request, slug):
     page_number = int(page_number)
     page_obj = paginator.get_page(page_number)
     pdf = all_pdfs.get(slug=slug, num=page_number - 1)
-    pdf_path = pdf.path
+    pdf_path = os.path.relpath(pdf.path)
+    print("PDF EXPECTED AT", pdf_path, pdf.path)
     template = loader.get_template("compare/sidetoside.html")
 
     this_pdf = OCRUpdate.objects.filter(pdf=pdf)
@@ -72,7 +73,7 @@ def browse_collection(request, slug):
             buzz_raw_text = markdown_to_buzz_input(new_text, slug)
             store_buzz_raw(buzz_raw_text, slug, pdf_path)
             # todo: handle submitted changes properly
-            updated = OCRUpdate(slug=slug, commit_msg=commit, text=new_text, pdf=pdf)
+            updated = OCRUpdate(slug=slug, commit_msg=commit, text=new_text, previous=plaintext, pdf=pdf)
             updated.save()
             initial = {"description": new_text, "commit_msg": default_commit}
             context["form"] = PostForm(initial=initial)

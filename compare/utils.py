@@ -5,6 +5,7 @@ import os
 import re
 
 from buzz import Corpus as BuzzCorpus
+from buzz import Collection
 from django.conf import settings
 
 from explore.models import Corpus
@@ -18,7 +19,7 @@ MEANINGFUL = r"[A-Za-z0-9]{3}"
 THRESHOLD = 3
 
 
-def markdown_to_buzz_input(markdown):
+def markdown_to_buzz_input(markdown, slug):
     """
     todo
 
@@ -30,22 +31,12 @@ def markdown_to_buzz_input(markdown):
     return markdown
 
 
-def _get_tif_paths(slug):
-    """
-    Get sorted list of all TIF files in the slug's static dir
-    """
-    tifs_path = os.path.join("static", "tifs", slug + "-tifs")
-    fs = os.listdir(tifs_path)
-    tifs = [os.path.join(tifs_path, i) for i in fs if i.endswith(".tif")]
-    return list(sorted(tifs))
-
-
-def store_buzz_raw(raw, slug, pdf_path, corpus_path=None):
+def store_buzz_raw(raw, slug, pdf_path):
     """
     Put the raw text into the right place for eventual parsing
     """
-    # todo: should it go into static?
-    base = f"uploads/{slug}"
+    # todo: corpora dir?
+    base = os.path.join("static", "corpora", slug, "txt")
     os.makedirs(base, exist_ok=True)
     filename = os.path.basename(pdf_path).replace(".pdf", ".txt")
     with open(os.path.join(base, filename), "w") as fo:

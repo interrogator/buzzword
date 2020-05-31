@@ -34,5 +34,6 @@ class OCRUpdate(models.Model):
     slug = models.SlugField(max_length=255, unique=False)
     commit_msg = models.CharField(max_length=200, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
+    previous = models.TextField()
     text = models.TextField()
     pdf = models.ForeignKey(PDF, on_delete=models.PROTECT)

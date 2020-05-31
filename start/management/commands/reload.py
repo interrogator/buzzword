@@ -1,7 +1,8 @@
 import os
 from importlib import import_module
 
-from explorer.parts.main import load_corpora
+from explorer.parts.main import load_explorer_app
+from explore.models import Corpus
 from compare.load import load_tif_pdf_plaintext
 from django.apps import apps
 from django.contrib.staticfiles.management.commands.runserver import (
@@ -10,7 +11,7 @@ from django.contrib.staticfiles.management.commands.runserver import (
 from django.core.management.color import no_style
 from django.core.management.sql import emit_post_migrate_signal, sql_flush
 from django.db import DEFAULT_DB_ALIAS, connections
-
+from django.conf import settings
 
 class Command(RunServerCommand):
 
@@ -53,14 +54,14 @@ class Command(RunServerCommand):
             # respond as if the database had been migrated from scratch.
             emit_post_migrate_signal(verbosity, interactive, database)
 
-        print("Done. Loading from corpora.json")
+        corpora_file = os.path.abspath(settings.CORPORA_FILE)
 
-        # ???
-        if os.environ.get(
-            "RUN_MAIN", False
-        ):  # https://code.djangoproject.com/ticket/8085
-            corpus_meta = load_corpora()
-            for corpus in corpus_meta:
-                if corpus.pdfs:
+        print(f"Done. Loading from {corpora_file}")
+
+        # see https://code.djangoproject.com/ticket/8085
+        if os.environ.get("RUN_MAIN", False):
+            load_explorer_app()
+            for corpus in Corpus.objects.all():
+                if corpus.pdfs and not corpus.disabled:
                     load_tif_pdf_plaintext(corpus)
         super().run(**options)

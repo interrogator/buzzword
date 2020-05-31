@@ -247,3 +247,18 @@ MARKDOWNIFY_WHITELIST_TAGS = [
   'strong',
   'ul'
 ]
+
+# BUZZWORD from env
+CORPORA_FILE = "corpora.json"
+LOAD_CORPORA = True
+LOAD_LAYOUTS = True
+# explorer settings 
+DROP_COLUMNS = {"parse", "text"}
+PAGE_SIZE = 25
+TABLE_SIZE = (2000, 200)
+ADD_GOVERNOR = False
+MAX_CONC = 999
+MAX_DATASET_ROWS = None
+
+# path to tessdata -- needed to find the models
+TESSDATA_PREFIX = "./tessdata"

@@ -4,57 +4,52 @@ buzzword explorer: run on startup, corpus loading and app initialisation
 
 
 import json
+import os
 
-from buzz.corpus import Corpus, Collection
+from buzz.corpus import Collection
+from buzz.constants import LANGUAGES, AVAILABLE_MODELS
 from django_plotly_dash import DjangoDash
 
-from .configure import configure_buzzword
+from explore.models import Language, Corpus
+
+from django.conf import settings
+from django.db import IntegrityError
+
 from .helpers import (
-    _get_corpora_meta,
     _get_corpus,
     _get_initial_table,
-    _preprocess_corpus,
-    register_callbacks,
+    _postprocess_corpus,
+    register_callbacks
 )
 from .tabs import make_explore_page
 
-
 app = DjangoDash("buzzword", suppress_callback_exceptions=True)
 
-GLOBAL_CONFIG = configure_buzzword()
 
-ROOT = GLOBAL_CONFIG["root"]
-
-LAYOUTS = dict()
-
-
-def _get_corpus_config(corpus, global_conf):
+def _load_languages():
     """
-    Return global conf plus individual settings for corpus
+    Put all available languages into the DB
     """
-    conf = {**global_conf}
-    settings = {
-        "max_dataset_rows",
-        "drop_columns",
-        "add_governor",
-        "load",
-        "slug",
-        "initial_table",
-        "initial_query",
-        "pdfs",
-    }
-    is_json_data = {"initial_table", "initial_query"}
-    for setting in settings:
-        loc = getattr(corpus, setting, None)
-        if loc is not None:
-            if loc in is_json_data:
-                loc = json.loads(loc)
-            conf[setting] = loc
-    conf["corpus_name"] = corpus.name
-    return conf
+    choices = [(k, v) for k, v in sorted(LANGUAGES.items()) if v in AVAILABLE_MODELS]
+    print(f"Loading languages: {', '.join([i[0] for i in choices])}...")
+    for longname, short in choices:
+        try:
+            Language(name=longname, short=short).save()
+        except IntegrityError:
+            pass
 
 
-def _get_corpora(corpus_meta, multiprocess=False):
+def _load_corpora(corpora_file):
+    """
+    Load contents of corpora.json into DB as Corpus objects
+    """
+    with open(corpora_file) as fo:
+        data = json.load(fo)
+    for name, meta in data.items():
+        modelled = Corpus.from_json(meta, name)
+        modelled.save()
+
+def _load_explorer_data(multiprocess=False):
     """
     Load in all available corpora and make their initial tables
 
@@ -62,74 +57,74 @@ def _get_corpora(corpus_meta, multiprocess=False):
     """
     corpora = dict()
     tables = dict()
-    corpora_config = dict()
-    for corpus in corpus_meta:
+    for corpus in Corpus.objects.all():
         if corpus.disabled:
-            print("Skipping corpus because it is disabled: {}".format(corpus.name))
+            print(f"Skipping corpus because it is disabled: {corpus.name}")
             continue
         buzz_collection = Collection(corpus.path)
+        # a corpus must have a feather or conll to be explorable. prefer feather.
         buzz_corpus = buzz_collection.feather or buzz_collection.conllu
-        conf = _get_corpus_config(corpus, GLOBAL_CONFIG)
-        if conf["load"]:
-            print("Loading corpus into memory: {} ...".format(corpus.name))
-            opts = dict(add_governor=conf["add_governor"], multiprocess=multiprocess)
+
+        if buzz_corpus is None:
+            print(f"No parsed data found for {corpus.path}")
+            continue
+        
+        corpora[corpus.slug] = buzz_corpus
+
+        if corpus.load:
+            print(f"Loading corpus into memory: {corpus.name} ...")
+            opts = dict(add_governor=corpus.add_governor, multiprocess=multiprocess)
             buzz_corpus = buzz_corpus.load(**opts)
-            buzz_corpus = _preprocess_corpus(buzz_corpus, **conf)
+            buzz_corpus = _postprocess_corpus(buzz_corpus, corpus)
+            corpora[corpus.slug] = buzz_corpus
         else:
             print(f"NOT loading corpus into memory: {corpus.name} ...")
+
+        # what should be shown in the frequencies space to begin with?
         if getattr(corpus, "initial_table", False):
             display = json.loads(corpus.initial_table)
         else:
             display = dict(show="p", subcorpora="file")
-        print(f"Generating an initial table for {corpus.name} using {display}")
-        initial_table = buzz_corpus.table(**display)
-        corpora[corpus.slug] = buzz_corpus
-        tables[corpus.slug] = initial_table
-        corpora_config[corpus.slug] = conf
-    return corpora, tables, corpora_config
+            print(f"Generating an initial table for {corpus.name} using {display}")
+            initial_table = buzz_corpus.table(**display)
+            tables[corpus.slug] = initial_table
+
+    return corpora, tables
 
 
-def load_layout(slug, set_and_register=True, django=True):
+def load_layout(slug, set_and_register=True):
     """
     Django can import this function to set the correct dataset on explore page
 
     Return app instance, just in case django has a use for it.
     """
-    if django:
-        global CORPUS_META, CORPORA, INITIAL_TABLES, CORPORA_CONFIGS
-        corfile = GLOBAL_CONFIG.get("corpora_file")
-        print(f"Using django corpus configuration at: {corfile}")
-        CORPUS_META = _get_corpora_meta(GLOBAL_CONFIG.get("corpora_file"))
-        CORPORA, INITIAL_TABLES, CORPORA_CONFIGS = _get_corpora(CORPUS_META)
-
-    conf = CORPORA_CONFIGS[slug]
-    # store the default explore for each corpus in a dict for speed
-    # if slug in LAYOUTS:
-    #    layout = LAYOUTS[slug]
-    # else:
-    if True:
-        corpus = _get_corpus(slug)
-        table = _get_initial_table(slug, conf)
-        conf["length"] = conf.get("length", len(corpus))
-        layout = make_explore_page(corpus, table, conf, CORPORA_CONFIGS)
-        LAYOUTS[slug] = layout
+    fullpath = os.path.abspath(settings.CORPORA_FILE)
+    print(f"Using django corpus configuration at: {fullpath}")
+    corpora, initial_tables = _load_explorer_data()
+    corpus = _get_corpus(slug)
+    table = _get_initial_table(slug)
+    layout = make_explore_page(corpus, table, slug)
     if set_and_register:
         app.layout = layout
         register_callbacks()
+
     return app
 
 
-def load_corpora():
-    global CORPUS_META, CORPORA, INITIAL_TABLES, CORPORA_CONFIGS
-    print(f"Using corpus configuration at: {GLOBAL_CONFIG.get('corpora_file')}")
-    CORPUS_META = _get_corpora_meta(GLOBAL_CONFIG.get("corpora_file"))
-    CORPORA, INITIAL_TABLES, CORPORA_CONFIGS = _get_corpora(CORPUS_META)
-
+def load_explorer_app():
+    """
+    Triggered during runserver, reload
+    """
+    fullpath = os.path.abspath(settings.CORPORA_FILE)
+    print(f"Using corpus configuration at: {fullpath}")
+    _load_languages()
+    _load_corpora(fullpath)
+    global CORPORA, INITIAL_TABLES
+    CORPORA, INITIAL_TABLES = _load_explorer_data()
     # this can potentially save time: generate layouts for all datasets
     # before the pages are visited. comes at expense of some memory,
     # but the app should obviously be able to handle all datasets in use
-    if GLOBAL_CONFIG["load_layouts"]:
-        for corpus in CORPUS_META:
+    if settings.LOAD_LAYOUTS:
+        for corpus in Corpus.objects.all():
             if not corpus.disabled:
                 load_layout(corpus.slug, set_and_register=False)
-    return CORPUS_META

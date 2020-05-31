@@ -10,6 +10,9 @@ import dash_table
 from buzz.constants import SHORT_TO_COL_NAME
 from buzz.corpus import Corpus
 
+from django.conf import settings
+from explore.models import Corpus as CorpusModel
+
 from . import style
 from .chart import CHART_TYPES, _df_to_figure
 from .helpers import _drop_cols_for_datatable, _get_cols, _update_frequencies
@@ -23,7 +26,7 @@ DAQ_THEME = {
 }
 
 
-def _make_storage(configs):
+def _make_storage():
     """
     Invisible containers that store session info
     """
@@ -33,9 +36,8 @@ def _make_storage(configs):
     click_clear = dcc.Store(id="session-clicks-clear", data=-1)
     click_show = dcc.Store(id="session-clicks-show", data=-1)
     click_table = dcc.Store(id="session-clicks-table", data=-1)
-    configs = dcc.Store(id="session-configs", data=configs)
     content = html.Div(id="page-content")
-    stores = [search_store, tables_store, click_clear, click_show, click_table, configs]
+    stores = [search_store, tables_store, click_clear, click_show, click_table]
     return html.Div(stores + [content])
 
 
@@ -45,17 +47,17 @@ def _build_dataset_space(df, config):
     """
     if isinstance(df, Corpus):
         df = df.files[0].load()
-    cols = _get_cols(df, config["add_governor"])
+    cols = _get_cols(df, config.add_governor)
     extra = [("Dependencies", "d"), ("Describe thing", "describe")]
     grams = [("Match (default)", 0), ("Bigrams of match", 1), ("Trigrams of match", 2)]
     extra = [dict(label=l, value=v) for l, v in extra]
     grams = [dict(label=l, value=v) for l, v in grams]
     cols = extra + cols
-    df = _drop_cols_for_datatable(df, config["add_governor"])
+    df = _drop_cols_for_datatable(df, config.add_governor)
     df = df.reset_index()
     # no file extensions
     df["file"] = df["file"].str.replace(".txt.conllu", "", regex=False)
-    max_row, max_col = config["table_size"]
+    max_row, max_col = settings.TABLE_SIZE
     df = df.iloc[:max_row, :max_col]
     pieces = [
         dcc.Dropdown(
@@ -145,7 +147,7 @@ def _build_dataset_space(df, config):
         selected_rows=[],
         page_action="none",
         page_current=0,
-        page_size=config["page_size"],
+        page_size=settings.PAGE_SIZE,
         # style_as_list_view=True,
         virtualization=True,
         style_table={"maxHeight": "1000px"},
@@ -173,7 +175,7 @@ def _build_frequencies_space(corpus, table, config):
     """
     Build stuff related to the frequency table
     """
-    cols = _get_cols(corpus, config["add_governor"])
+    cols = _get_cols(corpus, config.add_governor)
     show_check = dcc.Dropdown(
         placeholder="Features to show",
         multi=True,
@@ -219,8 +221,8 @@ def _build_frequencies_space(corpus, table, config):
         placeholder="Sort columns by...",
     )
     sort_drop = html.Div(sort_drop, style=style.TSTYLE)
-    max_row, max_col = config["table_size"]
-    print(f"Making {max_row}x{max_col} table for {config['corpus_name']} ...")
+    max_row, max_col = settings.TABLE_SIZE
+    print(f"Making {max_row}x{max_col} table for {config.name} ...")
     table = table.iloc[:max_row, :max_col]
     columns, data = _update_frequencies(table, False, False)
     print("Done!")
@@ -246,7 +248,7 @@ def _build_frequencies_space(corpus, table, config):
                 row_deletable=False,
                 selected_rows=[],
                 page_current=0,
-                page_size=config["page_size"],
+                page_size=settings.PAGE_SIZE,
                 page_action="none",
                 fixed_rows={"headers": True, "data": 0},
                 virtualization=True,
@@ -315,7 +317,7 @@ def _build_concordance_space(df, config):
     """
     if isinstance(df, Corpus):
         df = df.files[0].load()
-    cols = _get_cols(df, config["add_governor"])
+    cols = _get_cols(df, config.add_governor)
     show_check = dcc.Dropdown(
         multi=True,
         placeholder="Features to show",
@@ -329,8 +331,8 @@ def _build_concordance_space(df, config):
     conc_space = html.Div(toolbar, style=style.VERTICAL_MARGINS)
 
     # todo, not respected for some reason?
-    max_row, max_col = config["table_size"]
-    max_conc = config.get("max_conc", -1)
+    max_row, max_col = settings.TABLE_SIZE
+    max_conc = settings.MAX_CONC
 
     meta = ["file", "s", "i"]
     if "speaker" in df.columns:
@@ -338,12 +340,12 @@ def _build_concordance_space(df, config):
 
     # do an initial search, potentially from corpora.json
     # default to, get nouns
-    if config.get("initial_query"):
-        query = json.loads(config["initial_query"])
+    if config.initial_query:
+        query = json.loads(config.initial_query)
     else:
         query = {"target": "x", "query": "NOUN"}
 
-    print(f"Making concordance (max {max_conc}) for {config['corpus_name']} ...")
+    print(f"Making concordance (max {max_conc}) for {config.name} ...")
     df = getattr(df.just, query["target"])(query["query"])
     df = df.conc(metadata=meta, window=(100, 100), n=max_conc)
     print("Done!")
@@ -385,7 +387,7 @@ def _build_concordance_space(df, config):
                 page_action="none",
                 fixed_rows={"headers": True, "data": 0},
                 page_current=0,
-                page_size=config["page_size"],
+                page_size=settings.PAGE_SIZE,
                 virtualization=True,
                 style_table={"maxHeight": "1000px"},
                 style_as_list_view=True,
@@ -486,22 +488,23 @@ def _build_chart_space(table, config):
     return html.Div(id="display-chart", children=[div])
 
 
-def make_explore_page(corpus, table, config, configs):
+def make_explore_page(corpus, table, slug):
     """
     Create every tab, as well as the top rows of stuff, and tab container
 
     Return html.Div
     """
-    slug = html.Div(id="slug", title=config["slug"], style={"display": "none"})
+    config = CorpusModel.objects.get(slug=slug)
+    slug = html.Div(id="slug", title=slug, style={"display": "none"})
     dataset = _build_dataset_space(corpus, config)
     frequencies = _build_frequencies_space(corpus, table, config)
     chart = _build_chart_space(table, config)
     concordance = _build_concordance_space(corpus, config)
-    label = _make_search_name(config["corpus_name"], config["length"], dict())
+    length = config.length or len(corpus)
+    label = _make_search_name(config.name, length, dict())
     search_from = [dict(value=0, label=label)]
-    show = html.Button(
-        "Show", id="show-this-dataset", style={**style.MARGIN_5_MONO, **style.FRONT}
-    )
+    sty = {**style.MARGIN_5_MONO, **style.FRONT}
+    show = html.Button("Show", id="show-this-dataset", style=sty)
     show.title = "Show the selected corpus or search result in the Dataset tab"
     clear = html.Button("Clear history", id="clear-history", style=style.MARGIN_5_MONO)
     clear.title = "Delete all searches and frequency tables"
@@ -575,5 +578,5 @@ def make_explore_page(corpus, table, config, configs):
 
     pad = {"paddingLeft": "10px", "paddingRight": "10px"}
     tab_contents = html.Div(id="tab-contents", children=tab_contents)
-    children = [slug, _make_storage(configs), top_bit, tab_headers, tab_contents]
+    children = [slug, _make_storage(), top_bit, tab_headers, tab_contents]
     return html.Div(id="everything", children=children, style=pad)

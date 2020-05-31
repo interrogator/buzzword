@@ -5,6 +5,7 @@ buzzword explorer: helpers and utilities
 import json
 import os
 
+from django.conf import settings
 import pandas as pd
 from buzz.constants import SHORT_TO_COL_NAME, SHORT_TO_LONG_NAME
 from buzz.corpus import Corpus
@@ -17,11 +18,10 @@ def _get_specs_and_corpus(search_from, searches, corpora, slug):
     """
     Get the correct corpus based on search_from
     """
-    from .main import ROOT
 
     # if corpus not loaded into corpora, it is an upload. fix now
     if not corpora:
-        upload = os.path.join(ROOT, "uploads", slug + "-parsed")
+        upload = os.path.join("uploads", slug)
         loaded = Corpus(upload).load()
         corpora[slug] = loaded
     # if the user wants the corpus, return that
@@ -191,15 +191,15 @@ def _update_conll(df, deletable, drop_govs):
     return columns, df.to_dict("rows")
 
 
-def _preprocess_corpus(corpus, max_dataset_rows, drop_columns, **kwargs):
+def _postprocess_corpus(df, corpus_model):
     """
     Fix corpus if the user wants this on command line
     """
-    if max_dataset_rows is not None:
-        corpus = corpus.iloc[:max_dataset_rows, :]
-    if drop_columns is not None:
-        corpus = corpus.drop(drop_columns, axis=1, errors="ignore")
-    return corpus
+    if settings.MAX_DATASET_ROWS is not None:
+        df = df.iloc[:settings.MAX_DATASET_ROWS, :]
+    if corpus_model.drop_columns is not None:
+        df = df.drop(corpus_model.drop_columns, axis=1, errors="ignore")
+    return df
 
 
 def _make_csv(table, long_name):
@@ -221,26 +221,25 @@ def _get_corpus(slug):
     """
     Get corpus from slug, loading from uploads dir if need be
     """
-    from .main import ROOT, CORPORA
-
+    from .main import CORPORA
     if slug in CORPORA:
         return CORPORA[slug]
-    upload = os.path.join(ROOT, "uploads", slug + "-parsed")
+    upload = os.path.join("uploads", slug, "conllu")
     corpus = Corpus(upload).load()
     CORPORA[slug] = corpus
     return corpus
 
 
-def _get_initial_table(slug, config):
+def _get_initial_table(slug):
     """
     Get or create the initial table for this slug
     """
     # todo: speed up by storing as INITIAL_TABLES?
     corpus = _get_corpus(slug)
     default = dict(show="p", subcorpora="file")
-    if "initial_table" in config:
-        if config["initial_table"]:  # `None` and empty string are not good defaults
-            default = json.loads(config["initial_table"])
+    initial = CorpusModel.objects.get(slug=slug).initial_table
+    if initial is not None:
+        default = json.loads(initial)
     return corpus.table(**default)
 
 
@@ -280,14 +279,6 @@ def _get_corpora_json_contents(corpora_file):
         return dict()
     with open(corpora_file, "r") as fo:
         return json.loads(fo.read())
-
-
-def _get_corpora_meta(corpora_file):
-    contents = _get_corpora_json_contents(corpora_file)
-    corpora = []
-    for corpus_name, corpus_json in contents.items():
-        corpora.append(CorpusModel.from_json(corpus_json, corpus_name))
-    return corpora
 
 
 def _special_search(df, col, search_string, skip):
