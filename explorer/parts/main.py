@@ -92,7 +92,7 @@ def _load_explorer_data(multiprocess=False):
     return corpora, tables
 
 
-def load_layout(slug, set_and_register=True):
+def load_layout(slug, spec=False, set_and_register=True):
     """
     Django can import this function to set the correct dataset on explore page
 
@@ -103,7 +103,7 @@ def load_layout(slug, set_and_register=True):
     corpora, initial_tables = _load_explorer_data()
     corpus = _get_corpus(slug)
     table = _get_initial_table(slug)
-    layout = make_explore_page(corpus, table, slug)
+    layout = make_explore_page(corpus, table, slug, spec=spec)
     if set_and_register:
         app.layout = layout
         register_callbacks()

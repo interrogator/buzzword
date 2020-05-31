@@ -178,7 +178,8 @@ def _update_conll(df, deletable, drop_govs):
     col_order = ["file", "s", "i"] + list(df.columns)
     df = df.reset_index()
     # do not show file extension
-    df["file"] = df["file"].str.replace(".txt.conllu", "", regex=False)
+    df["file"] = df["file"].str.replace(".conllu", "", regex=False)
+    df["file"] = df["file"].str.replace(f"^.*/conllu/", "", regex=True)
     df = df[[i for i in col_order if i is not None]]
     cannot_delete = {"s", "i"}
     columns = [

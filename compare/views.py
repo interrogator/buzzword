@@ -39,9 +39,8 @@ def browse_collection(request, slug):
     page_obj = paginator.get_page(page_number)
     pdf = all_pdfs.get(slug=slug, num=page_number - 1)
     pdf_path = os.path.relpath(pdf.path)
-    print("PDF EXPECTED AT", pdf_path, pdf.path)
     template = loader.get_template("compare/sidetoside.html")
-
+    spec_format = "" if not spec else "&spec=true"
     this_pdf = OCRUpdate.objects.filter(pdf=pdf)
     plaintext = this_pdf.latest("timestamp").text
 
@@ -53,7 +52,8 @@ def browse_collection(request, slug):
         "page_obj": page_obj,
         "specific_nav": spec == "true",
         "corpus": Corpus.objects.get(slug=slug),
-        "navbar": "compare"
+        "navbar": "compare",
+        "spec": spec_format
     }
     # if the user has tried to update the OCR text
     if request.method == "POST":

@@ -19,7 +19,7 @@ def start(request):
     Load the list-of-corpora style mainpage
     """
     navbar = request.GET.get("navbar", "home")
-    corpora = explore.models.Corpus.objects.filter(disabled=False, load=True)
+    corpora = explore.models.Corpus.object<s.filter(disabled=False, load=True)
     context = {"corpora": corpora, "navbar": navbar}
     return render(request, "start/start.html", context)
 
@@ -33,3 +33,13 @@ def start_specific(request, slug):
     content = _get_markdown_content(slug, navbar)
     context = {"corpus": corpus, "navbar": navbar, "content": content}
     return render(request, f"start/{slug}.html", context)
+
+def example(request, slug):
+    """
+    Load the examples page for a given corpus
+    """
+    spec = request.GET.get("spec", None)
+    corpus = explore.models.Corpus.objects.get(slug=slug)
+    content = _get_markdown_content(slug, "example")
+    context = {"corpus": corpus, "navbar": "example", "content": content}
+    return render(request, f"start/{slug}.html", context)    

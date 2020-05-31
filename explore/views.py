@@ -29,7 +29,11 @@ def _start_parse_corpus_job(corpus):
 
 
 def explore(request, slug):
-    load_layout(slug)
+    """
+    Make and serve up the explorer dash app
+    """
+    spec = request.GET.get("spec", None)
+    load_layout(slug, spec=bool(spec))
     return render(request, "explore/explore.html")
 
 

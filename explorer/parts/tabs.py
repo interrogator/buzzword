@@ -56,7 +56,8 @@ def _build_dataset_space(df, config):
     df = _drop_cols_for_datatable(df, config.add_governor)
     df = df.reset_index()
     # no file extensions
-    df["file"] = df["file"].str.replace(".txt.conllu", "", regex=False)
+    df["file"] = df["file"].str.replace(".conllu", "", regex=False)
+    df["file"] = df["file"].str.replace("^.*/conllu/", "", regex=True)
     max_row, max_col = settings.TABLE_SIZE
     df = df.iloc[:max_row, :max_col]
     pieces = [
@@ -360,6 +361,7 @@ def _build_concordance_space(df, config):
             "id": i,
             "deletable": i not in ["left", "match", "right"],
             "hideable": True,
+            "presentation": ("markdown" if i == "match" else None)
         }
         for i in df.columns
     ]
@@ -488,14 +490,16 @@ def _build_chart_space(table, config):
     return html.Div(id="display-chart", children=[div])
 
 
-def make_explore_page(corpus, table, slug):
+def make_explore_page(corpus, table, slug, spec=False):
     """
     Create every tab, as well as the top rows of stuff, and tab container
 
     Return html.Div
+
+    spec mode: pretend only this corpus exists...
     """
     config = CorpusModel.objects.get(slug=slug)
-    slug = html.Div(id="slug", title=slug, style={"display": "none"})
+    slug_div = html.Div(id="slug", title=slug, style={"display": "none"})
     dataset = _build_dataset_space(corpus, config)
     frequencies = _build_frequencies_space(corpus, table, config)
     chart = _build_chart_space(table, config)
@@ -523,14 +527,16 @@ def make_explore_page(corpus, table, slug):
     # remove the paddingTop, which is not needed in explore view
     nav = {k: v for k, v in style.NAV_HEADER.items() if k != "paddingTop"}
 
+    mainlink = "/" if not spec else f"/{slug}"
+    img = html.Img(
+        src="../../static/bolt.jpg",
+        height=42,
+        width=38,
+        style=style.BLOCK_MIDDLE_35
+    )
+
     top_bit = [
-        html.Img(
-            src="../../static/bolt.jpg",
-            height=42,
-            width=38,
-            style=style.BLOCK_MIDDLE_35,
-        ),
-        dcc.Link("buzzword", href="/", style=nav),
+        dcc.Link(["buzzword", img], href=mainlink, style=nav),
         # these spaces are used to flash messages to the user if something is wrong
         dcc.ConfirmDialog(id="dialog-search", message=""),
         dcc.ConfirmDialog(id="dialog-table", message=""),
@@ -578,5 +584,5 @@ def make_explore_page(corpus, table, slug):
 
     pad = {"paddingLeft": "10px", "paddingRight": "10px"}
     tab_contents = html.Div(id="tab-contents", children=tab_contents)
-    children = [slug, _make_storage(), top_bit, tab_headers, tab_contents]
+    children = [slug_div, _make_storage(), top_bit, tab_headers, tab_contents]
     return html.Div(id="everything", children=children, style=pad)
