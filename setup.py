@@ -42,7 +42,7 @@ setup(
         "dash-daq==0.5.0",
         "dash-html-components==1.0.3",
         "dash-renderer==1.3.0",
-        "dash-table==4.6.2",
+        "dash-table==4.7.0",
         "dash==1.10.0",
         "django-plotly-dash==1.3.1",
         "django==3.0.5",

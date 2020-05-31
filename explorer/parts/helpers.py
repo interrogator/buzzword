@@ -10,6 +10,7 @@ import pandas as pd
 from buzz.constants import SHORT_TO_COL_NAME, SHORT_TO_LONG_NAME
 from buzz.corpus import Corpus
 from explore.models import Corpus as CorpusModel
+from compare.models import PDF
 
 from .strings import _capitalize_first, _downloadable_name
 
@@ -162,6 +163,7 @@ def _update_concordance(df, deletable):
             "id": i,
             "deletable": i not in cannot_delete and deletable,
             "hideable": True,
+            "presentation": ("markdown" if i == "match" else None)
         }
         for i in df.columns
     ]
@@ -296,3 +298,18 @@ def _special_search(df, col, search_string, skip):
         msg = f"search error for {col} ({search_string}): {type(error)}: {error}"
         print(msg)
         return df.iloc[:0, :0], msg
+
+def _apply_conc_href(row, slug=None):
+    file, match = row["file"], row["match"]
+    pdf_name = os.path.basename(file).replace(".conllu", "")
+    pdf = PDF.objects.get(slug=slug, name=pdf_name)
+    path = f"/compare/{slug}?page={pdf.num+1}&spec=true"
+    return f"[{match}]({path})"
+
+
+def _add_links_to_conc(conc, slug):
+    """
+    add a markdown href to the match
+    """
+    conc["match"] = conc.apply(_apply_conc_href, axis=1, slug=slug)
+    return conc

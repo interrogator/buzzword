@@ -8,8 +8,12 @@ from dash import no_update
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
+from explore.models import Corpus
+
+from django.conf import settings
 from .chart import _df_to_figure
 from .helpers import (
+    _add_links_to_conc,
     _cast_query,
     _get_specs_and_corpus,
     _special_search,
@@ -80,7 +84,6 @@ for i in range(1, 6):
             State(f"chart-top-n-{i}", "value"),
             State(f"chart-transpose-{i}", "on"),
             State("session-tables", "data"),
-            State("session-configs", "data"),
             State("slug", "title"),
         ],
     )
@@ -91,7 +94,6 @@ for i in range(1, 6):
         top_n,
         transpose,
         session_tables,
-        conf,
         slug,
         **kwargs,
     ):
@@ -102,8 +104,7 @@ for i in range(1, 6):
         if n_clicks is None:
             return no_update
         # get correct dataset to chart
-
-        conf = conf[slug]
+        conf = Corpus.objects.get(slug=slug)
 
         if str(table_from) in session_tables:
             this_table = session_tables[str(table_from)]
@@ -158,7 +159,6 @@ def _on_load_callback(n_clicks, **kwargs):
         State("use-regex", "on"),
         State("gram-select", "value"),
         State("search-from", "options"),
-        State("session-configs", "data"),
         State("session-search", "data"),
         State("session-clicks-clear", "data"),
         State("session-clicks-show", "data"),
@@ -176,7 +176,6 @@ def _new_search(
     no_use_regex,
     gram_select,
     search_from_options,
-    conf,
     session_search,
     session_clicks_clear,
     session_clicks_show,
@@ -192,9 +191,8 @@ def _new_search(
     if n_clicks is None:
         return [no_update] * 11
 
-    conf = conf[slug]
-    add_governor = conf["add_governor"]
-    max_row, max_col = conf["table_size"]
+    conf = Corpus.objects.get(slug=slug)
+    max_row, max_col = settings.TABLE_SIZE
 
     specs, corpus = _get_specs_and_corpus(search_from, session_search, CORPORA, slug)
 
@@ -202,7 +200,7 @@ def _new_search(
     if show_dataset and show_dataset != session_clicks_show:
         session_clicks_show = show_dataset
         editable = bool(search_from)
-        cols, data = _update_conll(corpus, editable, drop_govs=add_governor)
+        cols, data = _update_conll(corpus, editable, drop_govs=conf.add_governor)
         return [
             cols,
             data,
@@ -251,8 +249,8 @@ def _new_search(
         corpus = CORPORA[slug]
         corpus_size = len(corpus)
         corpus = corpus.iloc[:max_row, :max_col]
-        cols, data = _update_conll(corpus, False, drop_govs=add_governor)
-        name = _make_search_name(conf["corpus_name"], corpus_size, session_search)
+        cols, data = _update_conll(corpus, False, drop_govs=conf.add_governor)
+        name = _make_search_name(conf.name, corpus_size, session_search)
         search_from = [dict(value=0, label=name)]
         # set number of clicks at last moment
         session_clicks_clear = cleared
@@ -284,7 +282,6 @@ def _new_search(
         elif col not in {"t", "d", "describe"}:
             search = _cast_query(search_string, col)
             method = "just" if not skip else "skip"
-            print("USING no REGEX", no_use_regex)
             if not no_use_regex:
                 extra = dict(regex=False, exact_match=True)
             else:
@@ -309,7 +306,7 @@ def _new_search(
         session_search[new_value] = _tuple_or_list(this_search, list)
         corpus = CORPORA[slug]
         df = df.iloc[:max_row, :max_col]
-        current_cols, current_data = _update_conll(df, True, add_governor)
+        current_cols, current_data = _update_conll(df, True, conf.add_governor)
     else:
         current_cols, current_data = no_update, no_update
 
@@ -373,7 +370,6 @@ def _new_search(
         State("content-table-switch", "on"),
         State("chart-from-1", "options"),
         State("chart-from-1", "value"),
-        State("session-configs", "data"),
         State("session-search", "data"),
         State("session-tables", "data"),
         State("session-clicks-table", "data"),
@@ -395,7 +391,6 @@ def _new_table(
     content_table,
     table_from_options,
     nv1,
-    conf,
     session_search,
     session_tables,
     session_click_table,
@@ -409,7 +404,7 @@ def _new_table(
     if n_clicks is None:
         raise PreventUpdate
 
-    conf = conf[slug]
+    conf = CorpusModel.objects.get(slug=slug)
 
     # because no option below can return initial table, rows can now be deleted
     row_deletable = True
@@ -500,7 +495,7 @@ def _new_table(
     if updating:
         cols, data = no_update, no_update
     else:
-        max_row, max_col = conf["table_size"]
+        max_row, max_col = settings.TABLE_SIZE
         tab = table.iloc[:max_row, :max_col]
         cols, data = _update_frequencies(tab, True, content_table)
 
@@ -537,19 +532,18 @@ def _new_table(
     [
         State("show-for-conc", "value"),
         State("search-from", "value"),
-        State("session-configs", "data"),
         State("session-search", "data"),
         State("slug", "title"),
     ],
 )
-def _new_conc(n_clicks, show, search_from, conf, session_search, slug, **kwargs):
+def _new_conc(n_clicks, show, search_from, session_search, slug, **kwargs):
     """
     Callback for concordance. We just pick what to show and where from...
     """
     if n_clicks is None:
         return [no_update] * 4
 
-    conf = conf[slug]
+    conf = Corpus.objects.get(slug=slug)
 
     # easy validation!
     msg = "" if show else "No choice made for match formatting."
@@ -568,7 +562,8 @@ def _new_conc(n_clicks, show, search_from, conf, session_search, slug, **kwargs)
         met.append("speaker")
 
     conc = corpus.conc(show=show, metadata=met, window=(100, 100))
-    max_row, max_col = conf["table_size"]
+    conc = _add_links_to_conc(conc, slug=slug)
+    max_row, max_col = settings.TABLE_SIZE
     short = conc.iloc[:max_row, :max_col]
     cols, data = _update_concordance(short, deletable=True)
     return cols, data, bool(msg), msg
