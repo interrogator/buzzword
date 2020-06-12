@@ -14,8 +14,10 @@ from .models import OCRUpdate, PDF
 
 # from django.core.exceptions import ObjectDoesNotExist
 
-# there needs to be at least 3 occurrences of this pattern for a text to not be junk
-MEANINGFUL = r"[A-Za-z0-9]{3}"
+# when doing OCR, re.findall will be run on it using this regex, which sort of
+# approximates a word. note that this will mean that "the end" will be marked
+# as blank, but that is a decent tradeoff for marking blank a lot of junk pages.
+MEANINGFUL = r"[A-Za-z]{3,}"
 THRESHOLD = 3
 
 
@@ -28,8 +30,25 @@ def markdown_to_buzz_input(markdown, slug):
     handle italics and that sort of thing...perhaps we can convert the text
     to html and then postprocess that...
     """
-    return markdown
-
+    fixed = []
+    lines = markdown.splitlines()
+    for line in lines:
+        # handle headings
+        # note that this doesn't put text inside respective headings as sections.
+        # doing so would not work across pages anyway.
+        if line.startswith("#"):
+            pref, head = line.split(" ", 1)
+            depth = len(pref.strip())
+            head = head.strip()
+            line = f"<meta heading=\"true\" depth=\"{depth}\">{head}</meta>"
+        # handle bulletpoints
+        elif line.startswith("* "):
+            line = line.lstrip("* ")
+            line = "<meta point=\"true\">{line}</meta>"
+        for styler in ["***", "**", "*", "`"]:
+            pass
+        fixed.append(line)
+    return "\n".join(fixed)
 
 def store_buzz_raw(raw, slug, pdf_path):
     """
@@ -69,17 +88,21 @@ def dump_latest():
         return parsed
 
 
-def _is_meaningful(plaintext):
+def _is_meaningful(plaintext, language):
     """
     Determine if an OCR page contains something worthwhile
     """
-    found = re.findall(MEANINGFUL, plaintext)
-    return len(found) >= THRESHOLD
+    # skip this check for non latin alphabet ... right now the parser doesn't
+    # accept most non-latin languages, so it's mostly academic for now...
+    if lang in {"zh", "ja", "fa", "iw", "ar"}:
+        return True
+    words = re.findall(plaintext, MEANINGFUL)
+    return len(words) >= THRESHOLD
 
 
 def _handle_page_numbers(text):
     """
-    Attempt to make page-level metadata containing page and header
+    Attempt to make page-level metadata containing page number
     """
     # if no handling, just return text
     if settings.COMPARE_HANDLE_PAGE_NUMBERS is False:
@@ -93,57 +116,20 @@ def _handle_page_numbers(text):
     else:
         lines = [lines[0], lines[-1]]
 
-    # if we find page_number, it goes here
     page_number = None
-    # page number lines to remove if set to remove
     ix_to_delete = set()
-    # if we find a header beside the page number it goes here
-    header = ""
+
     # lines is just the first and last, stripped
     for i, line in enumerate(lines):
-        # if it's numerical, we found it. either store for deletion
-        # or remember it as page_number
         if line.isnumeric():
-            if settings.COMPARE_HANDLE_PAGE_NUMBERS is None:
-                ix_to_delete.add(i)
-                continue
-            else:
-                page_number = line
-                ix_to_delete.add(i)
-                break
-        # maybe there's a header printbeside the page number
-        sublines = [(ii, n) for ii, n in enumerate(line.split())]
-        for ix, part in sublines:
-            # if there is a numerical part in the page numbering,
-            if part.strip().isnumeric():
-                # then get that from the sublist
-                page_number = sublines.pop(ix)[1].strip()
-                ix_to_delete.add(i)
-                break
-        # if we're on header, not footer, we may have a header!
-        if not i:
-            header = " ".join([x[-1] for x in sublines])
-            header = header.replace("'", "").replace('"', "")
-            header = "".join([x for x in header if x.isalnum() or x.isspace()])
-            if not header.strip():
-                header = None
-            else:
-                ix_to_delete.add(i)
-        # footer via: elif i == 1: ...
+            page_number = line
+            ix_to_delete.add(i)
+            break
 
-    # build header if we have it
-    if header:
-        header = f'header="{header.strip()}" '
+    if page_number is not None:
+        form = f"<meta page={page_number} />\n"
 
-    # settings todo: right now you only get header detection if page detection
-    # and if page number found!
-    form = None
-    if page_number is not None and settings.COMPARE_HANDLE_PAGE_NUMBERS:
-        form = f"<meta {header}page={page_number} />\n"
-    elif header and page_number is None and settings.COMPARE_HANDLE_PAGE_NUMBERS:
-        form = f"<meta {header}/>\n"
-
-    # if we want the page numbers REMOVED
+    # we also want to REMOVE page number from the actual text
     cut = [x for i, x in enumerate(text.splitlines()) if i not in ix_to_delete]
     if form:
         cut = [form] + cut

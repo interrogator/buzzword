@@ -19,7 +19,7 @@ def start(request):
     Load the list-of-corpora style mainpage
     """
     navbar = request.GET.get("navbar", "home")
-    corpora = explore.models.Corpus.object<s.filter(disabled=False, load=True)
+    corpora = explore.models.Corpus.objects.filter(disabled=False, load=True)
     context = {"corpora": corpora, "navbar": navbar}
     return render(request, "start/start.html", context)
 

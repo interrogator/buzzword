@@ -75,7 +75,7 @@ def load_tif_pdf_plaintext(corpus):
         except ObjectDoesNotExist:
             pass
 
-        if collection.txt:
+        if collection.txt and len(collection.txt.files) >= tot:
             path = collection.txt.files[i].path
             print(f"Text file exists at {path}; skipping OCR")
             with open(path, "r") as fo:
@@ -95,8 +95,9 @@ def load_tif_pdf_plaintext(corpus):
             )
             plaintext = _handle_page_numbers(plaintext)
 
-            if not _is_meaningful(plaintext):
+            if not _is_meaningful(plaintext, corpus.language.short):
                 plaintext = '<meta blank="true"/>'
+
             ocr = OCRUpdate(
                 slug=corpus.slug, commit_msg="OCR result", text=plaintext, pdf=pdf
             )
