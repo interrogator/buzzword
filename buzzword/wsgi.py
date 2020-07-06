@@ -7,18 +7,13 @@ For more information on this file, see
 https://docs.djangoproject.com/en/2.2/howto/deployment/wsgi/
 """
 
-# importing is in this crazy order as a hack.
 import os
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "buzzword.settings")
 
-from django.conf import settings
-settings.configure()
+from django.core.management import call_command
 
-import django
-django.setup()
-
-import explorer.parts.main
-explorer.parts.main.load_corpora()
+call_command('load')
 
 from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
+
