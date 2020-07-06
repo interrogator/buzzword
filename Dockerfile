@@ -8,7 +8,8 @@ WORKDIR /
 RUN \
     git clone https://github.com/interrogator/buzz.git buzz && \
     cd buzz && \
-    pip install -r requirements.txt
+    pip install -r requirements.txt & \\
+    python setup.py install
 
 RUN \
     git clone https://github.com/interrogator/buzzword.git && \
