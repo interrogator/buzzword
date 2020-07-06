@@ -26,6 +26,11 @@ RUN \
 
 RUN python manage.py migrate
 
+RUN chown www-data:www-data . && \
+    chmod 777 . && \
+    chown www-data:www-data db.sqlite3 && \
+    chmod 777 db.sqlite3
+
 RUN \
     pip install uwsgi && \
     ln -s /buzzword/buzzword_nginx.conf /etc/nginx/sites-enabled/
