@@ -8,9 +8,11 @@ https://docs.djangoproject.com/en/2.2/howto/deployment/wsgi/
 """
 
 import os
+import explorer.parts.main
 
 from django.core.wsgi import get_wsgi_application
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "buzzword.settings")
 
+explorer.parts.main.load_corpora()
 application = get_wsgi_application()
