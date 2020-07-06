@@ -5,7 +5,11 @@ buzzword explorer: run on startup, corpus loading and app initialisation
 
 import json
 
-from buzz.corpus import Corpus, Collection
+from buzz.corpus import Corpus
+try:
+    from buzz.corpus import Collection
+except:
+    pass
 from django_plotly_dash import DjangoDash
 
 from .configure import configure_buzzword
@@ -67,8 +71,12 @@ def _get_corpora(corpus_meta, multiprocess=False):
         if corpus.disabled:
             print("Skipping corpus because it is disabled: {}".format(corpus.name))
             continue
-        buzz_collection = Collection(corpus.path)
-        buzz_corpus = buzz_collection.feather or buzz_collection.conllu
+        # todo: fix this when backend update happens
+        try:
+            buzz_collection = Collection(corpus.path)
+            buzz_corpus = buzz_collection.feather or buzz_collection.conllu
+        except:
+            buzz_corpus = Corpus(corpus.path)
         conf = _get_corpus_config(corpus, GLOBAL_CONFIG)
         if conf["load"]:
             print("Loading corpus into memory: {} ...".format(corpus.name))
