@@ -11,10 +11,10 @@ RUN \
     pip install -r requirements.txt
 
 RUN \
-    git clone https://github.com/interrogator/buzzword.git buzzword && \
+    git clone https://github.com/interrogator/buzzword.git && \
     cd buzzword && \
     git pull --all && \
-    git checkout dev && \
+    git checkout origin/dev && \
     pip install -r requirements.txt
 
 WORKDIR /buzzword
