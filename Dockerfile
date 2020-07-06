@@ -13,6 +13,8 @@ RUN \
 RUN \
     git clone https://github.com/interrogator/buzzword.git buzzword && \
     cd buzzword && \
+    git pull --all && \
+    git checkout dev && \
     pip install -r requirements.txt
 
 WORKDIR /buzzword
