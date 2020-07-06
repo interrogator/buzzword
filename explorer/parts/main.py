@@ -123,6 +123,7 @@ def load_layout(slug, set_and_register=True, django=True):
         layout = make_explore_page(corpus, table, conf, CORPORA_CONFIGS)
         LAYOUTS[slug] = layout
     if set_and_register:
+        print(f"REGISTERING LAYOUT AND CALLBACKS FOR {slug}")
         app.layout = layout
         register_callbacks()
     return app
@@ -140,5 +141,5 @@ def load_corpora():
     if GLOBAL_CONFIG["load_layouts"]:
         for corpus in CORPUS_META:
             if not corpus.disabled:
-                load_layout(corpus.slug, set_and_register=False)
+                load_layout(corpus.slug, set_and_register=True)
     return CORPUS_META

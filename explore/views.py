@@ -29,7 +29,7 @@ def _start_parse_corpus_job(corpus):
 
 
 def explore(request, slug):
-    load_layout(slug)
+    app = load_layout(slug)
     return render(request, "explore/explore.html")
 
 
