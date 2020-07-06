@@ -16,6 +16,7 @@ python-dotenv==0.10.3
 martor==1.4.9
 pyocr==0.7.2
 tesseract==0.1.3
+markdownify==0.4.1
 # Tests and CI
 pre-commit
 black==19.10b0
