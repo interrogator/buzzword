@@ -11,7 +11,7 @@ RUN \
     pip install -r requirements.txt
 
 RUN \
-    git clone https://github.com/l0rb/buzzword.git buzzword && \
+    git clone https://github.com/interrogator/buzzword.git buzzword && \
     cd buzzword && \
     pip install -r requirements.txt
 
