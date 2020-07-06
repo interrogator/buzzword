@@ -75,6 +75,7 @@ def _get_corpora(corpus_meta, multiprocess=False):
         try:
             buzz_collection = Collection(corpus.path)
             buzz_corpus = buzz_collection.feather or buzz_collection.conllu
+            raise NotImplementedError("todo")
         except:
             buzz_corpus = Corpus(corpus.path)
         conf = _get_corpus_config(corpus, GLOBAL_CONFIG)
