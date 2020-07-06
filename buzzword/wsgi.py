@@ -8,6 +8,9 @@ https://docs.djangoproject.com/en/2.2/howto/deployment/wsgi/
 """
 
 import os
+from django.conf import settings
+settings.configure()
+
 import explorer.parts.main
 
 from django.core.wsgi import get_wsgi_application
