@@ -1,3 +1,4 @@
+import os
 from django.apps import AppConfig
 
 # note about why the ready() code is a bad idea:
@@ -13,10 +14,10 @@ from django.apps import AppConfig
 class ExploreConfig(AppConfig):
     name = "explore"
     def ready(self):
-    	try:
-            print("Loading corpora from apps.py!")
-            import explorer.parts.main
-            explorer.parts.main.load_corpora()
-        except:
-        	print("Load corpora from apps.py failed (OK during migrate etc)")
-        super().ready()
+        if os.environ.get('RUN_MAIN'):
+            try:
+                print("Loading corpora from apps.py!")
+                import explorer.parts.main
+                explorer.parts.main.load_corpora()
+            except:
+                print("Load corpora from apps.py failed (OK during migrate etc)")
