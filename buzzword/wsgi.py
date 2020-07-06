@@ -8,6 +8,8 @@ https://docs.djangoproject.com/en/2.2/howto/deployment/wsgi/
 """
 
 import os
+import django
+django.setup()
 from django.conf import settings
 settings.configure()
 
