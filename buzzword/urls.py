@@ -17,6 +17,3 @@ urlpatterns = (
     + static(settings.MEDIA_URL)
 )
 
-print("Loading corpora from urls.py!")
-import explorer.parts.main
-explorer.parts.main.load_corpora()
