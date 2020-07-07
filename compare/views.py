@@ -1,5 +1,6 @@
 import os
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.messages import get_messages
 
@@ -31,7 +32,7 @@ def browse_collection(request, slug):
     """
     # corpus = Corpus.objects.get(slug=slug)
     # lang = corpus.language.name
-    spec = request.GET.get("spec", None)
+    spec = bool(settings.BUZZWORD_SPECIFIC_CORPUS)
     all_pdfs = PDF.objects.all()
     paginator = Paginator(all_pdfs, 1)
     page_number = request.GET.get("page", 1)
