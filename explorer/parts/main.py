@@ -104,7 +104,7 @@ def load_layout(slug, set_and_register=True, django=True):
 
     Return app instance, just in case django has a use for it.
     """
-    if django:
+    if django and slug not in LAYOUTS:
         global CORPUS_META, CORPORA, INITIAL_TABLES, CORPORA_CONFIGS
         corfile = GLOBAL_CONFIG.get("corpora_file")
         print(f"Using django corpus configuration at: {corfile}")
