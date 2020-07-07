@@ -84,3 +84,8 @@ p, ul, ol {
 #martor-description {
   font-size: 16pt;
 }
+
+/* control height of dash tables! */
+.dash-spreadsheet-inner {
+  min-height: 80vh !important;
+}
