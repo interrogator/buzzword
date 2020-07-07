@@ -70,3 +70,17 @@ p, ul, ol {
     margin-top:2rem;
     margin-bottom:2rem;
 }
+
+.compare-container {
+    max-width: 100vw;
+    max-height: 50vh;
+}
+
+.ace_editor {
+  height: 77vh !important;
+  max-height: 80vh !important;   
+}
+
+#martor-description {
+  font-size: 16pt;
+}
