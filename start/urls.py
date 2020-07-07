@@ -3,10 +3,16 @@ from django.urls import path, re_path
 from . import views
 from explore.models import Corpus
 from django.conf import settings
+from django.db.utils import OperationalError
 
 # we need to make a regex matching each corpus slug
 # so that signout and other urls are still matched
-slugs = [i.slug for i in Corpus.objects.all()]
+# try is to catch migrate (etc) calls
+try:
+    slugs = [i.slug for i in Corpus.objects.all()]
+except OperationalError:
+    slugs = []
+
 slugs = "(" + "|".join(set(slugs)) + ")"
 paths = f"^(?P<slug>{slugs})/"
 
