@@ -51,7 +51,7 @@ def browse_collection(request, slug):
         "pdf_filepath": "/" + pdf_path.replace(".tif", ".pdf"),
         "form": form,
         "page_obj": page_obj,
-        "specific_nav": spec == "true",
+        "specific_nav": spec,
         "corpus": Corpus.objects.get(slug=slug),
         "navbar": "compare"
     }
