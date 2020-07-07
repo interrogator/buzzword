@@ -26,7 +26,7 @@ RUN \
     echo "BUZZWORD_SPECIFIC_CORPUS = 'swiss-law'" >> buzzword/settings.py && \
     mkdir swiss-law
 
-COPY swiss-law/swiss-law-parsed swiss-law/swiss-law-parsed
+COPY buzzword/swiss-law/swiss-law-parsed /buzzword/swiss-law/swiss-law-parsed
 
 RUN python manage.py migrate
 
