@@ -22,8 +22,11 @@ WORKDIR /buzzword
 
 RUN \
     cp .env.example .env && \
-    cp corpora.json.example corpora.json && \
-    sed -i 's!dtrt/do-the-right-thing-parsed!/buzz/dtrt/do-the-right-thing-parsed!' corpora.json
+    cp configs/swiss-law.json corpora.json && \
+    echo "BUZZWORD_SPECIFIC_CORPUS = 'swiss-law'" >> buzzword/settings.py && \
+    mkdir swiss-law
+
+COPY swiss-law/swiss-law-parsed swiss-law/swiss-law-parsed
 
 RUN python manage.py migrate
 
