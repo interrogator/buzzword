@@ -22,7 +22,7 @@ app_name = "start"
 if not settings.BUZZWORD_SPECIFIC_CORPUS:
     urlpatterns = [path("", views.start, name="start")]
 else:
-	slug = dict(slug=settings.BUZZWORD_SPECIFIC_CORPUS)
-	urlpatterns = [path("", views.start_specific, slug)]
+    urlpatterns = [path("", views.start_specific), path("example/", views.start_specific)]
 
 urlpatterns.append(re_path(paths, views.start_specific, name="start_specific"))
+

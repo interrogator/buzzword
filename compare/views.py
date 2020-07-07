@@ -23,7 +23,7 @@ def _make_message(request, level, msg):
         messages.add_message(request, level, msg)
 
 
-def browse_collection(request, slug):
+def browse_collection(request, slug=None):
     """
     Main compare/correct view, showing PDF beside its OCR output
 
@@ -32,7 +32,10 @@ def browse_collection(request, slug):
     """
     # corpus = Corpus.objects.get(slug=slug)
     # lang = corpus.language.name
-    spec = bool(settings.BUZZWORD_SPECIFIC_CORPUS)
+    # handle specific mode
+    if not slug:
+        slug = settings.BUZZWORD_SPECIFIC_CORPUS
+    spec = bool(slug)
     all_pdfs = PDF.objects.all()
     paginator = Paginator(all_pdfs, 1)
     page_number = request.GET.get("page", 1)

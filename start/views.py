@@ -1,5 +1,6 @@
 import os
 
+from django.conf import settings
 from django.shortcuts import render
 import explore.models
 from django.contrib.auth.decorators import login_required
@@ -25,12 +26,15 @@ def start(request):
     return render(request, "start/start.html", context)
 
 #@login_required
-def start_specific(request, slug):
+def start_specific(request, slug=None):
     """
     Load a unique website for this particular slug
+
+    This function also handles the example page. Genius.
     """
-    navbar = request.GET.get("navbar", "home")
+    slug = slug or settings.BUZZWORD_SPECIFIC_CORPUS
+    current_section = request.path.strip("/") or "home"
     corpus = explore.models.Corpus.objects.get(slug=slug)
-    content = _get_markdown_content(slug, navbar)
-    context = {"corpus": corpus, "navbar": navbar, "content": content}
+    content = _get_markdown_content(slug, current_section)
+    context = {"corpus": corpus, "navbar": current_section, "content": content}
     return render(request, f"start/{slug}.html", context)

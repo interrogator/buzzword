@@ -37,7 +37,9 @@ def _start_parse_corpus_job(corpus):
 
 
 #@login_required
-def explore(request, slug):
+def explore(request, slug=None):
+    if slug is None:
+        slug = settings.BUZZWORD_SPECIFIC_CORPUS
     app = load_layout(slug)
     return render(request, "explore/explore.html")
 

@@ -14,16 +14,16 @@
     <div class="collapse navbar-collapse" id="navbarsExampleDefault">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item {% if navbar == 'home' %}active{% endif %}">
-                <a class="nav-link" href="/{{ corpus.slug }}">Home</a>
+                <a class="nav-link" href="/">Home</a>
             </li>
             <li class="nav-item {% if navbar == 'compare' %}active{% endif %}">
-                <a class="nav-link" href="/compare/{{ corpus.slug }}">Browse & correct</a>
+                <a class="nav-link" href="/compare/">Browse & correct</a>
             </li>
             <li class="nav-item {% if navbar == 'explore' %}active{% endif %}">
-                <a class="nav-link" href="/explore/{{ corpus.slug }}">Explore & analyse</a>
+                <a class="nav-link" href="/explore/">Explore & analyse</a>
             </li>
             <li class="nav-item {% if navbar == 'example' %}active{% endif %}">
-                <a class="nav-link" href="/example/{{ corpus.slug }}">Example investigation</a>
+                <a class="nav-link" href="/example/">Example investigation</a>
             </li>
             {% if not user.is_authenticated %}
                 <li class="nav-item {% if navbar == 'signup' %}active{% endif %}">
