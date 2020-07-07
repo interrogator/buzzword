@@ -113,17 +113,15 @@ def load_layout(slug, set_and_register=True, django=True):
 
     conf = CORPORA_CONFIGS[slug]
     # store the default explore for each corpus in a dict for speed
-    # if slug in LAYOUTS:
-    #    layout = LAYOUTS[slug]
-    # else:
-    if True:
+    if slug in LAYOUTS:
+        layout = LAYOUTS[slug]
+    else:
         corpus = _get_corpus(slug)
         table = _get_initial_table(slug, conf)
         conf["length"] = conf.get("length", len(corpus))
         layout = make_explore_page(corpus, table, conf, CORPORA_CONFIGS)
         LAYOUTS[slug] = layout
     if set_and_register:
-        print(f"REGISTERING LAYOUT AND CALLBACKS FOR {slug}")
         app.layout = layout
         register_callbacks()
     return app

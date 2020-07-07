@@ -247,3 +247,8 @@ MARKDOWNIFY_WHITELIST_TAGS = [
   'strong',
   'ul'
 ]
+
+# this setting is for running buzzword in single-corpus mode.
+# doing this shuts off access to the root url, and redirects
+# to /<this-swtting> instead of /
+BUZZWORD_SPECIFIC_CORPUS = "swiss-law"

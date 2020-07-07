@@ -2,6 +2,7 @@ import os
 
 from django.shortcuts import render
 import explore.models
+from django.contrib.auth.decorators import login_required
 
 
 def _get_markdown_content(slug, page):
@@ -23,7 +24,7 @@ def start(request):
     context = {"corpora": corpora, "navbar": navbar}
     return render(request, "start/start.html", context)
 
-
+#@login_required
 def start_specific(request, slug):
     """
     Load a unique website for this particular slug

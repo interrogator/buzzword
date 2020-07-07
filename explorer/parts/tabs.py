@@ -15,6 +15,14 @@ from .chart import CHART_TYPES, _df_to_figure
 from .helpers import _drop_cols_for_datatable, _get_cols, _update_frequencies
 from .strings import _capitalize_first, _make_search_name, _make_table_name
 
+from django.conf import settings
+
+if settings.BUZZWORD_SPECIFIC_CORPUS:
+    HOME_URL = f"/{settings.BUZZWORD_SPECIFIC_CORPUS}"
+else:
+    HOME_URL = "/"
+
+
 DAQ_THEME = {
     "dark": False,
     "detail": "#007439",
@@ -527,7 +535,7 @@ def make_explore_page(corpus, table, config, configs):
             width=38,
             style=style.BLOCK_MIDDLE_35,
         ),
-        dcc.Link("buzzword", href="/", style=nav),
+        dcc.Link("buzzword", href=HOME_URL, style=nav),
         # these spaces are used to flash messages to the user if something is wrong
         dcc.ConfirmDialog(id="dialog-search", message=""),
         dcc.ConfirmDialog(id="dialog-table", message=""),

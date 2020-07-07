@@ -1,9 +1,17 @@
 from django.shortcuts import redirect, render
+from django.contrib.auth.decorators import login_required
 
 # from explore.models import Corpus
 from explorer.parts.main import load_layout
 from explorer.parts.strings import _slug_from_name
 from .forms import UploadCorpusForm
+
+from django.conf import settings
+
+if settings.BUZZWORD_SPECIFIC_CORPUS:
+    HOME_URL = f"/{settings.BUZZWORD_SPECIFIC_CORPUS}"
+else:
+    HOME_URL = "/"
 
 
 def _make_path(slug):
@@ -28,11 +36,13 @@ def _start_parse_corpus_job(corpus):
     pass
 
 
+#@login_required
 def explore(request, slug):
     app = load_layout(slug)
     return render(request, "explore/explore.html")
 
 
+@login_required
 def upload(request):
     if request.method == "POST":
         form = UploadCorpusForm(request.POST, request.FILES)
@@ -49,7 +59,7 @@ def upload(request):
             corpus.path = path
             corpus.save()
             _start_parse_corpus_job(corpus)
-            return redirect("/")
+            return redirect(HOME_URL)
     else:
         form = UploadCorpusForm()
 

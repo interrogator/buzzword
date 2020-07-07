@@ -2,9 +2,14 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
+from django.conf import settings
 
 import explore.models
 
+if settings.BUZZWORD_SPECIFIC_CORPUS:
+    HOME_URL = f"/{settings.BUZZWORD_SPECIFIC_CORPUS}"
+else:
+    HOME_URL = "/"
 
 def signup(request):
     if request.method == "POST":
@@ -13,7 +18,7 @@ def signup(request):
             user = form.save()
             user.backend = "django.contrib.auth.backends.ModelBackend"
             login(request, user)
-            return redirect("/")
+            return redirect(HOME_URL)
     else:
         form = UserCreationForm()
     return render(request, "accounts/signup.html", {"form": form})
@@ -21,7 +26,7 @@ def signup(request):
 
 def logout_view(request):
     logout(request)
-    return redirect("/")
+    return redirect(HOME_URL)
 
 
 def login_view(request):
@@ -30,7 +35,7 @@ def login_view(request):
     user = authenticate(request, username=username, password=password)
     if user:
         login(request, user)
-    return redirect("/")
+    return redirect(HOME_URL)
 
 
 def corpus_settings(request):
