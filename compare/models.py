@@ -2,11 +2,6 @@ from django.db import models
 from martor.models import MartorField
 
 
-class Post(models.Model):
-    description = MartorField(blank=True)
-    commit_msg = models.CharField(max_length=200, blank=True)
-
-
 class PDF(models.Model):
     class Meta:
         unique_together = ["slug", "num"]

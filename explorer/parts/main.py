@@ -68,7 +68,7 @@ def _get_corpora(corpus_meta, multiprocess=False):
     tables = dict()
     corpora_config = dict()
     for corpus in corpus_meta:
-        if corpus.disabled or corpus.slug in LAYOUTS:
+        if corpus.disabled:
             print("Skipping corpus because it is disabled: {}".format(corpus.name))
             continue
         # todo: fix this when backend update happens
