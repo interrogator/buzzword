@@ -14,6 +14,8 @@ RUN \
 RUN \
     git clone https://github.com/interrogator/buzzword.git && \
     cd buzzword && \
+    git pull --all && \
+    git checkout swisslaw && \
     pip install -r requirements.txt
 
 WORKDIR /buzzword
