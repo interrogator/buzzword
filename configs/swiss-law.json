@@ -1,0 +1,17 @@
+{
+  "Swiss law corpus": {
+    "slug": "swiss-law",
+    "language": "en",
+    "path": "swiss-law/swiss-law-parsed",
+    "desc": "Swiss legal texts",
+    "length": 17713,
+    "drop_columns": ["text", "parse"],
+    "disabled": false,
+    "date": "1809",
+    "load": true,
+    "url": "https://en.wikipedia.org/wiki/Switzerland",
+    "initial_table": {"show": "x", "subcorpora": "file"},
+    "initial_query": {"target": "x", "query": "VERB"},
+    "pdfs": true
+  }
+}

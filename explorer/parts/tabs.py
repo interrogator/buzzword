@@ -2,6 +2,7 @@
 buzzword explorer: build the explore page and its tabs
 """
 import json
+import os
 
 import dash_core_components as dcc
 import dash_daq as daq
@@ -10,13 +11,15 @@ import dash_table
 from buzz.constants import SHORT_TO_COL_NAME
 from buzz.corpus import Corpus
 
-from django.conf import settings
 from explore.models import Corpus as CorpusModel
 
 from . import style
 from .chart import CHART_TYPES, _df_to_figure
 from .helpers import _drop_cols_for_datatable, _get_cols, _update_frequencies
 from .strings import _capitalize_first, _make_search_name, _make_table_name
+
+from django.conf import settings
+
 
 DAQ_THEME = {
     "dark": False,
@@ -89,7 +92,7 @@ def _build_dataset_space(df, config):
         dcc.Input(
             id="input-box",
             type="text",
-            placeholder="Enter regular expression search query...",
+            placeholder="Enter search query...",
             size="60",
             style=style.MARGIN_5_MONO,
         ),
@@ -109,14 +112,14 @@ def _build_dataset_space(df, config):
                 ),
             ],
         ),
-        dcc.Dropdown(
-            id="gram-select",
-            options=grams,
-            # value="",
-            placeholder="What to return from search",
-            disabled=False,
-            style={"width": "240px", "fontFamily": "monospace", **style.FRONT},
-        ),
+        #dcc.Dropdown(
+        #    id="gram-select",
+        #    options=grams,
+        #    # value="",
+        #    placeholder="What to return from search",
+        #    disabled=False,
+        #    style={"width": "240px", "fontFamily": "monospace", **style.FRONT},
+        #),
         html.Button("Search", id="search-button"),
     ]
     pieces = [html.Div(piece, style=style.CELL_MIDDLE_35) for piece in pieces]
@@ -139,7 +142,7 @@ def _build_dataset_space(df, config):
         id="conll-view",
         columns=columns,
         data=data,
-        editable=True,
+        # editable=True,
         style_cell={**style.HORIZONTAL_PAD_5, **{"minWidth": "60px"}},
         filter_action="native",
         sort_action="native",
@@ -148,17 +151,19 @@ def _build_dataset_space(df, config):
         selected_rows=[],
         page_action="none",
         page_current=0,
-        page_size=settings.PAGE_SIZE,
+        # page_size=settings.PAGE_SIZE,
         # style_as_list_view=True,
+        css=[{"selector": ".show-hide", "rule": "display: none"}],
         virtualization=True,
-        style_table={"maxHeight": "1000px"},
+        style_table={'height': '1000px'},
         fixed_rows={"headers": True, "data": 0},
         style_header=style.BOLD_DARK,
         style_cell_conditional=style.LEFT_ALIGN,
         style_data_conditional=style.INDEX + style.STRIPES,
         merge_duplicate_headers=True,
-        export_format="xlsx",
-        export_headers="display",
+        #export_format="xlsx",
+        #export_headers="display",
+
     )
     # add loading
     conll_table = dcc.Loading(
@@ -253,13 +258,14 @@ def _build_frequencies_space(corpus, table, config):
                 page_action="none",
                 fixed_rows={"headers": True, "data": 0},
                 virtualization=True,
-                style_table={"maxHeight": "1000px"},
+                style_table={'height': '1000px'},
                 style_header=style.BOLD_DARK,
                 style_cell_conditional=style.LEFT_ALIGN,
                 style_data_conditional=[style_index] + style.STRIPES,
                 merge_duplicate_headers=True,
-                export_format="xlsx",
-                export_headers="display",
+                #export_format="xlsx",
+                #export_headers="display",
+                css=[{"selector": ".show-hide", "rule": "display: none"}],
             )
         ],
     )
@@ -287,6 +293,7 @@ def _build_frequencies_space(corpus, table, config):
         ],
         style={**style.CELL_MIDDLE_35, **style.TSTYLE},
     )
+    # disabled in swisslaw
     content = html.Span(
         children=[
             daq.BooleanSwitch(
@@ -305,9 +312,9 @@ def _build_frequencies_space(corpus, table, config):
 
     gen = "Generate table"
     generate = html.Button(gen, id="table-button", style=sty)
-    top = html.Div([show_check, subcorpora_drop, multi, content])
-    bottom = html.Div([sort_drop, relative_drop, generate])
-    toolbar = html.Div([top, bottom], style=style.VERTICAL_MARGINS)
+    top = html.Div([show_check, subcorpora_drop, sort_drop, relative_drop, generate]) # multi, content
+    #bottom = html.Div([sort_drop, relative_drop, generate])
+    toolbar = html.Div([top], style=style.VERTICAL_MARGINS) # , bottom
     div = html.Div([toolbar, freq_table])
     return html.Div(id="display-frequencies", children=[div])
 
@@ -349,6 +356,7 @@ def _build_concordance_space(df, config):
     print(f"Making concordance (max {max_conc}) for {config.name} ...")
     df = getattr(df.just, query["target"])(query["query"])
     df = df.conc(metadata=meta, window=(100, 100), n=max_conc)
+    df["file"] = df["file"].apply(os.path.basename)
     print("Done!")
 
     just = ["left", "match", "right", "file", "s", "i"]
@@ -376,7 +384,7 @@ def _build_concordance_space(df, config):
         children=[
             dash_table.DataTable(
                 id="conc-table",
-                css=[{"selector": ".dash-cell div.dash-cell-value", "rule": rule}],
+                css=[{"selector": ".dash-cell div.dash-cell-value", "rule": rule}, {"selector": ".show-hide", "rule": "display: none"}],
                 columns=columns,
                 data=data,
                 editable=True,
@@ -391,14 +399,14 @@ def _build_concordance_space(df, config):
                 page_current=0,
                 page_size=settings.PAGE_SIZE,
                 virtualization=True,
-                style_table={"maxHeight": "1000px"},
+                style_table={'height': '1000px'},
                 style_as_list_view=True,
                 style_header=style.BOLD_DARK,
                 style_cell_conditional=style.LEFT_ALIGN_CONC,
                 style_data_conditional=style_data,
                 merge_duplicate_headers=True,
-                export_format="xlsx",
-                export_headers="display",
+                #export_format="xlsx",
+                #export_headers="display",
             )
         ],
     )

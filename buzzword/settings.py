@@ -29,7 +29,7 @@ SECRET_KEY = "_^vo*lm=7o!zoj4c6zi*di!kw5ovar@*@%subhxmv*pu=)!-w5"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["127.0.0.1", "0.0.0.0", "localhost", "127.0.0.1:8000", "130.60.24.230"]
+ALLOWED_HOSTS = ["127.0.0.1", "0.0.0.0", "localhost", "127.0.0.1:8000", "172.23.3.66"]
 
 # APPEND_SLASH = False
 
@@ -254,7 +254,7 @@ CORPORA_FILE = "corpora.json"
 LOAD_CORPORA = True
 LOAD_LAYOUTS = True
 # explorer settings 
-DROP_COLUMNS = {"parse", "text"}
+DROP_COLUMNS = {"text", "parse"}
 PAGE_SIZE = 25
 TABLE_SIZE = (2000, 200)
 ADD_GOVERNOR = False
@@ -263,3 +263,6 @@ MAX_DATASET_ROWS = None
 
 # path to tessdata -- needed to find the models
 TESSDATA_PREFIX = "./tessdata"
+
+# this should be set to none, or a corpus slug
+BUZZWORD_SPECIFIC_CORPUS = "swiss-law"

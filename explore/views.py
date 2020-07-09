@@ -1,10 +1,12 @@
 from django.shortcuts import redirect, render
+from django.contrib.auth.decorators import login_required
 
 # from explore.models import Corpus
 from explorer.parts.main import load_layout
 from explorer.parts.strings import _slug_from_name
 from .forms import UploadCorpusForm
 
+from django.conf import settings
 
 def _make_path(slug):
     return f"storage/{slug}"
@@ -28,15 +30,16 @@ def _start_parse_corpus_job(corpus):
     pass
 
 
-def explore(request, slug):
-    """
-    Make and serve up the explorer dash app
-    """
-    spec = request.GET.get("spec", None)
-    load_layout(slug, spec=bool(spec))
+
+#@login_required
+def explore(request, slug=None):
+    if slug is None:
+        slug = settings.BUZZWORD_SPECIFIC_CORPUS
+    app = load_layout(slug)
     return render(request, "explore/explore.html")
 
 
+@login_required
 def upload(request):
     if request.method == "POST":
         form = UploadCorpusForm(request.POST, request.FILES)

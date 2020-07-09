@@ -39,7 +39,7 @@ def _correct_placeholder(value, **kwargs):
     """
     More accurate placeholder text when doing dependencies
     """
-    default = "Enter regular expression search query..."
+    default = "Enter search query..."
     mapped = {
         "t": "Enter Tgrep2 query...",
         "d": "Enter depgrep query",
@@ -174,7 +174,7 @@ def _new_search(
     col,
     search_string,
     no_use_regex,
-    gram_select,
+    # gram_select,
     search_from_options,
     session_search,
     session_clicks_clear,
@@ -234,7 +234,7 @@ def _new_search(
     new_value = len(session_search) + 1
 
     # on first search, spec is slug name, so it goes here.
-    this_search = [specs, col, skip, search_string, gram_select]
+    this_search = [specs, col, skip, search_string]
 
     exists = next(
         (i for i in session_search.values() if this_search == list(i)[:5]), False
@@ -276,8 +276,8 @@ def _new_search(
         if col in {"t", "d", "describe"}:
             df, msg = _special_search(corpus, col, search_string, skip)
         # do ngramming stuff
-        if gram_select:
-            df = getattr(corpus.near, col)(search_string, distance=gram_select)
+        # if gram_select:
+        #   df = getattr(corpus.near, col)(search_string, distance=gram_select)
         # skip/just searches
         elif col not in {"t", "d", "describe"}:
             search = _cast_query(search_string, col)
@@ -366,8 +366,8 @@ def _new_search(
         State("subcorpora-for-table", "value"),
         State("relative-for-table", "value"),
         State("sort-for-table", "value"),
-        State("multiindex-switch", "on"),
-        State("content-table-switch", "on"),
+        # State("multiindex-switch", "on"),
+        # State("content-table-switch", "on"),
         State("chart-from-1", "options"),
         State("chart-from-1", "value"),
         State("session-search", "data"),
@@ -387,8 +387,8 @@ def _new_table(
     subcorpora,
     relkey,
     sort,
-    multiindex_columns,
-    content_table,
+    # multiindex_columns,
+    # content_table,
     table_from_options,
     nv1,
     session_search,
@@ -437,8 +437,8 @@ def _new_table(
         relative,
         keyness,
         sort,
-        multiindex_columns,
-        content_table,
+        # multiindex_columns,
+        #content_table,
     ]
     this_table_tuple = _tuple_or_list(this_table_list, tuple)
 
@@ -469,14 +469,14 @@ def _new_table(
             table = INITIAL_TABLES[slug]
     else:
         # generate table
-        method = "table" if not content_table else "content_table"
+        method = "table"
         table = getattr(corpus, method)(
             show=show,
             subcorpora=subcorpora,
             relative=relative if relative != "corpus" else CORPORA[slug],
             keyness=keyness,
             sort=sort,
-            multiindex_columns=multiindex_columns,
+            multiindex_columns=False, # multiindex_columns,
             show_frequencies=relative is not False and relative is not None,
         )
         # round df if floats are used
@@ -497,9 +497,9 @@ def _new_table(
     else:
         max_row, max_col = settings.TABLE_SIZE
         tab = table.iloc[:max_row, :max_col]
-        cols, data = _update_frequencies(tab, True, content_table)
+        cols, data = _update_frequencies(tab, True, False)
 
-    if not msg and not updating and not content_table:
+    if not msg and not updating:
         table_name = _make_table_name(this_table_list)
         option = dict(value=idx, label=table_name)
         table_from_options.append(option)
