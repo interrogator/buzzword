@@ -8,21 +8,29 @@ WORKDIR /
 RUN \
     git clone https://github.com/interrogator/buzz.git buzz && \
     cd buzz && \
-    pip install -r requirements.txt
+    pip install -r requirements.txt && \
+    python setup.py install
 
 RUN \
-    git clone https://github.com/l0rb/buzzword.git buzzword && \
+    git clone https://github.com/interrogator/buzzword.git && \
     cd buzzword && \
     pip install -r requirements.txt
 
 WORKDIR /buzzword
 
 RUN \
-    cp .env.example .env && \
-    cp corpora.json.example corpora.json && \
-    sed -i 's!dtrt/do-the-right-thing-parsed!/buzz/dtrt/do-the-right-thing-parsed!' corpora.json
+    cp configs/swiss-law.json corpora.json && \
+    echo "BUZZWORD_SPECIFIC_CORPUS = 'swiss-law'" >> buzzword/settings.py && \
+    mkdir swiss-law
+
+COPY buzzword/swiss-law/swiss-law-parsed /buzzword/swiss-law/swiss-law-parsed
 
 RUN python manage.py migrate
+
+RUN chown www-data:www-data . && \
+    chmod 777 . && \
+    chown www-data:www-data db.sqlite3 && \
+    chmod 777 db.sqlite3
 
 RUN \
     pip install uwsgi && \

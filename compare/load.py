@@ -10,6 +10,7 @@ from PIL import Image
 
 from buzz import Collection
 
+
 def _get_ocr_engine(lang):
     """
     todo: handle english and other spacy languages

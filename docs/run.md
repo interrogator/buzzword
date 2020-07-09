@@ -15,9 +15,7 @@ Parsing will leave you with `./path/to/data-parsed`, a directory that mimics the
 
 Next, you need to configure *buzzword* to load this corpus (and potentially others) on startup. To do this, you should create a `corpora.json`, which tells the tool which corpora will be loaded into the tool. Copy `corpora.json.example` as `corpora.json`, and modify it to contain the corpora you want to show in the app.
 
-The final part of the configuration process is to add the tool's settings. This can be done using a `.env` file, or by passing in command line options. If you want to use a `.env` file (as system adminstrators likely will), copy `.env.example` to `.env`, and modify settings as per your requirements. Most importantly, make sure `BUZZWORD_CORPORA_FILE` is set to the path for your `corpora.json`.
-
-If a value isn't configured in `corpora.json`, the tool will look to `.env`, or to the provided command line options, for global settings.
+The final part of the configuration process is to add the tool's settings. This can be done by modifying `buzzword/settings.py`. Most importantly, make sure `CORPORA_FILE` is set to the path for your `corpora.json`.
 
 Once your configuration files are set up, you can start the tool with:
 
@@ -26,23 +24,3 @@ python -m buzzword
 # or
 buzzword
 ```
-
-With either command, you can also enter any the following options on the command line:
-
-```
-# global settings
---corpora-json          : corpora.json : path to corpora.json file used to load corpora
---no-load / -nl         : false        : do not load the full corpus into memory (for very large datasets/small machines, makes searches much slower)
---page-size / -p        : 25           : Rows per page of table
---env / -e              : none         : Use .env for configuration (pass path to .env file)
---debug                 : true         : run flask/dash in debug mode
-
-# settings overridden by corpora.json
-
---drop-columns / -d     : none         : Comma separated list of corpus columns to drop before loading into tool
---max-dataset-rows / -m : none         : Cut corpus at this many lines before loading into tool
---table-size / -s       : 2000,200     : Max rows,columns to show in tables
---add-governor / -g     : false        : add governor token features to dataset. Slow to load and consumes more memory, but allows searching/showing governor features
-```
-
-If you pass a value for `--env`, make sure all these settings are in your `.env` file.

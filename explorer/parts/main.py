@@ -8,6 +8,7 @@ import os
 
 from buzz.corpus import Collection
 from buzz.constants import LANGUAGES, AVAILABLE_MODELS
+
 from django_plotly_dash import DjangoDash
 
 from explore.models import Language, Corpus
@@ -61,6 +62,7 @@ def _load_explorer_data(multiprocess=False):
         if corpus.disabled:
             print(f"Skipping corpus because it is disabled: {corpus.name}")
             continue
+
         buzz_collection = Collection(corpus.path)
         # a corpus must have a feather or conll to be explorable. prefer feather.
         buzz_corpus = buzz_collection.feather or buzz_collection.conllu
@@ -76,6 +78,9 @@ def _load_explorer_data(multiprocess=False):
             opts = dict(add_governor=corpus.add_governor, multiprocess=multiprocess)
             buzz_corpus = buzz_corpus.load(**opts)
             buzz_corpus = _postprocess_corpus(buzz_corpus, corpus)
+            cols = json.loads(corpus.drop_columns)
+            if cols:
+                buzz_corpus = buzz_corpus.drop(cols, axis=1, errors="ignore")
             corpora[corpus.slug] = buzz_corpus
         else:
             print(f"NOT loading corpus into memory: {corpus.name} ...")
@@ -128,3 +133,5 @@ def load_explorer_app():
         for corpus in Corpus.objects.all():
             if not corpus.disabled:
                 load_layout(corpus.slug, set_and_register=False)
+                # load_layout(corpus.slug, set_and_register=True)
+

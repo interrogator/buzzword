@@ -18,11 +18,11 @@
         </ul>
     {% endif %}
 
-    <div class="container">
+    <div class="container compare-container">
       <div class="row">
         <div class="col-sm">
             <div>
-                <object data={{ pdf_filepath }} type="application/pdf" width="100%" height="400vh">
+                <object data={{ pdf_filepath }} type="application/pdf" style="min-height:80vh;min-width:50vw">
                     <embed src={{ pdf_filepath }} type="application/pdf" />
                 </object>
                 {% include "comparenav.html" %}
@@ -31,7 +31,7 @@
         <div class="col-sm">
             <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
-                <div style="height:100vh;">
+                <div style="height:80vh;min-width:40vw">
                     {{ form.description }}
                     <div class="float-right">
                         Describe your changes: 

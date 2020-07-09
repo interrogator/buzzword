@@ -1,5 +1,6 @@
 import os
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.messages import get_messages
 
@@ -22,7 +23,7 @@ def _make_message(request, level, msg):
         messages.add_message(request, level, msg)
 
 
-def browse_collection(request, slug):
+def browse_collection(request, slug=None):
     """
     Main compare/correct view, showing PDF beside its OCR output
 
@@ -31,7 +32,10 @@ def browse_collection(request, slug):
     """
     # corpus = Corpus.objects.get(slug=slug)
     # lang = corpus.language.name
-    spec = request.GET.get("spec", None)
+    # handle specific mode
+    if not slug:
+        slug = settings.BUZZWORD_SPECIFIC_CORPUS
+    spec = bool(slug)
     all_pdfs = PDF.objects.all()
     paginator = Paginator(all_pdfs, 1)
     page_number = request.GET.get("page", 1)
@@ -50,7 +54,7 @@ def browse_collection(request, slug):
         "pdf_filepath": "/" + pdf_path.replace(".tif", ".pdf"),
         "form": form,
         "page_obj": page_obj,
-        "specific_nav": spec == "true",
+        "specific_nav": spec,
         "corpus": Corpus.objects.get(slug=slug),
         "navbar": "compare",
         "spec": spec_format

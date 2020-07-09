@@ -31,20 +31,6 @@ CORPUS_PATH = os.path.join(NAME, "example")
 
 print("Making a new workspace at {}".format(FULLNAME))
 
-ENV = f"""
-# .env example for deploying buzzword
-# comment out keys you are not using
-BUZZWORD_CORPORA_FILE=corpora.json
-BUZZWORD_ROOT={FULLNAME}
-BUZZWORD_LOAD=true
-BUZZWORD_DEBUG=false
-BUZZWORD_MAX_DATASET_ROWS=999999
-BUZZWORD_DROP_COLUMNS=parse,text
-BUZZWORD_PAGE_SIZE=25
-BUZZWORD_TABLE_SIZE=2000,200
-BUZZWORD_ADD_GOVERNOR=false
-"""
-
 CORPORA = f"""
 {{
   "Example corpus: joke": {{
@@ -74,8 +60,7 @@ os.makedirs(FULLNAME)
 
 for folder in ["csv", "uploads", "example"]:
     os.makedirs(os.path.join(FULLNAME, folder))
-with open(os.path.join(FULLNAME, ".env"), "w") as fo:
-    fo.write(ENV.strip() + "\n")
+
 with open(os.path.join(FULLNAME, "corpora.json"), "w") as fo:
     fo.write(CORPORA.strip() + "\n")
 with open(os.path.join(CORPUS_PATH, "001-joke-lion-pun.txt"), "w") as fo:

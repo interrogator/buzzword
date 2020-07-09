@@ -10,13 +10,15 @@ import dash_table
 from buzz.constants import SHORT_TO_COL_NAME
 from buzz.corpus import Corpus
 
-from django.conf import settings
 from explore.models import Corpus as CorpusModel
 
 from . import style
 from .chart import CHART_TYPES, _df_to_figure
 from .helpers import _drop_cols_for_datatable, _get_cols, _update_frequencies
 from .strings import _capitalize_first, _make_search_name, _make_table_name
+
+from django.conf import settings
+
 
 DAQ_THEME = {
     "dark": False,
@@ -151,7 +153,7 @@ def _build_dataset_space(df, config):
         page_size=settings.PAGE_SIZE,
         # style_as_list_view=True,
         virtualization=True,
-        style_table={"maxHeight": "1000px"},
+        style_table={'height': '1000px'},
         fixed_rows={"headers": True, "data": 0},
         style_header=style.BOLD_DARK,
         style_cell_conditional=style.LEFT_ALIGN,
@@ -159,6 +161,7 @@ def _build_dataset_space(df, config):
         merge_duplicate_headers=True,
         export_format="xlsx",
         export_headers="display",
+
     )
     # add loading
     conll_table = dcc.Loading(
@@ -253,7 +256,7 @@ def _build_frequencies_space(corpus, table, config):
                 page_action="none",
                 fixed_rows={"headers": True, "data": 0},
                 virtualization=True,
-                style_table={"maxHeight": "1000px"},
+                style_table={'height': '1000px'},
                 style_header=style.BOLD_DARK,
                 style_cell_conditional=style.LEFT_ALIGN,
                 style_data_conditional=[style_index] + style.STRIPES,
@@ -391,7 +394,7 @@ def _build_concordance_space(df, config):
                 page_current=0,
                 page_size=settings.PAGE_SIZE,
                 virtualization=True,
-                style_table={"maxHeight": "1000px"},
+                style_table={'height': '1000px'},
                 style_as_list_view=True,
                 style_header=style.BOLD_DARK,
                 style_cell_conditional=style.LEFT_ALIGN_CONC,
