@@ -4,6 +4,7 @@ buzzword explorer: making human-readable strings from data
 import urllib.parse
 
 from buzz.constants import SHORT_TO_LONG_NAME
+from .lang import LANGUAGES
 
 
 def _make_description(names, size):
@@ -57,7 +58,7 @@ def _format_size(size):
         return f"{size/1000:.2f} kB"
 
 
-def _make_search_name(history, size, searches):
+def _make_search_name(history, size, searches, lang):
     """
     Generate a search name from its history
     """
@@ -67,11 +68,14 @@ def _make_search_name(history, size, searches):
 
     locale.setlocale(locale.LC_ALL, "")
     if isinstance(history, str):
-        return f"Search entire corpus: {history} ({size:n} tokens)"
-    previous, col, skip, search_string, gram, n, n_results, _ = history
+        searchlang = LANGUAGES[("search-default", None)][int(lang)]
+        return f"{searchlang} {history} ({size:n} tokens)"
+    #previous, col, skip, search_string, gram, n, n_results, _ = history
+    previous, col, skip, search_string, n, n_results, _ = history  # swisslaw
+    gram = 0  # swisslaw
     no = "not " if skip else ""
     col = SHORT_TO_LONG_NAME.get(col, col)
-    relative_corpus = n_results * 100 / size
+    relative_corpus = n_results * 100 / size  # list / int
     prev_total = previous[-2] if isinstance(previous, (tuple, list)) else None
     rel_last = ""
     if prev_total is not None:

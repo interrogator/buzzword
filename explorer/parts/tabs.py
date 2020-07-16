@@ -19,7 +19,7 @@ from .helpers import _drop_cols_for_datatable, _get_cols, _update_frequencies
 from .strings import _capitalize_first, _make_search_name, _make_table_name
 
 from django.conf import settings
-
+from .lang import LANGUAGES
 
 DAQ_THEME = {
     "dark": False,
@@ -171,7 +171,7 @@ def _build_dataset_space(df, config):
         id="loading-main",
         fullscreen=True,
         className="loading-main",
-        children=[conll_table],
+        children=conll_table,
     )
     div = html.Div(id="dataset-container", children=[search_space, conll_table])
     return html.Div(id="display-dataset", children=[div])
@@ -311,7 +311,7 @@ def _build_frequencies_space(corpus, table, config):
     )
 
     gen = "Generate table"
-    generate = html.Button(gen, id="table-button", style=sty)
+    generate = html.Button(gen, id="table-button", style={**style.MARGIN_5_MONO, **style.TSTYLE})
     top = html.Div([show_check, subcorpora_drop, sort_drop, relative_drop, generate]) # multi, content
     #bottom = html.Div([sort_drop, relative_drop, generate])
     toolbar = html.Div([top], style=style.VERTICAL_MARGINS) # , bottom
@@ -490,7 +490,7 @@ def _build_chart_space(table, config):
         chart = dcc.Loading(type="default", children=[dcc.Graph(**chart_data)])
         chart_space = html.Div([toolbar, chart])
         name = f"Chart #{chart_num}"
-        summary = html.Summary(name, style=style.CHART_SUMMARY)
+        summary = html.Summary(name, id=f"chart-num-{chart_num}", style=style.CHART_SUMMARY)
         drop = [summary, html.Div(chart_space)]
         collapse = html.Details(drop, open=chart_num == 1)
         charts.append(collapse)
@@ -513,13 +513,31 @@ def make_explore_page(corpus, table, slug, spec=False):
     chart = _build_chart_space(table, config)
     concordance = _build_concordance_space(corpus, config)
     length = config.length or len(corpus)
-    label = _make_search_name(config.name, length, dict())
+    label = _make_search_name(config.name, length, dict(), 0)  # 0 == english
     search_from = [dict(value=0, label=label)]
     sty = {**style.MARGIN_5_MONO, **style.FRONT}
     show = html.Button("Show", id="show-this-dataset", style=sty)
     show.title = "Show the selected corpus or search result in the Dataset tab"
     clear = html.Button("Clear history", id="clear-history", style=style.MARGIN_5_MONO)
+    langselect = html.Div(
+        id="langselect-box",
+        children=[
+            daq.BooleanSwitch(
+                theme=DAQ_THEME,
+                className="colour-off",
+                id="language-switch",
+                on=False,
+                style={"verticalAlign": "top", **style.MARGIN_5_MONO},
+            ),
+            html.Div(
+                id="language-text",
+                style={"verticalAlign": "bottom", "textAlign": "center", **style.MARGIN_5_MONO},
+            ),
+        ],
+        style={"marginRight": "20px"}
+    )
     clear.title = "Delete all searches and frequency tables"
+    langselect.title = "Select language for the interface"
 
     dropdown = dcc.Dropdown(
         id="search-from", options=search_from, value=0, disabled=True
@@ -553,6 +571,7 @@ def make_explore_page(corpus, table, slug, spec=False):
         html.Div(dropdown, style=drop_style),
         html.Div(show, style=dict(width="10%", **style.BLOCK_MIDDLE_35)),
         html.Div(clear, style=dict(width="10%", **style.BLOCK_MIDDLE_35)),
+        html.Div(langselect, style=dict(**style.BLOCK_MIDDLE_35, **{"float": "right", "marginRight": "10px"})),
     ]
     top_bit = html.Div(top_bit, style=style.VERTICAL_MARGINS)
 
@@ -569,10 +588,10 @@ def make_explore_page(corpus, table, slug, spec=False):
             "paddingRight": "10px",
         },
         children=[
-            dcc.Tab(label="DATASET", value="dataset"),
-            dcc.Tab(label="FREQUENCIES", value="frequencies"),
-            dcc.Tab(label="CHART", value="chart"),
-            dcc.Tab(label="CONCORDANCE", value="concordance"),
+            dcc.Tab(id="dataset-tab-label", label="DATASET", value="dataset"),
+            dcc.Tab(id="freq-tab-label", label="FREQUENCIES", value="frequencies"),
+            dcc.Tab(id="chart-tab-label", label="CHART", value="chart"),
+            dcc.Tab(id="conc-tab-label", label="CONCORDANCE", value="concordance"),
         ],
     )
     blk = {"display": "block", **style.HORIZONTAL_PAD_5}

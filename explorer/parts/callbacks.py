@@ -23,6 +23,7 @@ from .helpers import (
     _update_conll,
     _update_frequencies,
 )
+from .lang import LANGUAGES
 from .main import CORPORA, INITIAL_TABLES, app
 from .strings import _make_search_name, _make_table_name, _search_error, _table_error
 
@@ -32,21 +33,27 @@ FREQUENCY_TABLES = dict()
 
 
 @app.expanded_callback(
-    [Output("input-box", "placeholder"), Output("gram-select", "disabled")],
+    Output("input-box", "placeholder"), #Output("gram-select", "disabled")],  # swisslaw
     [Input("search-target", "value")],
+    [State("language-switch", "on")]
 )
-def _correct_placeholder(value, **kwargs):
+def _correct_placeholder(value, lang, **kwargs):
     """
     More accurate placeholder text when doing dependencies
     """
-    default = "Enter search query..."
+    if value is None:
+        return no_update
+
+    return "Enter search query..." if not lang else "Suchabfrage eingeben..."
+
+    # tofix
     mapped = {
         "t": "Enter Tgrep2 query...",
         "d": "Enter depgrep query",
         "describe": 'Enter depgrep query (e.g. l"man" = f"nsubj")',
     }
-    disable_gram = value in mapped
-    return mapped.get(value, default), disable_gram
+    # disable_gram = value in mapped
+    return mapped.get(value, default)#, disable_gram
 
 
 @app.expanded_callback(
@@ -157,12 +164,13 @@ def _on_load_callback(n_clicks, **kwargs):
         State("search-target", "value"),
         State("input-box", "value"),
         State("use-regex", "on"),
-        State("gram-select", "value"),
+        #State("gram-select", "value"),
         State("search-from", "options"),
         State("session-search", "data"),
         State("session-clicks-clear", "data"),
         State("session-clicks-show", "data"),
         State("slug", "title"),
+        State("language-switch", "on")
     ],
 )
 def _new_search(
@@ -180,6 +188,7 @@ def _new_search(
     session_clicks_clear,
     session_clicks_show,
     slug,
+    lang,
     **kwargs,
 ):
     """
@@ -250,7 +259,7 @@ def _new_search(
         corpus_size = len(corpus)
         corpus = corpus.iloc[:max_row, :max_col]
         cols, data = _update_conll(corpus, False, drop_govs=conf.add_governor)
-        name = _make_search_name(conf.name, corpus_size, session_search)
+        name = _make_search_name(conf.name, corpus_size, session_search, int(lang))
         search_from = [dict(value=0, label=name)]
         # set number of clicks at last moment
         session_clicks_clear = cleared
@@ -311,7 +320,7 @@ def _new_search(
         current_cols, current_data = no_update, no_update
 
     if not msg:
-        name = _make_search_name(this_search, len(corpus), session_search)
+        name = _make_search_name(this_search, len(corpus), session_search, int(lang))
         new_option = dict(value=new_value, label=name)
         index_for_option = next(
             i for i, s in enumerate(search_from_options) if s["value"] == search_from
@@ -355,7 +364,6 @@ def _new_search(
     ],
     [
         Input("table-button", "n_clicks"),
-        Input("freq-table", "columns_previous"),
         Input("freq-table", "data_previous"),
     ],
     [
@@ -378,7 +386,6 @@ def _new_search(
 )
 def _new_table(
     n_clicks,
-    prev_cols,
     prev_data,
     current_cols,
     current_data,
@@ -584,7 +591,7 @@ def _matching_not_matching(on, **kwargs):
     [Input("use-regex", "on")],
 )
 def _use_regex(on, **kwargs):
-    text = "simple" if not on else "regex"
+    text = "simple search" if not on else "regular expression"
     classname = "colour-off" if not on else "colour-on"
     return text, classname
 
@@ -598,3 +605,31 @@ def _multiindex(_, show, on, **kwargs):
     if not show or len(show) < 2:
         return True, False
     return False, on
+
+
+@app.expanded_callback(
+    [Output("language-text", "children"), Output("language-switch", "className")],
+    [Input("language-switch", "on")],
+)
+def _switch_language(on, **kwargs):
+    text = "English" if not on else "German"
+    classname = "colour-off" if not on else "colour-on"
+    return text, classname
+
+
+language_outputs = [Output(c, f) for c, f in sorted(LANGUAGES) if f]
+language_states = [State(c, f) for c, f in sorted(LANGUAGES) if f]
+
+
+@app.expanded_callback(
+    language_outputs,
+    [Input("language-switch", "on")],
+    language_states,
+)
+def _change_language(lang, *args, **kwargs):
+    """
+    Change the language of the entire explorer
+    """
+    if lang is None:
+        return no_update
+    return [v[int(lang)] for (_, f), v in sorted(LANGUAGES.items()) if f]

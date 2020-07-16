@@ -83,3 +83,8 @@ p, ul, ol {
 .dash-spreadsheet-inner {
   min-height: 80vh !important;
 }
+
+/* stop table from left-side cutoff */
+.dash-table-container .row {
+  margin: 0;
+}
