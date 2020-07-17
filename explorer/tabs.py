@@ -560,9 +560,8 @@ def make_explore_page(corpus, table, slug, spec=False):
         width=38,
         style=style.BLOCK_MIDDLE_35
     )
-
     top_bit = [
-        dcc.Link(["buzzword", img], href=mainlink, style=nav),
+        html.A(["buzzword", img], href=mainlink, style=nav),
         # these spaces are used to flash messages to the user if something is wrong
         dcc.ConfirmDialog(id="dialog-search", message=""),
         dcc.ConfirmDialog(id="dialog-table", message=""),
