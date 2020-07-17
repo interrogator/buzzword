@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from .forms import CustomUserCreationForm
 from bootstrap_modal_forms.generic import BSModalCreateView
 from django.urls import reverse_lazy
+from django.contrib.auth import login, authenticate
 
 def _get_markdown_content(slug, page):
     """
@@ -52,4 +53,33 @@ class SignUpView(BSModalCreateView):
     context = {"corpus": corpus, "navbar": "home", "content": content}
     # return to homepage, logged in, authenticated
     # return render(f"start/{slug}.html", context)
-    success_url = reverse_lazy('index')
+    success_url = reverse_lazy("start.views.start_specific", kwargs={"slug": slug})
+
+
+def signup(request, slug=None):
+    # if this is a POST request we need to process the form data
+    slug = slug or settings.BUZZWORD_SPECIFIC_CORPUS
+    current_section = request.path.strip("/") or "home"
+    corpus = explore.models.Corpus.objects.get(slug=slug)
+    context = {}
+
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            # save user in db...login
+            form.request = request
+            user = form.save()
+            user.backend = "django.contrib.auth.backends.ModelBackend"
+            print("SAVED IN DB...")
+            username = request.POST.get("username")
+            password = request.POST.get("password")
+            user = authenticate(request, username=username, password=password)
+            if user:
+                login(request, user)
+            # or redirect?
+            return render(request, f"start/{slug}.html", context)
+    else:
+        form = CustomUserCreationForm()
+        context["form"] = form
+
+    return render(request, 'signup.html', context)

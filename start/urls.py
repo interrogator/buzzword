@@ -19,7 +19,7 @@ paths = f"^(?P<slug>{slugs})/"
 app_name = "start"
 
 urlpatterns = [
-    path('signup/', views.SignUpView.as_view(), name='signup'),
+    path('signup/', views.signup, name='signup'),
     re_path(paths, views.start_specific, name="start_specific")
 ]
 

@@ -97,6 +97,10 @@ label[for=id_password] {
   display:none;
 }
 
+.logout{
+  color:white;
+}
+
 p .validate {
   margin-top:10px;
   margin-right:5px;
