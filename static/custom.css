@@ -88,3 +88,23 @@ p, ul, ol {
 .dash-table-container .row {
   margin: 0;
 }
+
+label[for=id_username] {
+  display:none;
+}
+
+label[for=id_password] {
+  display:none;
+}
+
+p .validate {
+  margin-top:10px;
+}
+
+p input[type=password] {
+  margin-top:10px;
+}
+
+.login-button {
+    margin-top:-5px;
+}

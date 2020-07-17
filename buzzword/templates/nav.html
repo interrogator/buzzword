@@ -39,7 +39,7 @@
             <form class="form-inline my-2 my-lg-0" action="{% url 'login' %}" method="POST">
                 {% csrf_token %}
                 {{ login_form.as_p }}
-                <button type="submit" class="btn btn-primary">Login</button>
+                <button type="submit" class="btn btn-primary login-button">Login</button>
             </form>
         {% endif %}
     </div>
