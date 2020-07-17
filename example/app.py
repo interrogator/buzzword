@@ -25,7 +25,7 @@ def _make_layout():
     with open("static/swiss-law/example.json") as fo:
         text = json.load(fo)
     conc_space = concordance_space()
-    text_style = {"maxWidth": "800px", "margin": "auto"}
+    text_style = {"maxWidth": "800px", "margin": "auto", "marginBottom": "40px"}
     children = [dcc.Markdown(text["intro"], style={**text_style, **{"marginTop": "140px"}}),
                 dcc.Markdown(text["freq"], style=text_style),
                 dcc.Markdown(text["calc"], style=text_style),
