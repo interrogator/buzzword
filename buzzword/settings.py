@@ -38,6 +38,7 @@ ALLOWED_HOSTS = ["127.0.0.1", "0.0.0.0", "localhost", "127.0.0.1:8000", "172.23.
 INSTALLED_APPS = [
     "dpd_static_support",
     "start.apps.StartConfig",
+    "example.apps.ExampleConfig",
     "explore.apps.ExploreConfig",
     "compare.apps.CompareConfig",
     "django_plotly_dash.apps.DjangoPlotlyDashConfig",

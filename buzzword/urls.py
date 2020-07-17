@@ -9,6 +9,7 @@ urlpatterns = (
         path("", include("accounts.urls")),
         path("compare/", include("compare.urls")),
         path("explore/", include("explore.urls")),
+        path("example/", include("example.urls")),
         path("martor/", include("martor.urls")),
         path("admin/login/", admin.site.urls),
         path("resources/", include("django_plotly_dash.urls")),

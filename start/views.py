@@ -44,6 +44,8 @@ def start_specific(request, slug=None):
 def example(request, slug):
     """
     Load the examples page for a given corpus
+
+    not used!
     """
     spec = request.GET.get("spec", None)
     corpus = explore.models.Corpus.objects.get(slug=slug)

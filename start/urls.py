@@ -27,4 +27,4 @@ urlpatterns = [
 if not settings.BUZZWORD_SPECIFIC_CORPUS:
     urlpatterns += [path("", views.start, name="start")]
 else:
-    urlpatterns += [path("", views.start_specific), path("example/", views.start_specific)]
+    urlpatterns += [path("", views.start_specific)]
