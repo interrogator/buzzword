@@ -39,7 +39,7 @@ def load_tif_pdf_plaintext(corpus):
     tot = len(collection.tiff.files)
     for i, tif_file in enumerate(collection.tiff.files):
         tif_path = tif_file.path
-        pdf_path = tif_path.replace('/tiff/', "/pdf/").replace(".tif", ".pdf")
+        pdf_path = tif_path.replace('/tiff/', "/pdf/").replace("/tif/", "/pdf/").replace(".tif", ".pdf")
         os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
         name = os.path.basename(tif_path)
         name = os.path.splitext(name)[0]

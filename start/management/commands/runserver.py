@@ -1,6 +1,6 @@
 import os
 
-from explorer.parts.main import load_explorer_app
+from explorer.main import load_explorer_app
 from django.contrib.staticfiles.management.commands.runserver import (
     Command as RunServerCommand,
 )

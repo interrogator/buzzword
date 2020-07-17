@@ -2,8 +2,8 @@ from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 
 # from explore.models import Corpus
-from explorer.parts.main import load_layout
-from explorer.parts.strings import _slug_from_name
+from explorer.main import load_layout
+from explorer.strings import _slug_from_name
 from .forms import UploadCorpusForm
 
 from django.conf import settings

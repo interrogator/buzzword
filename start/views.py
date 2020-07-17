@@ -4,7 +4,9 @@ from django.conf import settings
 from django.shortcuts import render
 import explore.models
 from django.contrib.auth.decorators import login_required
-
+from .forms import CustomUserCreationForm
+from bootstrap_modal_forms.generic import BSModalCreateView
+from django.urls import reverse_lazy
 
 def _get_markdown_content(slug, page):
     """
@@ -48,3 +50,16 @@ def example(request, slug):
     content = _get_markdown_content(slug, "example")
     context = {"corpus": corpus, "navbar": "example", "content": content}
     return render(request, f"start/{slug}.html", context)    
+
+
+class SignUpView(BSModalCreateView):
+    form_class = CustomUserCreationForm
+    template_name = 'signup.html'
+    success_message = 'Sign up succeeded. You can now log in.'
+    slug = settings.BUZZWORD_SPECIFIC_CORPUS  # todo: slug for non specific
+    corpus = explore.models.Corpus.objects.get(slug=slug)
+    content = _get_markdown_content(slug, "home")
+    context = {"corpus": corpus, "navbar": "home", "content": content}
+    # return to homepage, logged in, authenticated
+    # return render(f"start/{slug}.html", context)
+    success_url = reverse_lazy('index')

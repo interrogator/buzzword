@@ -8,7 +8,6 @@
     <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="{% static 'bootstrap.min.css' %}"/>
-    <!-- Optional theme <link rel="stylesheet" href="{% static "bootstrap-theme.min.css" %}"/> -->
   </head>
   <body>
   {% block body %}
@@ -17,8 +16,6 @@
     {% block content %}
     {% endblock %}
     </div>
-    <!-- Latest compiled and minified JavaScript -->
-    <script src="{% static 'jquery.min.js' %}"/>
     <script src="{% static 'popper.min.js' %}"/>
     <script src="{% static 'bootstrap.min.js' %}"/>
   {% endblock body %}

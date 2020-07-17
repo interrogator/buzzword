@@ -526,7 +526,7 @@ def make_explore_page(corpus, table, slug, spec=False):
                 theme=DAQ_THEME,
                 className="colour-off",
                 id="language-switch",
-                on=False,
+                on=False, # false == en, true == de; get from user model
                 style={"verticalAlign": "top", **style.MARGIN_5_MONO},
             ),
             html.Div(

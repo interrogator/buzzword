@@ -8,14 +8,12 @@
   <link href="{% static 'plugins/css/resizable.min.css' %}" type="text/css" media="all" rel="stylesheet" />
   <link href="{% static 'martor/css/martor.min.css' %}" type="text/css" media="all" rel="stylesheet" />
   <link rel="stylesheet" href="{% static 'bootstrap.min.css' %}"/>
-  <script type="text/javascript" src="{% static 'jquery.min.js' %}"></script>
   <script type="text/javascript" src="{% static 'bootstrap.min.js' %}"></script>
   <link rel="stylesheet" href="{% static 'custom.css' %}"/>
 </head>
 <body>
 {% if specific_nav %} {% include "specific_nav.html" %} {% else %} {% include "nav.html" %} {% endif %}
 {% block content %}{% endblock %}
-
   <script type="text/javascript" src="{% static 'plugins/js/ace.js' %}"></script>
   <script type="text/javascript" src="{% static 'plugins/js/semantic.min.js' %}"></script>
   <script type="text/javascript" src="{% static 'plugins/js/mode-markdown.js' %}"></script>

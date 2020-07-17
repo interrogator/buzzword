@@ -3,7 +3,7 @@ import json
 
 from buzz.constants import LANGUAGES, AVAILABLE_MODELS
 from django.db import models
-from explorer.parts.strings import _slug_from_name
+from explorer.strings import _slug_from_name
 
 from django.db import IntegrityError
 

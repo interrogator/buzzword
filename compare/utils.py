@@ -68,11 +68,12 @@ def dump_latest():
     Get the latest OCR corrections and build a parseable corpus.
     Maybe even parse it?
     """
-    slugs = OCRUpdate.objects.values_list("slug")
-    slugs = set(slugs)
+    slugs = set(OCRUpdate.objects.values_list("slug"))
     for slug in slugs:
         corp = Corpus.objects.get(slug=slug)
-        lang = corp.language.name
+        if not corp.pdfs:
+            continue
+        lang = corp.language.short
         # get the associated pdfs
         pdfs = PDF.objects.filter(slug=slug)
         for pdf in pdfs:

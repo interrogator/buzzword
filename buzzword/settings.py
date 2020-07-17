@@ -50,7 +50,9 @@ INSTALLED_APPS = [
     "guardian",
     "accounts",
     "martor",
-    "markdownify"
+    "markdownify",
+    "bootstrap_modal_forms",
+    "widget_tweaks"
 ]
 
 STATICFILES_FINDERS = [

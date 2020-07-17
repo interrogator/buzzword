@@ -1,7 +1,7 @@
 import os
 from importlib import import_module
 
-from explorer.parts.main import load_explorer_app
+from explorer.main import load_explorer_app
 from explore.models import Corpus
 from compare.load import load_tif_pdf_plaintext
 from django.apps import apps

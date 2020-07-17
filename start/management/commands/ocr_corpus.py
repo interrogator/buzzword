@@ -8,8 +8,5 @@ from django.contrib.staticfiles.management.commands.runserver import (
 
 class Command(RunServerCommand):
     def run(self, **options):
-        if os.environ.get(
-            "RUN_MAIN", False
-        ):  # https://code.djangoproject.com/ticket/8085
-            dump_latest()
-        super().run(**options)
+        print("Dumping latest OCR")
+        dump_latest()

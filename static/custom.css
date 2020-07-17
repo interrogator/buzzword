@@ -99,10 +99,12 @@ label[for=id_password] {
 
 p .validate {
   margin-top:10px;
+  margin-right:5px;
 }
 
 p input[type=password] {
   margin-top:10px;
+  margin-right:5px;
 }
 
 .login-button {
