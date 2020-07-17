@@ -1,12 +1,14 @@
 from django.conf import settings
 from django.shortcuts import render
 from .app import app
+from explore.models import Corpus
 
-# Create your views here.
 
-
-#@login_required
 def example(request, slug=None):
+    specific_nav = False
     if slug is None:
         slug = settings.BUZZWORD_SPECIFIC_CORPUS
-    return render(request, "example/example.html")
+        specific_nav = True
+    corpus = Corpus.objects.get(slug=slug)
+    context = {"specific_nav": specific_nav, "navbar": "example", "corpus": corpus}
+    return render(request, "example/example.html", context)

@@ -41,18 +41,6 @@ def start_specific(request, slug=None):
     context = {"corpus": corpus, "navbar": current_section, "content": content}
     return render(request, f"start/{slug}.html", context)
 
-def example(request, slug):
-    """
-    Load the examples page for a given corpus
-
-    not used!
-    """
-    spec = request.GET.get("spec", None)
-    corpus = explore.models.Corpus.objects.get(slug=slug)
-    content = _get_markdown_content(slug, "example")
-    context = {"corpus": corpus, "navbar": "example", "content": content}
-    return render(request, f"start/{slug}.html", context)    
-
 
 class SignUpView(BSModalCreateView):
     form_class = CustomUserCreationForm

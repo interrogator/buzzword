@@ -1,15 +1,11 @@
 {% load static %}
 <html>
-    <head>
-    {% load plotly_dash%}
+  <head>
+    {% load plotly_dash %}
     {% plotly_header %}
-    <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
-    <link rel="stylesheet" href="{% static 'bootstrap.min.css' %}"/>
-    <link rel="stylesheet" href="{% static 'plotly.css' %}"/>
-    <link rel="stylesheet" href="{% static 'custom.css' %}"/>
-    </head>
-    <body>
+  </head>
+  <body>
     {%plotly_direct name="buzzword"%}
-    </body>
-    {% plotly_footer %}
+  </body>
+  {% plotly_footer %}
 </html>

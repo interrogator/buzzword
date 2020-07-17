@@ -6,9 +6,17 @@
 
 {% block content %}
 
-<div class="container" style="max-width: 700px;">
+<div class="container" style="max-width: 800px;">
 {{ content|markdownify }}
 </div>
 
 {% endblock %}
 
+<script type="text/javascript">
+  $(function () {
+    // Sign up button
+    $("#signup-btn").modalForm({
+      formURL: "{% url 'signup' %}"
+    });
+  });
+</script>

@@ -1,31 +1,53 @@
-{% load static %}<!DOCTYPE html>
+{% load static %}
+<!DOCTYPE html>
 <html lang="en-us">
-<head>
-  <title>{% block title %}buzzword{% endblock %}</title>
-  <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
-  <link href="{% static 'plugins/css/ace.min.css' %}" type="text/css" media="all" rel="stylesheet" />
-  <link href="{% static 'plugins/css/semantic.min.css' %}" type="text/css" media="all" rel="stylesheet" />
-  <link href="{% static 'plugins/css/resizable.min.css' %}" type="text/css" media="all" rel="stylesheet" />
-  <link href="{% static 'martor/css/martor.min.css' %}" type="text/css" media="all" rel="stylesheet" />
-  <link rel="stylesheet" href="{% static 'bootstrap.min.css' %}"/>
-  <script type="text/javascript" src="{% static 'bootstrap.min.js' %}"></script>
-  <link rel="stylesheet" href="{% static 'custom.css' %}"/>
-</head>
-<body>
-{% if specific_nav %} {% include "specific_nav.html" %} {% else %} {% include "nav.html" %} {% endif %}
-{% block content %}{% endblock %}
-  <script type="text/javascript" src="{% static 'plugins/js/ace.js' %}"></script>
-  <script type="text/javascript" src="{% static 'plugins/js/semantic.min.js' %}"></script>
-  <script type="text/javascript" src="{% static 'plugins/js/mode-markdown.js' %}"></script>
-  <script type="text/javascript" src="{% static 'plugins/js/ext-language_tools.js' %}"></script>
-  <script type="text/javascript" src="{% static 'plugins/js/theme-github.js' %}"></script>
-  <script type="text/javascript" src="{% static 'plugins/js/typo.js' %}"></script>
-  <script type="text/javascript" src="{% static 'plugins/js/spellcheck.js' %}"></script>
-  <script type="text/javascript" src="{% static 'plugins/js/highlight.min.js' %}"></script>
-  <script type="text/javascript" src="{% static 'plugins/js/resizable.min.js' %}"></script>
-  <script type="text/javascript" src="{% static 'plugins/js/emojis.min.js' %}"></script>
-  <script type="text/javascript" src="{% static 'martor/js/martor.min.js' %}"></script>
+  <head>
+    <title>{% block title %}buzzword{% endblock %}</title>
+    {% block header_content %}
+      <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+      <link href="{% static 'plugins/css/ace.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+      <link href="{% static 'plugins/css/semantic.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+      <link href="{% static 'plugins/css/resizable.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+      <link href="{% static 'martor/css/martor.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+      <link rel="stylesheet" href="{% static 'bootstrap.min.css' %}"/>
+      <link rel="stylesheet" href="{% static 'custom.css' %}"/>
+    {% endblock %}
+  </head>
 
-  {% block js %}{% endblock %}
-</body>
+  <body>
+    {% block content %}
+      {% if specific_nav %}
+        {% include "specific_nav.html" %}
+      {% else %}
+        {% include "nav.html" %}
+      {% endif %}
+    {% endblock %}
+
+    {% block js %}
+      <script type="text/javascript" src="{% static 'jquery.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'bootstrap.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'plugins/js/ace.js' %}"></script>
+      <script type="text/javascript" src="{% static 'plugins/js/semantic.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'plugins/js/mode-markdown.js' %}"></script>
+      <script type="text/javascript" src="{% static 'plugins/js/ext-language_tools.js' %}"></script>
+      <script type="text/javascript" src="{% static 'plugins/js/theme-github.js' %}"></script>
+      <script type="text/javascript" src="{% static 'plugins/js/typo.js' %}"></script>
+      <script type="text/javascript" src="{% static 'plugins/js/spellcheck.js' %}"></script>
+      <script type="text/javascript" src="{% static 'plugins/js/highlight.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'plugins/js/resizable.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'plugins/js/emojis.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'martor/js/martor.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'jquery.bootstrap.modal.forms.js' %}"></script>
+      <script type="text/javascript">
+        $(function () {
+          // Sign up button
+          $("#signup-btn").modalForm({
+              formURL: "{% url 'signup' %}"
+          });
+        });
+      </script>
+    {% endblock %}
+  </body>
+  {% block foot %}
+  {% endblock %}
 </html>

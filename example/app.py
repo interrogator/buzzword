@@ -25,13 +25,14 @@ def _make_layout():
     with open("static/swiss-law/example.json") as fo:
         text = json.load(fo)
     conc_space = concordance_space()
-    text_style = {"width": "70vw", "margin": "auto"}
-    children = [dcc.Markdown(text["intro"], style={**text_style, **{"marginTop": "100px"}}),
-                dcc.Markdown(text["first"], style=text_style),
-                dcc.Markdown(text["second"], style=text_style),
+    text_style = {"maxWidth": "800px", "margin": "auto"}
+    children = [dcc.Markdown(text["intro"], style={**text_style, **{"marginTop": "140px"}}),
+                dcc.Markdown(text["freq"], style=text_style),
+                dcc.Markdown(text["calc"], style=text_style),
+                dcc.Markdown(text["vis"], style=text_style),
+                dcc.Markdown(text["conc"], style=text_style),
                 conc_space,
-                dcc.Markdown(text["third"], style=text_style),
-                dcc.Markdown(text["fourth"], style=text_style)]
+                dcc.Markdown(text["end"], style=text_style)]
     layout = html.Div(children)
     return layout
 

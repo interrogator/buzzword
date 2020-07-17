@@ -110,3 +110,7 @@ p input[type=password] {
 .login-button {
     margin-top:-5px;
 }
+
+input:invalid {
+    outline: none !important;
+}

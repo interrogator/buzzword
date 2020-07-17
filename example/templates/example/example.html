@@ -3,14 +3,23 @@
     <head>
     {% load plotly_dash%}
     {% plotly_header %}
-    <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+    <script type="text/javascript" src="{% static 'jquery.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'bootstrap.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'jquery.bootstrap.modal.forms.js' %}"></script>
     <link rel="stylesheet" href="{% static 'bootstrap.min.css' %}"/>
-    <link rel="stylesheet" href="{% static 'plotly.css' %}"/>
     <link rel="stylesheet" href="{% static 'custom.css' %}"/>
     </head>
     <body>
     {% include "specific_nav.html" %}
     {%plotly_direct name="swisslaw"%}
+    <script type="text/javascript">
+      $(function () {
+        // Sign up button
+        $("#signup-btn").modalForm({
+          formURL: "{% url 'signup' %}"
+        });
+      });
+      </script>
     </body>
     {% plotly_footer %}
 </html>
