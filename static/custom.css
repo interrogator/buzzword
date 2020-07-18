@@ -82,7 +82,10 @@ p, ul, ol {
 
 /* control height of dash tables! */
 .dash-spreadsheet-inner {
-  min-height: 80vh !important;
+  min-height: 70vh !important;
+  max-height: 70vh !important;
+  min-width: 99vw !important;
+  max-width: 99vw !important;
 }
 
 /* stop table from left-side cutoff */

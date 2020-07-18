@@ -25,7 +25,11 @@ def _make_table_name(history):
     """
     if history == "initial":
         return "Part of speech tags by filename"
-    specs, show, subcorpora, relative, keyness, sort, multi, cont = history
+    # swisslaw disable complex buttons
+    # specs, show, subcorpora, relative, keyness, sort, multi, cont = history
+    specs, show, subcorpora, relative, keyness, sort = history
+    multi = False
+    cont = False
     if subcorpora is None:
         subcorpora = "corpus"
     subcorpora = (
@@ -62,11 +66,7 @@ def _make_search_name(history, size, searches, lang):
     """
     Generate a search name from its history
     """
-    import locale
-
     trans = {0: "match", 1: "bigrams", 2: "trigrams"}
-
-    locale.setlocale(locale.LC_ALL, "")
     if isinstance(history, str):
         searchlang = LANGUAGES[("search-default", None)][int(lang)]
         return f"{searchlang} {history} ({size} tokens)"

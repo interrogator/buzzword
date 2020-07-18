@@ -1,14 +1,14 @@
 """
 buzzword explorer: callbacks
 """
-
+import os
 import pandas as pd
 from buzz.exceptions import DataTypeError
 from dash import no_update
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
-from explore.models import Corpus
+from explore.models import Corpus as CorpusModel
 
 from django.conf import settings
 from .chart import _df_to_figure
@@ -111,7 +111,7 @@ for i in range(1, 6):
         if n_clicks is None:
             return no_update
         # get correct dataset to chart
-        conf = Corpus.objects.get(slug=slug)
+        conf = CorpusModel.objects.get(slug=slug)
 
         if str(table_from) in session_tables:
             this_table = session_tables[str(table_from)]
@@ -200,7 +200,7 @@ def _new_search(
     if n_clicks is None:
         return [no_update] * 11
 
-    conf = Corpus.objects.get(slug=slug)
+    conf = CorpusModel.objects.get(slug=slug)
     max_row, max_col = settings.TABLE_SIZE
 
     specs, corpus = _get_specs_and_corpus(search_from, session_search, CORPORA, slug)
@@ -504,7 +504,11 @@ def _new_table(
     else:
         max_row, max_col = settings.TABLE_SIZE
         tab = table.iloc[:max_row, :max_col]
+        print("TABLE DATA", tab.iloc[:5,:5])
+        # todo: swisslaw, multi and content
         cols, data = _update_frequencies(tab, True, False)
+
+        print("DATA", cols, data)
 
     if not msg and not updating:
         table_name = _make_table_name(this_table_list)
@@ -550,7 +554,7 @@ def _new_conc(n_clicks, show, search_from, session_search, slug, **kwargs):
     if n_clicks is None:
         return [no_update] * 4
 
-    conf = Corpus.objects.get(slug=slug)
+    conf = CorpusModel.objects.get(slug=slug)
 
     # easy validation!
     msg = "" if show else "No choice made for match formatting."
@@ -570,6 +574,7 @@ def _new_conc(n_clicks, show, search_from, session_search, slug, **kwargs):
 
     conc = corpus.conc(show=show, metadata=met, window=(100, 100))
     conc = _add_links_to_conc(conc, slug=slug)
+    conc["file"] = conc["file"].apply(os.path.basename)
     max_row, max_col = settings.TABLE_SIZE
     short = conc.iloc[:max_row, :max_col]
     cols, data = _update_concordance(short, deletable=True)
@@ -633,3 +638,15 @@ def _change_language(lang, *args, **kwargs):
     if lang is None:
         return no_update
     return [v[int(lang)] for (_, f), v in sorted(LANGUAGES.items()) if f]
+
+
+app.clientside_callback(
+    """
+    function() {
+        console.log("wowee");
+        return Math.round( window.innerHeight/30 );
+    }
+    """,
+    Output('conc-table', 'page_size'),
+    [Input('everything', 'value')]
+)

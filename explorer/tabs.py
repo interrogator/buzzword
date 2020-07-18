@@ -15,7 +15,7 @@ from explore.models import Corpus as CorpusModel
 
 from . import style
 from .chart import CHART_TYPES, _df_to_figure
-from .helpers import _drop_cols_for_datatable, _get_cols, _update_frequencies
+from .helpers import _drop_cols_for_datatable, _get_cols, _update_frequencies, _add_links_to_conc
 from .strings import _capitalize_first, _make_search_name, _make_table_name
 
 from django.conf import settings
@@ -108,7 +108,7 @@ def _build_dataset_space(df, config):
                 ),
                 html.Div(
                     id="regex-text",
-                    style={"verticalAlign": "bottom", "width": "140px", **style.MARGIN_5_MONO},
+                    style={"textAlign": "center", "verticalAlign": "bottom", "width": "140px", **style.MARGIN_5_MONO},
                 ),
             ],
         ),
@@ -151,11 +151,11 @@ def _build_dataset_space(df, config):
         selected_rows=[],
         page_action="none",
         page_current=0,
-        # page_size=settings.PAGE_SIZE,
+        # page_size=20,
         # style_as_list_view=True,
         css=[{"selector": ".show-hide", "rule": "display: none"}],
         virtualization=True,
-        style_table={'height': '1000px'},
+        style_table={"overflow": "hidden", "height": "75vh"},
         fixed_rows={"headers": True, "data": 0},
         style_header=style.BOLD_DARK,
         style_cell_conditional=style.LEFT_ALIGN,
@@ -173,7 +173,8 @@ def _build_dataset_space(df, config):
         className="loading-main",
         children=conll_table,
     )
-    div = html.Div(id="dataset-container", children=[search_space, conll_table])
+    data_space = html.Div([search_space, conll_table])
+    div = html.Div(id="dataset-container", children=data_space)
     return html.Div(id="display-dataset", children=[div])
 
 
@@ -229,7 +230,7 @@ def _build_frequencies_space(corpus, table, config):
     sort_drop = html.Div(sort_drop, style=style.TSTYLE)
     max_row, max_col = settings.TABLE_SIZE
     print(f"Making {max_row}x{max_col} table for {config.name} ...")
-    table = table.iloc[:max_row, :max_col]
+    table = table.iloc[:10, :10]
     columns, data = _update_frequencies(table, False, False)
     print("Done!")
 
@@ -254,11 +255,11 @@ def _build_frequencies_space(corpus, table, config):
                 row_deletable=False,
                 selected_rows=[],
                 page_current=0,
-                page_size=settings.PAGE_SIZE,
-                page_action="none",
+                page_size=20,
+                page_action="native",
                 fixed_rows={"headers": True, "data": 0},
-                virtualization=True,
-                style_table={'height': '1000px'},
+                #virtualization=True,
+                style_table={"overflowY": "scroll", "overflowX": "hidden"},
                 style_header=style.BOLD_DARK,
                 style_cell_conditional=style.LEFT_ALIGN,
                 style_data_conditional=[style_index] + style.STRIPES,
@@ -357,6 +358,10 @@ def _build_concordance_space(df, config):
     df = getattr(df.just, query["target"])(query["query"])
     df = df.conc(metadata=meta, window=(100, 100), n=max_conc)
     df["file"] = df["file"].apply(os.path.basename)
+    try:
+        df = _add_links_to_conc(df, slug=config.slug)
+    except:
+        pass
     print("Done!")
 
     just = ["left", "match", "right", "file", "s", "i"]
@@ -394,12 +399,12 @@ def _build_concordance_space(df, config):
                 sort_mode="multi",
                 row_deletable=True,
                 selected_rows=[],
-                page_action="none",
+                page_action="native",
                 fixed_rows={"headers": True, "data": 0},
                 page_current=0,
-                page_size=settings.PAGE_SIZE,
-                virtualization=True,
-                style_table={'height': '1000px'},
+                page_size=12,
+                #virtualization=True,
+                style_table={"overflow": "hidden"},
                 style_as_list_view=True,
                 style_header=style.BOLD_DARK,
                 style_cell_conditional=style.LEFT_ALIGN_CONC,
@@ -594,7 +599,7 @@ def make_explore_page(corpus, table, slug, spec=False):
     )
     blk = {"display": "block", **style.HORIZONTAL_PAD_5}
     conll_display = html.Div(id="display-dataset", children=[dataset])
-    hide = {"visibility": "hidden"}
+    hide = {"display": "none"}
 
     tab_contents = [
         html.Div(

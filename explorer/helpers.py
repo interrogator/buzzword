@@ -120,6 +120,10 @@ def _update_frequencies(df, deletable, content_table):
     # col_order = list(df.index.names) + list(df.columns)
     if not content_table:
         df = df.reset_index()
+
+    if "_file" in df.columns:
+        df["_file"] = df["_file"].apply(os.path.basename)
+
     if not multicols:
         columns = [
             {
@@ -305,7 +309,7 @@ def _apply_conc_href(row, slug=None):
     file, match = row["file"], row["match"]
     pdf_name = os.path.basename(file).replace(".conllu", "")
     pdf = PDF.objects.get(slug=slug, name=pdf_name)
-    path = f"/compare/{slug}?page={pdf.num+1}&spec=true"
+    path = f"/compare/{slug}?page={pdf.num+1}"
     return f"[{match}]({path})"
 
 

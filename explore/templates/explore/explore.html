@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="{% static 'plotly.css' %}"/>
     <link rel="stylesheet" href="{% static 'custom.css' %}"/>
   </head>
-  <body>
+  <body style="overflow:hidden;">
     {%plotly_direct name="buzzword"%}
   </body>
   {% plotly_footer %}
