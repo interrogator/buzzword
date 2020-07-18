@@ -640,13 +640,12 @@ def _change_language(lang, *args, **kwargs):
     return [v[int(lang)] for (_, f), v in sorted(LANGUAGES.items()) if f]
 
 
-app.clientside_callback(
-    """
-    function() {
-        console.log("wowee");
-        return Math.round( window.innerHeight/30 );
-    }
-    """,
-    Output('conc-table', 'page_size'),
-    [Input('everything', 'value')]
-)
+#app.clientside_callback(
+#    """
+#    function() {
+#        return Math.round( window.innerHeight/30 );
+#    }
+#    """,
+#    Output('conc-table', 'page_size'),
+#    [Input('everything', 'value')]
+#)

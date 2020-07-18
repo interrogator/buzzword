@@ -121,8 +121,13 @@ def _update_frequencies(df, deletable, content_table):
     if not content_table:
         df = df.reset_index()
 
+    # todo: improve this horrible code!
     if "_file" in df.columns:
         df["_file"] = df["_file"].apply(os.path.basename)
+    df = df.T
+    if "_file" in df.columns:
+        df["_file"] = df["_file"].apply(os.path.basename)
+    df = df.T
 
     if not multicols:
         columns = [

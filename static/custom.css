@@ -57,7 +57,7 @@ p, ul, ol {
 }
 
 .martor-field{
-    width:100%;
+    width:98%;
     height:350px !important;
     min-height:100px}
 
@@ -67,13 +67,14 @@ p, ul, ol {
 }
 
 .compare-container {
+    margin-top:78px;
     max-width: 100vw;
     max-height: 50vh;
 }
 
 .ace_editor {
-  height: 77vh !important;
-  max-height: 80vh !important;   
+  min-height: 75vh !important;
+  max-height: 75vh !important;   
 }
 
 #martor-description {
@@ -82,7 +83,7 @@ p, ul, ol {
 
 /* control height of dash tables! */
 .dash-spreadsheet-inner {
-  min-height: 70vh !important;
+  min-height: 60vh !important;
   max-height: 70vh !important;
   min-width: 99vw !important;
   max-width: 99vw !important;
@@ -121,4 +122,8 @@ p input[type=password] {
 
 input:invalid {
     outline: none !important;
+}
+
+.dash-spreadsheet-container {
+  width: "-webkit-fit-content" !important;
 }

@@ -23,7 +23,7 @@
       <div class="row">
         <div class="col-sm">
             <div id="pdf-here">
-                <object data={{ pdf_filepath }} type="application/pdf" style="min-height:80vh;min-width:50vw">
+                <object data={{ pdf_filepath }} type="application/pdf" style="min-height:80vh;min-width:48vw">
                     <embed src={{ pdf_filepath }} type="application/pdf" />
                 </object>
                 {% include "comparenav.html" %}
@@ -32,9 +32,9 @@
         <div class="col-sm">
             <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
-                <div style="height:80vh;min-width:40vw">
+                <div style="height:70vh;min-width:48vw">
                     {{ form.description }}
-                    <div class="float-right">
+                    <div class="float-right" style="margin-top:-10px;">
                         Describe your changes: 
                         {{ form.commit_msg }}
                         <button type="submit" class="btn btn-primary">Update</button>

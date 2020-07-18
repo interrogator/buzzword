@@ -259,7 +259,7 @@ def _build_frequencies_space(corpus, table, config):
                 page_action="native",
                 fixed_rows={"headers": True, "data": 0},
                 #virtualization=True,
-                style_table={"overflowY": "scroll", "overflowX": "hidden"},
+                #style_table={"overflowY": "scroll", "overflowX": "hidden"},
                 style_header=style.BOLD_DARK,
                 style_cell_conditional=style.LEFT_ALIGN,
                 style_data_conditional=[style_index] + style.STRIPES,
