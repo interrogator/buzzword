@@ -56,12 +56,19 @@ def _unwrap(text):
     Change the txt from how it should appear on-screen (i.e. with word-breaks)
     to how it is best parsed
     """
-    # unwrapping
+    # remove trailing space
+    text = "\n".join([i.strip() for i in text.splitlines()])
+    # unwrap words
     text = re.sub("[-–—]\s*\n\s*", "", text)
+    # replace more than two spaces with one
     text = re.sub(r" {2,}", " ", text)
+    # replace newline with space (so two newlines == two spaces)
     text = text.replace("\n", " ")
+    # replace two or more spaces (from the newlines) with \n\n
     text = re.sub(" {2,}", "\n\n", text)
-    text = text.replace("/> ", "/>\n")
+    # fix initial metadata
+    text = text.replace("/> ", "/>\n", 1)
+    # return with one newline at end
     return text.strip() + "\n"
 
 
