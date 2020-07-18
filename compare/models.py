@@ -10,6 +10,8 @@ class Post(models.Model):
 class PDF(models.Model):
     class Meta:
         unique_together = ["slug", "num"]
+        verbose_name_plural = "PDFs"
+        verbose_name = "PDF"
 
     slug = models.SlugField(max_length=255, unique=False)
     path = models.TextField()
@@ -20,6 +22,8 @@ class PDF(models.Model):
 class TIF(models.Model):
     class Meta:
         unique_together = ["slug", "num"]
+        verbose_name_plural = "TIFs"
+        verbose_name = "TIF"
 
     slug = models.SlugField(max_length=255, unique=False)
     path = models.TextField()
@@ -30,6 +34,8 @@ class TIF(models.Model):
 class OCRUpdate(models.Model):
     class Meta:
         unique_together = ["slug", "timestamp", "pdf"]
+        verbose_name_plural = "OCR texts"
+        verbose_name = "OCR texts"
 
     slug = models.SlugField(max_length=255, unique=False)
     commit_msg = models.CharField(max_length=200, blank=True)

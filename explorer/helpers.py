@@ -233,7 +233,11 @@ def _get_corpus(slug):
     """
     Get corpus from slug, loading from uploads dir if need be
     """
-    from .main import CORPORA
+    try:
+        from .main import CORPORA
+    except ImportError:
+        from explorer.main import load_explorer_app
+        CORPORA = load_explorer_app()
     if slug in CORPORA:
         return CORPORA[slug]
     raise ValueError(f"CORPUS not found: {slug}")

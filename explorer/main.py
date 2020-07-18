@@ -135,4 +135,4 @@ def load_explorer_app():
             if not corpus.disabled:
                 load_layout(corpus.slug, set_and_register=False)
                 # load_layout(corpus.slug, set_and_register=True)
-
+    return CORPORA

@@ -504,11 +504,8 @@ def _new_table(
     else:
         max_row, max_col = settings.TABLE_SIZE
         tab = table.iloc[:max_row, :max_col]
-        print("TABLE DATA", tab.iloc[:5,:5])
         # todo: swisslaw, multi and content
         cols, data = _update_frequencies(tab, True, False)
-
-        print("DATA", cols, data)
 
     if not msg and not updating:
         table_name = _make_table_name(this_table_list)

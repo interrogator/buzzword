@@ -49,7 +49,7 @@ def concordance_space():
     tstyle = dict(width="100%", marginBottom="10px", **style.CELL_MIDDLE_35)
     toolbar = html.Div([html.Div(i, style=tstyle) for i in (query_space, search)])
     style_data = [style.STRIPES[0], style.INDEX[0]] + style.CONC_LMR
-    columns, data = _quick_concordance("hot")
+    columns, data = _quick_concordance("gegen")
     rule = (
         "display: inline; white-space: inherit; "
         + "overflow: inherit; text-overflow: inherit;"
@@ -73,7 +73,7 @@ def concordance_space():
                     page_action="none",
                     fixed_rows={"headers": True, "data": 0},
                     page_current=0,
-                    page_size=settings.PAGE_SIZE,
+                    #page_size=settings.PAGE_SIZE,
                     virtualization=True,
                     #style_table={'height': '1000px'},
                     style_as_list_view=True,
