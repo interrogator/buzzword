@@ -5,6 +5,8 @@ from django.db import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 
 import pyocr
+import pytesseract
+from pytesseract import Output
 
 from PIL import Image
 
@@ -94,6 +96,30 @@ def load_tif_pdf_plaintext(corpus):
                 lang=lang_chosen,
                 builder=pyocr.builders.TextBuilder(),
             )
+            # this block would add meta coordinates to each word.
+            # the problem is, we can't load this text into the editor. and,
+            # if we strip out the tags, then when the user saves the data,
+            # we lose all the tags. so i can't see any way around this...
+            if False:
+                try:
+                    d = pytesseract.image_to_data(Image.open(tif_path), output_type=Output.DICT, lang="deu_frak2")
+                except:  # no text at all
+                    d = {}
+
+                n_boxes = len(d.get('level', []))
+
+                text_out = []
+                for i in range(n_boxes):
+                    text = d['text'][i]
+                    if not text:
+                        text = "\n"
+                    (x, y, w, h) = (d['left'][i], d['top'][i], d['width'][i], d['height'][i])
+                    if text != "\n":
+                        text = f"<meta x=\"{x}\" y=\"{y}\" w=\"{w}\" h=\"{h}\" >{text}</meta>"
+                    # d['conf'][i] == certainty
+                    text_out.append(text)
+                plaintext = "\n".join([i.strip(" ") for i in " ".join(text_out).splitlines()])
+
             plaintext = _handle_page_numbers(plaintext, tif_path)
 
             if not _is_meaningful(plaintext, corpus.language.short):
