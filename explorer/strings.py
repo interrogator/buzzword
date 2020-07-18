@@ -69,7 +69,7 @@ def _make_search_name(history, size, searches, lang):
     locale.setlocale(locale.LC_ALL, "")
     if isinstance(history, str):
         searchlang = LANGUAGES[("search-default", None)][int(lang)]
-        return f"{searchlang} {history} ({size:n} tokens)"
+        return f"{searchlang} {history} ({size} tokens)"
     #previous, col, skip, search_string, gram, n, n_results, _ = history
     previous, col, skip, search_string, n, n_results, _ = history  # swisslaw
     gram = 0  # swisslaw

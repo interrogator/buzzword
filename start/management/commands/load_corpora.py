@@ -9,4 +9,4 @@ from django.contrib.staticfiles.management.commands.runserver import (
 class Command(RunServerCommand):
     def run(self, **options):
         # https://code.djangoproject.com/ticket/8085
-        explorer.main.load_corpora()
+        explorer.main._load_corpora()

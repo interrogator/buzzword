@@ -512,8 +512,7 @@ def make_explore_page(corpus, table, slug, spec=False):
     frequencies = _build_frequencies_space(corpus, table, config)
     chart = _build_chart_space(table, config)
     concordance = _build_concordance_space(corpus, config)
-    length = config.length or len(corpus)
-    label = _make_search_name(config.name, length, dict(), 0)  # 0 == english
+    label = _make_search_name(config.name, len(corpus), dict(), 0)  # 0 == english
     search_from = [dict(value=0, label=label)]
     sty = {**style.MARGIN_5_MONO, **style.FRONT}
     show = html.Button("Show", id="show-this-dataset", style=sty)

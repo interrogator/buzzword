@@ -7,15 +7,19 @@ from django.contrib.staticfiles.management.commands.runserver import (
     Command as RunServerCommand,
 )
 from django.conf import settings
-
+import sys
 
 class Command(RunServerCommand):
     def run(self, **options):
-        fullpath = os.path.abspath(settings.CORPORA_FILE)
-        print(f"Using corpus configuration at: {fullpath}")
         _load_languages()
-        _load_corpora(fullpath)
+        _load_corpora()
+        slug = sys.argv[-1] if sys.argv[-1] != "do_ocr" else False
         for corpus in Corpus.objects.all():
-            if corpus.pdfs and not corpus.disabled:
-                os.environ["TESSDATA_PREFIX"] = settings.TESSDATA_PREFIX
-                load_tif_pdf_plaintext(corpus)
+            if not corpus.pdfs:
+                continue
+            if corpus.disabled:
+                continue
+            if slug and corpus.slug != slug:
+                continue
+            os.environ["TESSDATA_PREFIX"] = settings.TESSDATA_PREFIX
+            load_tif_pdf_plaintext(corpus)

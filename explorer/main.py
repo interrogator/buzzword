@@ -40,14 +40,17 @@ def _load_languages():
             pass
 
 
-def _load_corpora(corpora_file):
+def _load_corpora():
     """
     Load contents of corpora.json into DB as Corpus objects
     """
+    corpora_file = os.path.abspath(settings.CORPORA_FILE)
+    print(f"Loading corpora, using corpus configuration at: {corpora_file}")
     with open(corpora_file) as fo:
         data = json.load(fo)
     for name, meta in data.items():
         modelled = Corpus.from_json(meta, name)
+        print(f"Saving corpus model to DB: {modelled.slug}")
         modelled.save()
 
 def _load_explorer_data(multiprocess=False):
@@ -120,10 +123,8 @@ def load_explorer_app():
     """
     Triggered during runserver, reload
     """
-    fullpath = os.path.abspath(settings.CORPORA_FILE)
-    print(f"Using corpus configuration at: {fullpath}")
     _load_languages()
-    _load_corpora(fullpath)
+    _load_corpora()
     global CORPORA, INITIAL_TABLES
     CORPORA, INITIAL_TABLES = _load_explorer_data()
     # this can potentially save time: generate layouts for all datasets

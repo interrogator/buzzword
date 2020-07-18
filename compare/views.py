@@ -76,7 +76,8 @@ def browse_collection(request, slug=None):
             new_text = form.cleaned_data["description"]
             commit = form.cleaned_data["commit_msg"]
             buzz_raw_text = markdown_to_buzz_input(new_text, slug)
-            store_buzz_raw(buzz_raw_text, slug, pdf_path)
+            # this updates the text file with the latest data. bad idea?
+            # store_buzz_raw(buzz_raw_text, slug, pdf_path)
             # todo: handle submitted changes properly
             updated = OCRUpdate(slug=slug, commit_msg=commit, text=new_text, previous=plaintext, pdf=pdf)
             updated.save()

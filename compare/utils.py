@@ -56,24 +56,19 @@ def _unwrap(text):
     Change the txt from how it should appear on-screen (i.e. with word-breaks)
     to how it is best parsed
     """
-    print("OLD", text)
     # unwrapping
-    regex = "[-–—]\s*\n\s*"
-    fixed = re.sub(regex, "", text)
-    # replace single newline with space but leave multiple newline alone
-    regex = "[^\n>]\n\s*[^\n]"
-    fixed = re.sub(regex, " ", fixed)
-    #if fixed.startswith("<meta"):
-    #    fixed = fixed.replace("/>", "/>\n", 1)
-    print("NEW", fixed, regex)
-    return fixed.strip() + "\n"
+    text = re.sub("[-–—]\s*\n\s*", "", text)
+    text = re.sub(r" {2,}", " ", text)
+    text = text.replace("\n", " ")
+    text = re.sub(" {2,}", "\n\n", text)
+    text = text.replace("/> ", "/>\n")
+    return text.strip() + "\n"
 
 
 def store_buzz_raw(raw, slug, pdf_path, unwordwrap=False):
     """
     Put the raw text into the right place for eventual parsing
     """
-
     if unwordwrap:
         raw = _unwrap(raw)
 
@@ -82,9 +77,8 @@ def store_buzz_raw(raw, slug, pdf_path, unwordwrap=False):
     filename = os.path.basename(pdf_path).replace(".pdf", ".txt")
     outpath = os.path.join(base, filename)
     print(f"Saving txt: {outpath}")
-    if not os.path.exists(outpath):
-        with open(outpath, "w") as fo:
-            fo.write(raw)
+    with open(outpath, "w") as fo:
+        fo.write(raw)
     return outpath
 
 
@@ -96,8 +90,8 @@ def dump_latest(parse=False):
     """
     slugs = set(OCRUpdate.objects.values_list("slug"))
     for slug in slugs:
-        slug = slug[0]
-        print("SLUG", slug)
+        print(f"Storing latest and parsing: {slug}")
+        slug = slug[0]  # the set is a weird tuple thing
         corp = Corpus.objects.get(slug=slug)
         if not corp.pdfs:
             continue
@@ -107,10 +101,9 @@ def dump_latest(parse=False):
         for pdf in pdfs:
             updates = OCRUpdate.objects.filter(pdf=pdf, slug=slug)
             plaintext = updates.latest("timestamp").text
-            filepath = store_buzz_raw(plaintext, slug, pdf.path, unwordwrap=True)
+            store_buzz_raw(plaintext, slug, pdf.path, unwordwrap=True)
         if parse:
             parsed_dir = os.path.expanduser(os.path.join(corp.path, "conllu"))
-            print("PARSED DIR", parsed_dir)
             if os.path.isdir(parsed_dir):
                 shutil.rmtree(parsed_dir)
             print(f"Parsing ({lang}): {corp.path}")

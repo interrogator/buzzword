@@ -69,12 +69,9 @@ def load_tif_pdf_plaintext(corpus):
         # if there is already an OCRUpdate for this PDF, not much left to do
         # todo: fallback to preprocessed/txt ?? otherwise every reload causes
         # ocr to happen
-        try:
-            OCRUpdate.objects.get(pdf=pdf)
-            print(f"OCRUpdate already found for {tif.path}")
+        ocrs = OCRUpdate.objects.filter(pdf=pdf)
+        if ocrs:
             continue
-        except ObjectDoesNotExist:
-            pass
 
         # if there are text files for this corpus
         # and there are more or same amount as the tifs,
