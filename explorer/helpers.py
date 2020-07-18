@@ -227,6 +227,7 @@ def _get_corpus(slug):
     from .main import CORPORA
     if slug in CORPORA:
         return CORPORA[slug]
+    raise ValueError(f"CORPUS not found: {slug}")
     upload = os.path.join("uploads", slug, "conllu")
     corpus = Corpus(upload).load()
     CORPORA[slug] = corpus

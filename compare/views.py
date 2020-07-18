@@ -38,8 +38,11 @@ def browse_collection(request, slug=None):
     spec = bool(slug)
     all_pdfs = PDF.objects.all()
     paginator = Paginator(all_pdfs, 1)
-    page_number = request.GET.get("page", 1)
-    page_number = int(page_number)
+    query = request.GET.get('q')
+    if query:
+        page_number = int(query)
+    else:
+        page_number = int(request.GET.get("page", 1))
     page_obj = paginator.get_page(page_number)
     pdf = all_pdfs.get(slug=slug, num=page_number - 1)
     pdf_path = os.path.relpath(pdf.path)
@@ -53,7 +56,7 @@ def browse_collection(request, slug=None):
         "pdf_filepath": "/" + pdf_path.replace(".tif", ".pdf"),
         "form": form,
         "page_obj": page_obj,
-        "specific_nav": spec,
+        "specific_nav": bool(settings.BUZZWORD_SPECIFIC_CORPUS),
         "corpus": Corpus.objects.get(slug=slug),
         "navbar": "compare",
     }

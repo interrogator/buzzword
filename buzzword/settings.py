@@ -265,7 +265,9 @@ MAX_CONC = 999
 MAX_DATASET_ROWS = None
 
 # path to tessdata -- needed to find the models
-TESSDATA_PREFIX = "./tessdata"
+# make sure tessdata is always in repo root
+PWD = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+TESSDATA_PREFIX = os.path.join(PWD, "tessdata")
 
 # this should be set to none, or a corpus slug
 BUZZWORD_SPECIFIC_CORPUS = "swiss-law"

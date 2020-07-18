@@ -63,5 +63,6 @@ class Command(RunServerCommand):
             load_explorer_app()
             for corpus in Corpus.objects.all():
                 if corpus.pdfs and not corpus.disabled:
+                    os.environ["TESSDATA_PREFIX"] = settings.TESSDATA_PREFIX
                     load_tif_pdf_plaintext(corpus)
         super().run(**options)

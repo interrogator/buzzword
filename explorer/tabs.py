@@ -108,7 +108,7 @@ def _build_dataset_space(df, config):
                 ),
                 html.Div(
                     id="regex-text",
-                    style={"verticalAlign": "bottom", **style.MARGIN_5_MONO},
+                    style={"verticalAlign": "bottom", "width": "140px", **style.MARGIN_5_MONO},
                 ),
             ],
         ),

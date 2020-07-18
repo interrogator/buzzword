@@ -1,5 +1,5 @@
 import os
-from .utils import store_buzz_raw, _is_meaningful, _handle_page_numbers
+from .utils import store_buzz_raw, _is_meaningful, _handle_page_numbers, _remove_junk
 from .models import PDF, OCRUpdate, TIF
 from django.db import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
@@ -76,6 +76,9 @@ def load_tif_pdf_plaintext(corpus):
         except ObjectDoesNotExist:
             pass
 
+        # if there are text files for this corpus
+        # and there are more or same amount as the tifs,
+        # get the text data and save as OCR result
         if collection.txt and len(collection.txt.files) >= tot:
             path = collection.txt.files[i].path
             print(f"Text file exists at {path}; skipping OCR")
@@ -88,21 +91,26 @@ def load_tif_pdf_plaintext(corpus):
         else:
             print(f"Doing OCR for {tif.path}")
 
-            # there is no OCRUpdate for this code; therefore we build and save it
+            # there is no OCRUpdate for this data; therefore we do OCR and save it
             plaintext = ocr_engine.image_to_string(
                 Image.open(tif_path),
                 lang=lang_chosen,
                 builder=pyocr.builders.TextBuilder(),
             )
-            plaintext = _handle_page_numbers(plaintext)
+            plaintext = _handle_page_numbers(plaintext, tif_path)
 
             if not _is_meaningful(plaintext, corpus.language.short):
                 plaintext = '<meta blank="true"/>'
 
-            ocr = OCRUpdate(
+            plaintext = _remove_junk(plaintext, corpus.language.short)
+
+            ocr, ocr_created = OCRUpdate.objects.get_or_create(
                 slug=corpus.slug, commit_msg="OCR result", text=plaintext, pdf=pdf
             )
-            print(f"Storing OCR result for {tif_path} in DB...")
-            ocr.save()
+            if ocr_created:
+                print(f"Stored OCR result for {tif_path} in DB...")
+            else:
+                print(f"OCR already exists in DB for: {tif_path}")
+
             # store the result as buzz plaintext corpus for parsing
             store_buzz_raw(plaintext, corpus.slug, pdf_path)

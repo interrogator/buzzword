@@ -3,8 +3,8 @@ Random utilities this app needs
 """
 import os
 import re
+import shutil
 
-from buzz import Corpus as BuzzCorpus
 from buzz import Collection
 from django.conf import settings
 
@@ -17,7 +17,7 @@ from .models import OCRUpdate, PDF
 # when doing OCR, re.findall will be run on it using this regex, which sort of
 # approximates a word. note that this will mean that "the end" will be marked
 # as blank, but that is a decent tradeoff for marking blank a lot of junk pages.
-MEANINGFUL = r"[A-Za-z]{3,}"
+MEANINGFUL = "[A-Za-z]{3,}"
 THRESHOLD = 3
 
 
@@ -50,26 +50,54 @@ def markdown_to_buzz_input(markdown, slug):
         fixed.append(line)
     return "\n".join(fixed)
 
-def store_buzz_raw(raw, slug, pdf_path):
+
+def _unwrap(text):
+    """
+    Change the txt from how it should appear on-screen (i.e. with word-breaks)
+    to how it is best parsed
+    """
+    print("OLD", text)
+    # unwrapping
+    regex = "[-–—]\s*\n\s*"
+    fixed = re.sub(regex, "", text)
+    # replace single newline with space but leave multiple newline alone
+    regex = "[^\n>]\n\s*[^\n]"
+    fixed = re.sub(regex, " ", fixed)
+    #if fixed.startswith("<meta"):
+    #    fixed = fixed.replace("/>", "/>\n", 1)
+    print("NEW", fixed, regex)
+    return fixed.strip() + "\n"
+
+
+def store_buzz_raw(raw, slug, pdf_path, unwordwrap=False):
     """
     Put the raw text into the right place for eventual parsing
     """
-    # todo: corpora dir?
+
+    if unwordwrap:
+        raw = _unwrap(raw)
+
     base = os.path.join("static", "corpora", slug, "txt")
     os.makedirs(base, exist_ok=True)
     filename = os.path.basename(pdf_path).replace(".pdf", ".txt")
-    with open(os.path.join(base, filename), "w") as fo:
-        fo.write(raw)
-    return base
+    outpath = os.path.join(base, filename)
+    print(f"Saving txt: {outpath}")
+    if not os.path.exists(outpath):
+        with open(outpath, "w") as fo:
+            fo.write(raw)
+    return outpath
 
 
-def dump_latest():
+def dump_latest(parse=False):
     """
-    Get the latest OCR corrections and build a parseable corpus.
-    Maybe even parse it?
+    Get the latest OCR corrections and build a parseable corpus
+
+    Optionally, parse it
     """
     slugs = set(OCRUpdate.objects.values_list("slug"))
     for slug in slugs:
+        slug = slug[0]
+        print("SLUG", slug)
         corp = Corpus.objects.get(slug=slug)
         if not corp.pdfs:
             continue
@@ -79,14 +107,18 @@ def dump_latest():
         for pdf in pdfs:
             updates = OCRUpdate.objects.filter(pdf=pdf, slug=slug)
             plaintext = updates.latest("timestamp").text
-            corpus_path = store_buzz_raw(plaintext, slug, pdf.path)
-        print(f"Parsing ({lang}): {corpus_path}")
-        corp = BuzzCorpus(corpus_path)
-        parsed = corp.parse(language=lang, multiprocess=1)
-        corp.parsed = True
-        corp.path = parsed.path
-        corp.save()
-        return parsed
+            filepath = store_buzz_raw(plaintext, slug, pdf.path, unwordwrap=True)
+        if parse:
+            parsed_dir = os.path.expanduser(os.path.join(corp.path, "conllu"))
+            print("PARSED DIR", parsed_dir)
+            if os.path.isdir(parsed_dir):
+                shutil.rmtree(parsed_dir)
+            print(f"Parsing ({lang}): {corp.path}")
+            coll = Collection(corp.path)
+            parsed = coll.parse(language=lang, multiprocess=False)
+            corp.parsed = True
+            corp.save()
+            return parsed
 
 
 def _is_meaningful(plaintext, language):
@@ -95,13 +127,25 @@ def _is_meaningful(plaintext, language):
     """
     # skip this check for non latin alphabet ... right now the parser doesn't
     # accept most non-latin languages, so it's mostly academic for now...
-    if lang in {"zh", "ja", "fa", "iw", "ar"}:
+    if language in {"zh", "ja", "fa", "iw", "ar"}:
         return True
-    words = re.findall(plaintext, MEANINGFUL)
+    words = re.findall(MEANINGFUL, plaintext)
     return len(words) >= THRESHOLD
 
 
-def _handle_page_numbers(text):
+def _remove_junk(plaintext, language):
+    """
+    """
+    if language in {"zh", "ja", "fa", "iw", "ar"}:
+        return plaintext
+    lines = plaintext.splitlines()
+    lines = [l for l in lines if re.findall(MEANINGFUL, l) or not l.strip() or l.startswith("<meta")]
+    out = "\n".join(lines).strip() + "\n"
+    out = re.sub("\n{2,}", "\n\n", out)
+    return out
+
+
+def _handle_page_numbers(text, filename):
     """
     Attempt to make page-level metadata containing page number
     """
@@ -127,8 +171,22 @@ def _handle_page_numbers(text):
             ix_to_delete.add(i)
             break
 
+    # todo: this is swisslaw only
+    if "1803" in filename:
+        year = "1803"
+    elif "1847" in filename:
+        year = "1847"
+    elif "CF_650" in filename:
+        year = "1887"
+    else:
+        year = "unknown"
+
+    form = False
     if page_number is not None:
-        form = f"<meta page={page_number} />\n"
+        form = f"<meta year=\"{year}\" page=\"{page_number}\" />\n"
+    else:
+        form = f"<meta year=\"{year}\" />"
+
 
     # we also want to REMOVE page number from the actual text
     cut = [x for i, x in enumerate(text.splitlines()) if i not in ix_to_delete]
