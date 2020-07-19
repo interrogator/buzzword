@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
-from django.contrib.auth.forms import UserCreationForm
 from django import forms
 from django.conf import settings
+
 from .forms import CustomUserCreationForm
 
 import explore.models
@@ -51,7 +51,6 @@ def signup(request):
     current_section = request.path.strip("/") or "home"
     corpus = explore.models.Corpus.objects.get(slug=slug)
     context = {}
-
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():

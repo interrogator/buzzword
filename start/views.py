@@ -4,7 +4,6 @@ from django.conf import settings
 from django.shortcuts import render
 import explore.models
 from django.contrib.auth.decorators import login_required
-from .forms import CustomUserCreationForm
 from bootstrap_modal_forms.generic import BSModalCreateView
 from django.urls import reverse_lazy
 from django.contrib.auth import login, authenticate

@@ -18,22 +18,22 @@
 
 <div class="image-wrapper center">
   <img src="/static/bolt.jpg"/>
-  <span style="text-align: center;">Caption</span>
+  <span style="text-align: center;">Browse collection</span>
 </div>
 
 <div class="image-wrapper center">
   <img src="/static/bolt.jpg"/>
-  <span style="text-align: center;">Caption 2</span>
+  <span style="text-align: center;">Correct transcriptions</span>
 </div>
 
 <div class="image-wrapper center">
   <img class="center" src="/static/bolt.jpg"/>
-  <span style="text-align: center;">Caption 3</span>
+  <span style="text-align: center;">Visualise frequencies</span>
 </div>
 
 <div class="image-wrapper center">
   <img class="center" src="/static/bolt.jpg"/>
-  <span style="text-align: center;">Caption 4</span>
+  <span style="text-align: center;">Keyword-in-context</span>
 </div>
 
 Sie ist auch besonders geeignet für interdisziplinäre respektive kollaborative digitale Projekte, wie sie z.B. im Zusammenhang der Digital Humanities oder der Digital (Legal) History vorkommen. Wenn Sie im Rahmen der Rechtsprechung respektive Rechtsanwendung rechtsvergleichend und die  historische Tiefenperspektive miteinbeziehen möchten, da kann *Sdilaw* ideal zum Zug kommen. 
