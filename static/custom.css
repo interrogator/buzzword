@@ -141,3 +141,37 @@ input:invalid {
   margin-top: 25px !important;
   margin-bottom: 25px !important;
 }
+
+.center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 20%;
+  text-align: center
+}
+
+.image-wrapper {
+  box-sizing:border-box;
+  float: left;
+  margin-bottom:5px;
+  width: 50%;
+}
+
+.image-wrapper:nth-child(even)
+{
+  padding-left:5px;
+}
+
+.image-wrapper:nth-child(odd)
+{
+  padding-right:5px;
+}
+
+.image-wrapper > img {
+  width: 200px;
+}
+
+.image-wrapper > span {
+  display: inline-block;
+  width: 100%;
+}

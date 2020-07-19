@@ -241,6 +241,8 @@ MARKDOWNIFY_WHITELIST_TAGS = [
   'h3',
   'abbr',
   'acronym',
+  'div',
+  'img',
   'b',
   'blockquote',
   'em',
@@ -248,8 +250,19 @@ MARKDOWNIFY_WHITELIST_TAGS = [
   'li',
   'ol',
   'p',
+  'span',
   'strong',
   'ul'
+]
+
+MARKDOWNIFY_WHITELIST_ATTRS = [
+    'href',
+    'src',
+    'class',
+    'alt',
+    'width',
+    'height',
+    'display'
 ]
 
 # BUZZWORD from env
@@ -270,4 +283,4 @@ PWD = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TESSDATA_PREFIX = os.path.join(PWD, "tessdata")
 
 # this should be set to none, or a corpus slug
-BUZZWORD_SPECIFIC_CORPUS = "swiss-law"
+BUZZWORD_SPECIFIC_CORPUS = "swiss-law-mini"
