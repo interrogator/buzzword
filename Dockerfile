@@ -5,18 +5,16 @@ RUN apt-get update && \
 
 WORKDIR /
 
-COPY . /buzzword
-
 RUN \
     git clone https://github.com/interrogator/buzz.git buzz && \
     cd buzz && \
     pip install -r requirements.txt && \
     python setup.py install
 
-# COPY . buzzword
-
 RUN \
+    git clone https://github.com/interrogator/buzzword.git && \
     cd buzzword && \
+    git pull --all && \
     git checkout swisslaw && \
     pip install -r requirements.txt
 
