@@ -8,6 +8,7 @@ from .forms import CustomUserCreationForm
 from bootstrap_modal_forms.generic import BSModalCreateView
 from django.urls import reverse_lazy
 from django.contrib.auth import login, authenticate
+from django.db.utils import OperationalError
 
 def _get_markdown_content(slug, page):
     """
@@ -48,7 +49,12 @@ class SignUpView(BSModalCreateView):
     template_name = 'signup.html'
     success_message = 'Sign up succeeded. You can now log in.'
     slug = settings.BUZZWORD_SPECIFIC_CORPUS  # todo: slug for non specific
-    corpus = explore.models.Corpus.objects.get(slug=slug)
+    # when trying to do initial migrate, this table doesn't exist yet
+    # but it is loaded because of urls.py
+    try:
+        corpus = explore.models.Corpus.objects.get(slug=slug)
+    except OperationalError:
+        corpus = None
     content = _get_markdown_content(slug, "home")
     context = {"corpus": corpus, "navbar": "home", "content": content}
     # return to homepage, logged in, authenticated

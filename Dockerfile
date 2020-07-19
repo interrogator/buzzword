@@ -22,8 +22,7 @@ WORKDIR /buzzword
 
 RUN \
     cp configs/swiss-law.json corpora.json && \
-    echo "BUZZWORD_SPECIFIC_CORPUS = 'swiss-law'" >> buzzword/settings.py && \
-    mkdir swiss-law
+    echo "BUZZWORD_SPECIFIC_CORPUS = 'swiss-law'" >> buzzword/settings.py
 
 # COPY buzzword/swiss-law/swiss-law-parsed /buzzword/swiss-law/swiss-law-parsed
 
