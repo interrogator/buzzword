@@ -1,34 +1,103 @@
 <br><br>
 
-## Swiss legal history: a collaborative digitisation effort
+# Swiss Digital Law Discovery (**Sdilaw**)
 
-This site provides an interface for exploring the **Swiss Legal Texts** corpus, which contains Swiss laws written in German between (YEARS).
+*Inwiefern kann *Sdilaw* für Sie nützlich sein?*
 
-**(Table of 2x2 visualisations here for some visual appeal)**
+* Sind Sie an Gesetzesmaterialien der Schweizer Kantone interessiert, die Sie zum grössten Teil bisher nicht digital vorgefunden haben?
+* Stellen Sie sich transkantonale oder gar transnationale Forschungsfragen?
+* Möchten Sie Comparative Legal History betreiben?
+* Oder rechtsdogmatischen Fragen nachgehen?
+* Oder der Wirkungsgeschichte oder Vorgeschichte von Gesetzen?
+* Möchten Sie neben der Suche und dem Browsen in den Texten weitere computerbasierte Analysen vornehmen können? d.h. Sie sind an Corpus- oder Computerlinguistik interessiert.
+* Wären das Visualisieren und das Parsen von Text für Sie eine spannende Option?
+* Oder möchten Sie die Frequenz eines Begriffes dargestellt bekommen? 
+* Oder würde es Sie über die blosse Anzeige eines Suchbegriffes hinaus interessieren, in welchem Zusammenhang dieser jeweils vorkommt? (Keyword-in-context)
 
-### Browse the collection
+**Die Plattform *SdiLaw* bietet Ihnen all dies.**
 
-The texts have undergone [Optical Character Recognition](https://en.wikipedia.org/wiki/Optical_character_recognition), so that the data can be explored using digital methods. The OCR process is never perfect, expecially when dealing with older texts. Therefore, while browsing, you can see the current OCR results, and submit corrections if you see any mistakes.
+Sie ist auch besonders geeignet für interdisziplinäre respektive kollaborative digitale Projekte, wie sie z.B. im Zusammenhang der Digital Humanities oder der Digital (Legal) History vorkommen. Wenn Sie im Rahmen der Rechtsprechung respektive Rechtsanwendung rechtsvergleichend und die  historische Tiefenperspektive miteinbeziehen möchten, da kann *Sdilaw* ideal zum Zug kommen. 
+ 
+Nicht zu vergessen sind die Möglichkeiten, die Sie durch das Hinzufügen von eigenen Datensets haben, die Sie separat oder im Zusammenhang mit den angebotenen Materialien durchsuchen oder digital analysieren können. 
 
-### Improve the collection
+Das Portal ist als ausbaubares konzipiert. Es wird laufend erweitert mit Gesetzestexten über die Landesgrenzen hinaus sowie mit innerschweizerischen Materialien, die zu den Gesetzestexten in Verbindung gesetzt werden können, wie z.B. Ratsprotokolle. Es können auch neue nützliche Features und Interfaces implementiert werden.
 
-Using the [Guide for corrections](/guide.html), you can learn best practices for submitting corrections to the dataset. With some help from the community, we hope to eventually develop a high-quality searchable database of historical Swiss law, including not just German, but French and Italian documents as well.
+Wir bieten Ihnen mit dem Portal *Sdilaw* Swiss Digital Law Discovery und der Software [*buzzword*](https://github.com/interrogator/buzzword) einen möglichst idealen Ausgangspunkt, den wir kontinuierlich optimieren und uns über jedwede Rückmeldung, Anregung oder Meldung von Fehlern freuen. Es handelt sich um ein agil konzipiertes Portal, das jederzeit den Bedürfnissen seiner Benutzer angepasst werden kann.
 
-### Analyse the data
+Ob das Ausgangsinteresse eine nicht-digitale (rechts)geschichtliche Fragestellung ist oder eine Erwartung hinsichtlich digital gesteuerter Forschung oder bloss ein vages Forschungsinteresse bezüglich den hier angebotenen Textdaten besteht, wir denken, dass alle diese Ausgangspunkte zielführend sind. Sie verhalten sich zueinander komplementär im Verlaufe eines iterativen Vorgehens.
 
-The corrected OCR is periodically run through a linguistic processing pipeline, which makes possible novel ways of searching and visualising search results. You can use the [Explore](/explore/swiss-law) interface for this.
+Swiss Digital Law Discovery ist also ein Webtool (Frontend) für die Suche und Analyse von Textdateien, hier abgestimmt auf Gesetzesmaterialien und ihre Kontexte. Es verwendet corpus- respektive computerlinguistische Methoden und wurde mit [*buzz*](https://github.com/interrogator/buzz) als Backend sowie [*buzzword*](https://github.com/interrogator/buzzword) als Frontend erstellt. Die Text-
+erkennung wird grösstenteils mit der Software [*Transkribus*](https://transkribus.eu/Transkribus/) vorgenommen, welche auf Machine Learning basiert – einem Teilgebiet der Artificial Intelligence (AI). Es handelt sich um einen selbstanpassenden Algorithmus, der künstliche neuronale Netze verwendet. Alternativ kommt als Texterkennungssoftware [*Tesseract OCR*](https://github.com/tesseract-ocr/tesseract) zum Einsatz.
 
-### A sample analysis
+*Sdilaw* ermöglicht neben dem Durchsuchen und Visualisieren das Parsen von Text. 
+Beim Parsen wird der Text mittels eines Algorithmus einer automatisierten Analyse der Satzstruktur gemäss natürlicher Sprache unterzogen. Dabei werden auch Wortbedeutungen, d.h. semantische Zusammenhänge erschlossen. 
 
-You can visit [the example page](/example/swiss-law.html) to see a sample analysis made possible by this software. This provides a practical introduction to the Explore interface.
+## Wie gehen Sie vor?
 
-### About the project
+Bei *Sdilaw* haben Sie zwei Hauptoptionen – zu finden je auf einer Unterseite:
+eine Startseite, bei der Sie einen präsentierten Text auswählen (*search from dataset*) oder einfach in den vorhandenen Texten suchen, browsen und lesen können.$
 
-The project has been conceptualised by Martin Kurz at the University of Zurich, with software carried out by S3IT.
+Auf der Forschungs- oder Explore-Seite haben Sie folgende Optionen:
 
-The project makes use of numerous state-of-the-art tools, including:
+1. Suche
+2. Erstellung von Tabellen, die die Häufigkeit von Begriffen anzeigen (Frequenz-Ansicht)
+3. Visualisierung von Resultaten
+4. Konkordanzen, d.h. Kookkurrenzen, erstellen, wobei die direkte Umgebung vor und nach einem Wort/Begriff angezeigt wird (Keyword-in-context).
 
-* [*Django*](https://github.com/django/django) (the website's framework)
-* [*Martor*](https://github.com/agusmakmun/django-markdown-editor) (for submitting corrections)
-* [*Tesseract*](https://github.com/tesseract-ocr/tesseract) (for OCR)
-* [*buzzword*](https://github.com/interrogator/buzzword), an open-source tool designed for browser-based analysis of language texts
+## Zur Startseite
+
+Auf der Hauptseite kann durch Anklicken des Namens eines Textes/Bandes dieser dann durchblättert werden.
+Auch hier könnten eigene Texte/Dateien hochgeladen und wie die auf der Webseite vorzufindenden (Gesetzes-)Texte behandelt werden. 
+
+## Explorationsseite
+
+Nach dem Hochladen oder Auswählen eines Textkorpus können Sie über die Explorationsseite zur Schnittstelle gelangen, wo Sie entweder die Dataset-Ansicht wählen oder die vorher erstellten Suchresultate weiter verarbeiten können.
+
+### Dataset-Ansicht
+
+Der ausgewählte Text(korpus) kann mit allen Sprach- und Metadatenmerkmalen betrachtet werden. Es handelt sich um eine interaktive Tabelle. Hier können Sie Textteile filtern, sortieren oder herausnehmen, was natürlich den hinterlegten Originaltext nicht tangiert. Interessant ist die Suchfunktion, womit nach Eingabe eines Begriffes eine Teilmenge von (Text)Daten gebildet wird. Die Teilmenge kann weiter durchsucht oder konkordanziert werden. Bei der Konkordanz sehen Sie die direkte Umgebung vor und nach dem gesuchten Begriff im Text, was Ihnen den Zusammenhang des Begriffes erschliesst. 
+
+### Suche in Textauswahl (Dataset-Ansicht)
+
+Im Dropdown-Menu links wählen Sie zuerst die Art des Begriffes aus, nach dem Sie suchen: 
+
+* Wort(form)
+* Lemma
+* Part-of-Speech (Wortart gemäss Grammatik)
+* usw.
+
+Bei Wahl von «Wort» wird im unbearbeiteten Text Ihre Wortsuchanfrage verglichen mit dem Wort, wie es im originalen, unbearbeiteten Text vorkommt.
+
+### Sucheingabe (*Query Entry*)
+
+Dabei können Sie einen sog. Regulären Ausdruck (regular expression, Abkürzung regex) eingeben – unter Berücksichtigung der Gross- und Kleinschreibung (siehe dazu Wikipedia: «Regulärer Ausdruck»).
+
+## Frequenzansicht (*Frequencies View*)
+
+Bei Buzzword wird auf neuartige Weise der Prozess des Suchens von der Ansicht der Resultate getrennt. So können Sie mit Resultaten weiterarbeiten und sie unterschiedlich darstellen, ohne dass eine Suche nochmals gestartet werden muss. Von einem Suchresultat, generiert in der Dataset-Ansicht, können Sie verschiedene Ansichten erstellen: Tabellen, Visualisierungen, Konkordanzen.
+
+### Tabellen-Ansicht
+
+1. Wählen Sie zuerst einen Text/Dataset aus – beim Dropdown-Menu «Suche aus» («search from»).
+Daraus werden die Kalkulationen erstellt. 
+2. Dann gilt es die Spalten der Tabelle zu wählen, z.B. «Wort» («word») und «Wortklasse» («wordclass»). Die Resultate sehen Sie wie im folgenden Beispiel: «happy/adj.».
+3. Nach der Auswahl der Spalte wählen Sie ein Merkmal (feature), das als Index der Tabelle dienen soll.
+Z.B. «Lemma nach Sprecher».
+4. Die Tabelle kann im Anschluss daran noch sortiert werden – auf- oder absteigend.
+
+## Visualisierung der Tabellen-Ansicht
+
+Wählen Sie den Diagrammtyp, die Anzahl Elemente, und ob Sie die Zeilen und Spalten invertieren wollen oder nicht. Die nun entstandenen Diagramme sind sogar interaktiv, d.h. Sie können mit den verfügbaren Tools die Grafiken unterschiedlich erstellen. Die Visualisierungen können für die Verwendung ausserhalb des Portals auf einer Festplatte (Laufwerk) gesichert werden. 
+
+## Konkordanz-Ansicht (*Keyword-in-context*)
+
+«Stichwörter im Kontext» oder Konkordanzen ermöglichen nicht nur die Anzeige von den gesuchten Stichwörtern als solchen, sondern hier werden die Stichwörter zusammen mit dem 
+Text vor- oder nachher angezeigt. Über den Reiter «Konkordanz» (concordance) können Sie also das Resultat einer Suche als «Stichwörter im Kontext» anzeigen lassen. 
+
+Vorgehen: Suchresultat selektionieren über «Suche von» (search from) im Dropdown-Menu. Dabei haben Sie verschiedene Kombinationen zur Auswahl, z.B. Wort/Part-of-Speech.
+
+## Über uns
+
+Das Portal *Swiss Digital Law* wird in Kürze online gestellt und von der Universität Zürich UZH gehostet sowie vom Zentrum für rechtsgeschichtliche Forschung ZRF betreut werden, Projektsteuerung Prof. Andreas Thier, Projektleitung Martin Kurz, Softwareengineering [Daniel McDonald](https://twitter.com/interro_gator).
+
+Auf Ihre Rückmeldungen und Fragen sind wir gespannt. Bitte hinterlassen Sie diese als Issue auf dem [Repositorium des Projekts](https://github.com/interrogator/buzzword) (github) oder per [E-Mail](mailto:martin.kurz@uzh.ch). Besten Dank!
