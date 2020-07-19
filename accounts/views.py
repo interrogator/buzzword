@@ -51,3 +51,34 @@ def corpus_settings(request):
         "formset": formset,
     }
     return render(request, "accounts/corpus_settings.html", context)
+
+
+def signup(request, slug=None):
+    """
+    Signup modal
+    """
+    slug = slug or settings.BUZZWORD_SPECIFIC_CORPUS
+    current_section = request.path.strip("/") or "home"
+    corpus = explore.models.Corpus.objects.get(slug=slug)
+    context = {}
+
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            # save user in db...login
+            form.request = request
+            user = form.save()
+            user.backend = "django.contrib.auth.backends.ModelBackend"
+            print("SAVED IN DB...")
+            username = request.POST.get("username")
+            password = request.POST.get("password")
+            user = authenticate(request, username=username, password=password)
+            if user:
+                login(request, user)
+            # or redirect?
+            return render(request, f"start/{slug}.html", context)
+    else:
+        form = CustomUserCreationForm()
+        context["form"] = form
+
+    return render(request, 'signup.html', context)

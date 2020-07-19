@@ -19,7 +19,6 @@ def _register_urls():
     paths = f"^(?P<slug>{slugs})/"
 
     urlpatterns = [
-        path('signup/', views.signup, name='signup'),
         re_path(paths, views.start_specific, name="start_specific")
     ]
 
