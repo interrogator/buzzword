@@ -8,8 +8,10 @@
     <script type="text/javascript" src="{% static 'jquery.bootstrap.modal.forms.js' %}"></script>
     <link rel="stylesheet" href="{% static 'bootstrap.min.css' %}"/>
     <link rel="stylesheet" href="{% static 'custom.css' %}"/>
+    <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+
     </head>
-    <body>
+    <body class="example">
     {% include "specific_nav.html" %}
     {%plotly_direct name="swisslaw"%}
     <script type="text/javascript">

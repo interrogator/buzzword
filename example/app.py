@@ -73,9 +73,9 @@ def concordance_space():
                     page_action="none",
                     fixed_rows={"headers": True, "data": 0},
                     page_current=0,
-                    #page_size=settings.PAGE_SIZE,
-                    virtualization=True,
-                    #style_table={'height': '1000px'},
+                    page_size=10,
+                    #virtualization=True,
+                    #style_table={'width': '50vw'},
                     style_as_list_view=True,
                     style_header=style.BOLD_DARK,
                     style_cell_conditional=style.LEFT_ALIGN_CONC,
@@ -88,19 +88,16 @@ def concordance_space():
         )
         #style={"display": "table"}
     )
-    windowed = {**style.VERTICAL_MARGINS, **{"width": "70vw", "height": "35vh", "margin": "auto"}}
+    extra = {"height": "35vh", "minWidth": "1200px", "maxWidth": "1200px", "margin": "auto"}
+    windowed = {**style.VERTICAL_MARGINS, **extra}
     conc_space = html.Div([toolbar, conc_table], style=windowed)
     return conc_space
-
-def _get_year(cell):
-    return cell[:4]
 
 def _quick_concordance(query):
     corpus = _get_corpus(settings.BUZZWORD_SPECIFIC_CORPUS)
     df = corpus.just.word(query, exact_match=True)
-    df = df.conc(n=999)
+    df = df.conc(n=999, metadata=["year", "file", "s"])
     df["file"] = df["file"].apply(os.path.basename)
-    df["year"] = df["file"].apply(_get_year)
     just = ["left", "match", "right", "year", "file", "s"]
     if "speaker" in df.columns:
         just.append("speaker")

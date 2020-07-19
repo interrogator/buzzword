@@ -81,7 +81,7 @@ p, ul, ol {
 }
 
 /* control height of dash tables! */
-.dash-spreadsheet-inner {
+.explore .dash-spreadsheet-inner {
   min-height: 60vh !important;
   max-height: 70vh !important;
   min-width: 99vw !important;
@@ -89,7 +89,7 @@ p, ul, ol {
 }
 
 /* stop table from left-side cutoff */
-.dash-table-container .row {
+.explore .dash-table-container .row {
   margin: 0;
 }
 
@@ -125,4 +125,19 @@ input:invalid {
 
 .dash-spreadsheet-container {
   width: "-webkit-fit-content" !important;
+}
+
+.from-markdown h1 {
+  margin-top: 25px !important;
+  margin-bottom: 25px !important;
+}
+
+.from-markdown h2 {
+  margin-top: 25px !important;
+  margin-bottom: 25px !important;
+}
+
+.from-markdown h3 {
+  margin-top: 25px !important;
+  margin-bottom: 25px !important;
 }
