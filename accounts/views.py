@@ -2,21 +2,10 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
+from django.conf import settings
+from .forms import CustomUserCreationForm
 
 import explore.models
-
-
-def signup(request):
-    if request.method == "POST":
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            user.backend = "django.contrib.auth.backends.ModelBackend"
-            login(request, user)
-            return redirect("/")
-    else:
-        form = UserCreationForm()
-    return render(request, "accounts/signup.html", {"form": form})
 
 
 def logout_view(request):
