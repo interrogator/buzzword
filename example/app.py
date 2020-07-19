@@ -9,7 +9,6 @@ import dash_core_components as dcc
 import dash_html_components as html
 
 from django_plotly_dash import DjangoDash
-from django.db.utils import OperationalError
 from dash.dependencies import Input, Output, State
 import dash_table
 
@@ -50,14 +49,7 @@ def concordance_space():
     tstyle = dict(width="100%", marginBottom="10px", **style.CELL_MIDDLE_35)
     toolbar = html.Div([html.Div(i, style=tstyle) for i in (query_space, search)])
     style_data = [style.STRIPES[0], style.INDEX[0]] + style.CONC_LMR
-    try:
-        columns, data = _quick_concordance("gegen")
-    # migrate handling :(
-    except OperationalError as error:
-        if "no such table" in str(error):
-            columns, data = [], []
-        else:
-            raise
+    columns, data = _quick_concordance("gegen")
     rule = (
         "display: inline; white-space: inherit; "
         + "overflow: inherit; text-overflow: inherit;"
