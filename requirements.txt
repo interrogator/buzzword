@@ -16,7 +16,6 @@ dash-table==4.8.1
 python-dotenv==0.10.3
 pytesseract==0.3.4
 martor==1.4.9
-bootstrap_modal_forms
 pyocr==0.7.2
 tesseract==0.1.3
 markdownify==0.4.1
