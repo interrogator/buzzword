@@ -45,6 +45,9 @@ def start_specific(request, slug=None):
 
 
 class SignUpView(BSModalCreateView):
+    """
+    Todo: turn this into a non-class-based view when I learn how
+    """
     form_class = CustomUserCreationForm
     template_name = 'signup.html'
     success_message = 'Sign up succeeded. You can now log in.'
