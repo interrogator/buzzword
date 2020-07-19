@@ -42,11 +42,12 @@ def corpus_settings(request):
     return render(request, "accounts/corpus_settings.html", context)
 
 
-def signup(request, slug=None):
+def signup(request):
     """
     Signup modal
     """
-    slug = slug or settings.BUZZWORD_SPECIFIC_CORPUS
+    # todo: swisslaw only
+    slug = settings.BUZZWORD_SPECIFIC_CORPUS
     current_section = request.path.strip("/") or "home"
     corpus = explore.models.Corpus.objects.get(slug=slug)
     context = {}
