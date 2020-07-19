@@ -1,6 +1,5 @@
 from django.urls import path, re_path
 
-from . import views
 from explore.models import Corpus
 from django.conf import settings
 from buzzword.utils import management_handling
@@ -10,6 +9,7 @@ app_name = "start"
 
 
 def _register_urls():
+    from . import views
     # we need to make a regex matching each corpus slug
     # so that signout and other urls are still matched
     # try-except is to catch migrate (etc) calls
