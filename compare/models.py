@@ -1,6 +1,6 @@
 from django.db import models
 from martor.models import MartorField
-
+from django.contrib.auth import get_user_model
 
 class Post(models.Model):
     description = MartorField(blank=True)
@@ -43,3 +43,5 @@ class OCRUpdate(models.Model):
     previous = models.TextField()
     text = models.TextField()
     pdf = models.ForeignKey(PDF, on_delete=models.PROTECT)
+    username = models.CharField(max_length=200, blank=False, unique=False)
+    user = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True)

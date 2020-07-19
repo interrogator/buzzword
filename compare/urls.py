@@ -2,7 +2,7 @@ from django.urls import path
 
 from .views import browse_collection
 
-from buzz.utils import management_handling
+from buzzword.utils import management_handling
 
 
 app_name = "compare"

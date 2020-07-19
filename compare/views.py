@@ -35,7 +35,7 @@ def browse_collection(request, slug=None):
     # handle specific mode
     if not slug:
         slug = settings.BUZZWORD_SPECIFIC_CORPUS
-    spec = bool(slug)
+
     all_pdfs = PDF.objects.all()
     paginator = Paginator(all_pdfs, 1)
     query = request.GET.get('q')
@@ -51,7 +51,8 @@ def browse_collection(request, slug=None):
     plaintext = this_pdf.latest("timestamp").text
 
     default_commit = f"Update {os.path.splitext(os.path.basename(pdf_path))[0]}"
-    form = PostForm(initial={"description": plaintext, "commit_msg": default_commit})
+    form_data = {"description": plaintext, "commit_msg": default_commit}
+    form = PostForm(initial=form_data)
     context = {
         "pdf_filepath": "/" + pdf_path.replace(".tif", ".pdf"),
         "form": form,
@@ -79,7 +80,14 @@ def browse_collection(request, slug=None):
             # this updates the text file with the latest data. bad idea?
             # store_buzz_raw(buzz_raw_text, slug, pdf_path)
             # todo: handle submitted changes properly
-            updated = OCRUpdate(slug=slug, commit_msg=commit, text=new_text, previous=plaintext, pdf=pdf)
+            updated = OCRUpdate(slug=slug,
+                commit_msg=commit,
+                text=new_text,
+                previous=plaintext,
+                pdf=pdf,
+                username=request.user.username,
+                user=request.user
+            )
             updated.save()
             initial = {"description": new_text, "commit_msg": default_commit}
             context["form"] = PostForm(initial=initial)

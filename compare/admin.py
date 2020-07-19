@@ -19,17 +19,19 @@ class PostAdmin(admin.ModelAdmin):
 
 @admin.register(OCRUpdate)
 class OCRUpdateAdmin(admin.ModelAdmin):
-    list_display = ["slug", "commit_msg", "timestamp", "previous", "text"]
-    formfield_overrides = {
-        MartorField: {"widget": AdminMartorWidget},
-        models.TextField: {"widget": AdminMartorWidget},
-    }
+    list_display = ["username", "user", "slug", "commit_msg", "timestamp", "previous", "text"]
+    #formfield_overrides = {
+    #    MartorField: {"widget": AdminMartorWidget},
+    #    models.TextField: {"widget": AdminMartorWidget},
+    #}
 
-    actions = ['accept_correction']
+    actions = []
 
     def accept_correction(self, request, queryset):
         """
         todo: write what happens when admin accepts correction
+
+        https://docs.djangoproject.com/en/3.0/ref/contrib/admin/actions/
         """
         msg = f"{len(queryset)} changes accepted."
         self.message_user(request, msg, messages.SUCCESS)
@@ -39,6 +41,7 @@ class OCRUpdateAdmin(admin.ModelAdmin):
 @admin.register(PDF)
 class PDFAdmin(admin.ModelAdmin):
     list_display = ["slug", "path", "name", "num"]
+
 
 
 

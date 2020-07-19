@@ -1,7 +1,7 @@
 {
   "Swiss Digital Law Discovery": {
     "slug": "swiss-law",
-    "language": "en",
+    "language": "de",
     "path": "static/corpora/swiss-law",
     "desc": "Swiss legal texts",
     "drop_columns": ["text", "parse"],
