@@ -36,6 +36,9 @@
   <span style="text-align: center;">Keyword-in-context</span>
 </div>
 
+<br>
+<br>
+
 Sie ist auch besonders geeignet für interdisziplinäre respektive kollaborative digitale Projekte, wie sie z.B. im Zusammenhang der Digital Humanities oder der Digital (Legal) History vorkommen. Wenn Sie im Rahmen der Rechtsprechung respektive Rechtsanwendung rechtsvergleichend und die  historische Tiefenperspektive miteinbeziehen möchten, da kann *Sdilaw* ideal zum Zug kommen. 
  
 Nicht zu vergessen sind die Möglichkeiten, die Sie durch das Hinzufügen von eigenen Datensets haben, die Sie separat oder im Zusammenhang mit den angebotenen Materialien durchsuchen oder digital analysieren können. 

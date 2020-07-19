@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
 from django import forms
 from django.conf import settings
+from django.http import HttpResponseRedirect
 
 from .forms import CustomUserCreationForm
 
@@ -58,14 +59,14 @@ def signup(request):
             form.request = request
             user = form.save()
             user.backend = "django.contrib.auth.backends.ModelBackend"
-            print("SAVED IN DB...")
             username = request.POST.get("username")
             password = request.POST.get("password")
             user = authenticate(request, username=username, password=password)
             if user:
                 login(request, user)
             # or redirect?
-            return render(request, f"start/{slug}.html", context)
+        return render(request, f"start/{slug}.html", context)
+        
     else:
         form = CustomUserCreationForm()
         context["form"] = form
