@@ -1,27 +1,20 @@
 import os
 
+import django
 from django.conf import settings
-from django.contrib import messages
-from django.contrib.messages import get_messages
-
 from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.template import loader
+from django.contrib import messages
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
 
 from .forms import PostForm, SubmitForm
 from .models import PDF, OCRUpdate
 from .utils import markdown_to_buzz_input, store_buzz_raw
 
+from buzzword.utils import _make_message
 from explore.models import Corpus
-
-
-def _make_message(request, level, msg):
-    """
-    Just add the message once
-    """
-    if msg not in [m.message for m in get_messages(request)]:
-        messages.add_message(request, level, msg)
-
 
 def browse_collection(request, slug=None):
     """
@@ -80,13 +73,17 @@ def browse_collection(request, slug=None):
             # this updates the text file with the latest data. bad idea?
             # store_buzz_raw(buzz_raw_text, slug, pdf_path)
             # todo: handle submitted changes properly
+            try:
+                user = User.objects.get(id=request.user.id)
+            except django.contrib.auth.models.User.DoesNotExist:
+                user = None
             updated = OCRUpdate(slug=slug,
                 commit_msg=commit,
                 text=new_text,
                 previous=plaintext,
                 pdf=pdf,
                 username=request.user.username,
-                user=request.user
+                user=user
             )
             updated.save()
             initial = {"description": new_text, "commit_msg": default_commit}

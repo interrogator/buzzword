@@ -36,7 +36,10 @@ def start_specific(request, slug=None):
     This function also handles the example page. Genius.
     """
     slug = slug or settings.BUZZWORD_SPECIFIC_CORPUS
-    current_section = request.path.strip("/") or "home"
+    current_section = request.path.strip("/")
+    go_home = {"login", "logout", "signup", "corpus_settings"}
+    if current_section in go_home or not current_section:
+        current_section = "home"
     corpus = explore.models.Corpus.objects.get(slug=slug)
     content = _get_markdown_content(slug, current_section)
     context = {"corpus": corpus, "navbar": current_section, "content": content}

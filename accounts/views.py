@@ -1,26 +1,39 @@
 from django.shortcuts import render, redirect
+from django.contrib import messages
 from django.contrib.auth import login, logout, authenticate
 from django import forms
+
 from django.conf import settings
 from django.http import HttpResponseRedirect
 
 from .forms import CustomUserCreationForm
 
 import explore.models
-
+from start.views import start_specific
+from buzzword.utils import _make_message
+from django.template import loader
+from django.http import HttpResponse
 
 def logout_view(request):
     logout(request)
-    return redirect("/")
+    slug = settings.BUZZWORD_SPECIFIC_CORPUS
+    return start_specific(request, slug=slug)
 
 
 def login_view(request):
+    slug = settings.BUZZWORD_SPECIFIC_CORPUS
     username = request.POST["username"]
     password = request.POST["password"]
     user = authenticate(request, username=username, password=password)
+    context = {"slug": slug}
+    print("TEMPLATE", slug)
+    template = loader.get_template(f"start/{slug}.html")
     if user:
         login(request, user)
-    return redirect("/")
+    else:
+        error = "Login unsuccessful. Please sign up or try again."
+        _make_message(request, messages.ERROR, error)
+    return HttpResponse(template.render(context, request))
 
 
 def corpus_settings(request):
@@ -65,7 +78,9 @@ def signup(request):
             if user:
                 login(request, user)
             # or redirect?
-        return render(request, f"start/{slug}.html", context)
+        return start_specific(request, slug=slug)
+
+
         
     else:
         form = CustomUserCreationForm()
