@@ -5,6 +5,8 @@ RUN apt-get update && \
 
 WORKDIR /
 
+COPY . /buzzword
+
 RUN \
     git clone https://github.com/interrogator/buzz.git buzz && \
     cd buzz && \
