@@ -32,7 +32,7 @@ def login_view(request):
         login(request, user)
     else:
         error = "Login unsuccessful. Please sign up or try again."
-        _make_message(request, messages.ERROR, error)
+        _make_message(request, messages.WARNING, error)
     return HttpResponse(template.render(context, request))
 
 
