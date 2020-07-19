@@ -11,10 +11,10 @@ RUN \
     pip install -r requirements.txt && \
     python setup.py install
 
+# COPY . buzzword
+
 RUN \
-    git clone https://github.com/interrogator/buzzword.git && \
     cd buzzword && \
-    git pull --all && \
     git checkout swisslaw && \
     pip install -r requirements.txt
 
@@ -37,7 +37,8 @@ RUN \
     pip install uwsgi && \
     ln -s /buzzword/buzzword_nginx.conf /etc/nginx/sites-enabled/
 
-VOLUME static/corpora:static/corpora
+VOLUME /buzzword/static/corpora
+COPY static/corpora /buzzword/static/corpora
 
 #CMD python manage.py runserver 0.0.0.0:8000
 CMD service nginx start && uwsgi --ini /buzzword/uwsgi-docker.ini
