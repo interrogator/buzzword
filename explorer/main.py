@@ -140,7 +140,10 @@ def load_explorer_app():
                     load_layout(corpus.slug, set_and_register=False)
                     # load_layout(corpus.slug, set_and_register=True)
         return CORPORA
-    # catching errors during migrate. should make more specific, catch
-    # only "no such table" error
-    except OperationalError:
-        pass
+    # catching errors during migrate. not a lovely way to do this, but no alternative
+    # broad scope because there are model lookups in _load_languages and _load_corpora
+    except OperationalError as error:
+        if "no such table" in str(error):
+            pass
+        else:
+            raise
