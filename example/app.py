@@ -102,7 +102,11 @@ def concordance_space():
     return conc_space
 
 def _quick_concordance(query):
-    corpus = _get_corpus(settings.BUZZWORD_SPECIFIC_CORPUS)
+    try:
+        corpus = _get_corpus(settings.BUZZWORD_SPECIFIC_CORPUS)
+    # migrate handling :(
+    except TypeError:
+        return [], []
     df = corpus.just.word(query, exact_match=True)
     df = df.conc(n=999, metadata=["year", "file", "s"])
     df["file"] = df["file"].apply(os.path.basename)
