@@ -74,7 +74,7 @@ Dabei können Sie einen sog. Regulären Ausdruck (regular expression, Abkürzung
 
 ## Frequenzansicht (*Frequencies View*)
 
-Bei Buzzword wird auf neuartige Weise der Prozess des Suchens von der Ansicht der Resultate getrennt. So können Sie mit Resultaten weiterarbeiten und sie unterschiedlich darstellen, ohne dass eine Suche nochmals gestartet werden muss. Von einem Suchresultat, generiert in der Dataset-Ansicht, können Sie verschiedene Ansichten erstellen: Tabellen, Visualisierungen, Konkordanzen.
+Bei *buzzword* wird auf neuartige Weise der Prozess des Suchens von der Ansicht der Resultate getrennt. So können Sie mit Resultaten weiterarbeiten und sie unterschiedlich darstellen, ohne dass eine Suche nochmals gestartet werden muss. Von einem Suchresultat, generiert in der Dataset-Ansicht, können Sie verschiedene Ansichten erstellen: Tabellen, Visualisierungen, Konkordanzen.
 
 ### Tabellen-Ansicht
 
@@ -100,4 +100,4 @@ Vorgehen: Suchresultat selektionieren über «Suche von» (search from) im Dropd
 
 Das Portal *Swiss Digital Law* wird in Kürze online gestellt und von der Universität Zürich UZH gehostet sowie vom Zentrum für rechtsgeschichtliche Forschung ZRF betreut werden, Projektsteuerung Prof. Andreas Thier, Projektleitung Martin Kurz, Softwareengineering [Daniel McDonald](https://twitter.com/interro_gator).
 
-Auf Ihre Rückmeldungen und Fragen sind wir gespannt. Bitte hinterlassen Sie diese als Issue auf dem [Repositorium des Projekts](https://github.com/interrogator/buzzword) (github) oder per [E-Mail](mailto:martin.kurz@uzh.ch). Besten Dank!
+Auf Ihre Rückmeldungen und Fragen sind wir gespannt. Bitte hinterlassen Sie diese als Issue auf dem [Repositorium des Projekts](https://github.com/interrogator/buzzword) (github) oder per [E-Mail](mailto:martin.kurz@uzh.ch). *Besten Dank!*
