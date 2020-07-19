@@ -15,6 +15,7 @@ from explore.models import Language, Corpus
 
 from django.conf import settings
 from django.db import IntegrityError
+from django.db.utils import OperationalError
 
 from .helpers import (
     _get_corpus,
@@ -36,6 +37,8 @@ def _load_languages():
     for longname, short in choices:
         try:
             Language(name=longname, short=short).save()
+        # IntegrityError: already exists, don't care
+        # OperationalError: models aren't yet populated (on first run)
         except IntegrityError:
             pass
 
@@ -123,16 +126,21 @@ def load_explorer_app():
     """
     Triggered during runserver, reload
     """
-    _load_languages()
-    _load_corpora()
-    global CORPORA, INITIAL_TABLES
-    CORPORA, INITIAL_TABLES = _load_explorer_data()
-    # this can potentially save time: generate layouts for all datasets
-    # before the pages are visited. comes at expense of some memory,
-    # but the app should obviously be able to handle all datasets in use
-    if settings.LOAD_LAYOUTS:
-        for corpus in Corpus.objects.all():
-            if not corpus.disabled:
-                load_layout(corpus.slug, set_and_register=False)
-                # load_layout(corpus.slug, set_and_register=True)
-    return CORPORA
+    try:
+        _load_languages()
+        _load_corpora()
+        global CORPORA, INITIAL_TABLES
+        CORPORA, INITIAL_TABLES = _load_explorer_data()
+        # this can potentially save time: generate layouts for all datasets
+        # before the pages are visited. comes at expense of some memory,
+        # but the app should obviously be able to handle all datasets in use
+        if settings.LOAD_LAYOUTS:
+            for corpus in Corpus.objects.all():
+                if not corpus.disabled:
+                    load_layout(corpus.slug, set_and_register=False)
+                    # load_layout(corpus.slug, set_and_register=True)
+        return CORPORA
+    # catching errors during migrate. should make more specific, catch
+    # only "no such table" error
+    except OperationalError:
+        pass
