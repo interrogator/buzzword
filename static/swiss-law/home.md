@@ -16,6 +16,26 @@
 
 **Die Plattform *SdiLaw* bietet Ihnen all dies.**
 
+<div class="image-wrapper center">
+  <img src="/static/bolt.jpg"/>
+  <span style="text-align: center;">Caption</span>
+</div>
+
+<div class="image-wrapper center">
+  <img src="/static/bolt.jpg"/>
+  <span style="text-align: center;">Caption 2</span>
+</div>
+
+<div class="image-wrapper center">
+  <img class="center" src="/static/bolt.jpg"/>
+  <span style="text-align: center;">Caption 3</span>
+</div>
+
+<div class="image-wrapper center">
+  <img class="center" src="/static/bolt.jpg"/>
+  <span style="text-align: center;">Caption 4</span>
+</div>
+
 Sie ist auch besonders geeignet für interdisziplinäre respektive kollaborative digitale Projekte, wie sie z.B. im Zusammenhang der Digital Humanities oder der Digital (Legal) History vorkommen. Wenn Sie im Rahmen der Rechtsprechung respektive Rechtsanwendung rechtsvergleichend und die  historische Tiefenperspektive miteinbeziehen möchten, da kann *Sdilaw* ideal zum Zug kommen. 
  
 Nicht zu vergessen sind die Möglichkeiten, die Sie durch das Hinzufügen von eigenen Datensets haben, die Sie separat oder im Zusammenhang mit den angebotenen Materialien durchsuchen oder digital analysieren können. 
