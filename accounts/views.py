@@ -9,7 +9,7 @@ from django.http import HttpResponseRedirect
 from .forms import CustomUserCreationForm
 
 import explore.models
-from start.views import start_specific
+from start.views import start_specific, _get_markdown_content
 from buzzword.utils import _make_message
 from django.template import loader
 from django.http import HttpResponse
@@ -25,9 +25,14 @@ def login_view(request):
     username = request.POST["username"]
     password = request.POST["password"]
     user = authenticate(request, username=username, password=password)
-    context = {"slug": slug}
-    print("TEMPLATE", slug)
     template = loader.get_template(f"start/{slug}.html")
+    go_home = {"login", "logout", "signup", "corpus_settings"}
+    corpus = explore.models.Corpus.objects.get(slug=slug)
+    current_section = None  # todo
+    if current_section in go_home or not current_section:
+        current_section = "home"
+    content = _get_markdown_content(slug, current_section)
+    context = {"corpus": corpus, "navbar": current_section, "content": content}
     if user:
         login(request, user)
     else:
