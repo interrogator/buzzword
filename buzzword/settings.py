@@ -272,7 +272,7 @@ LOAD_LAYOUTS = True
 # explorer settings 
 DROP_COLUMNS = {"text", "parse"}
 PAGE_SIZE = 25
-TABLE_SIZE = (5000, 200)
+TABLE_SIZE = (2000, 200)
 ADD_GOVERNOR = False
 MAX_CONC = 999
 MAX_DATASET_ROWS = None
