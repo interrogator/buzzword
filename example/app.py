@@ -100,7 +100,7 @@ def _quick_concordance(query):
     except TypeError:
         return [], []
     df = corpus.just.word(query, exact_match=True)
-    df = df.conc(n=999, metadata=["year", "file", "s"])
+    df = df.conc(n=999, window=(80, 80), metadata=["year", "file", "s"])
     df["file"] = df["file"].apply(os.path.basename)
     just = ["left", "match", "right", "year", "file", "s"]
     if "speaker" in df.columns:
