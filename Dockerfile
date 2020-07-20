@@ -30,6 +30,7 @@ RUN \
 
 RUN chown www-data:www-data . && \
     chmod 777 . && \
+    touch db.sqlite3 && \
     chown www-data:www-data db.sqlite3 && \
     chmod 777 db.sqlite3
 
