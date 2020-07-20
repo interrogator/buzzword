@@ -26,7 +26,7 @@ RUN \
 
 # COPY buzzword/swiss-law/swiss-law-parsed /buzzword/swiss-law/swiss-law-parsed
 
-RUN python manage.py migrate
+# RUN python manage.py migrate
 
 RUN chown www-data:www-data . && \
     chmod 777 . && \
