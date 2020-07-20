@@ -61,8 +61,11 @@ def _build_dataset_space(df, config):
     # no file extensions
     df["file"] = df["file"].str.replace(".conllu", "", regex=False)
     df["file"] = df["file"].str.replace("^.*/conllu/", "", regex=True)
-    # max_row, max_col = settings.TABLE_SIZE
-    # df = df.iloc[:max_row, :max_col]
+    max_row, max_col = settings.TABLE_SIZE
+    if max_row:
+        df = df.iloc[:max_row]
+    if max_col:
+        df = df.iloc[:,:max_col]
     pieces = [
         dcc.Dropdown(
             id="search-target",
