@@ -272,7 +272,7 @@ LOAD_LAYOUTS = True
 # explorer settings 
 DROP_COLUMNS = {"text", "parse"}
 PAGE_SIZE = 25
-TABLE_SIZE = (20000, 200)
+TABLE_SIZE = (5000, 200)
 ADD_GOVERNOR = False
 MAX_CONC = 999
 MAX_DATASET_ROWS = None
@@ -283,4 +283,4 @@ PWD = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TESSDATA_PREFIX = os.path.join(PWD, "tessdata")
 
 # this should be set to none, or a corpus slug
-BUZZWORD_SPECIFIC_CORPUS = "swiss-law-mini"
+BUZZWORD_SPECIFIC_CORPUS = "swiss-law"
