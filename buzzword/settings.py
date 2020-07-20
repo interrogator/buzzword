@@ -14,7 +14,7 @@ import tempfile
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
 
-DATA_UPLOAD_MAX_MEMORY_SIZE = 50000000
+DATA_UPLOAD_MAX_MEMORY_SIZE = 200000000
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
