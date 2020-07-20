@@ -146,7 +146,6 @@ def load_layout(slug, spec=False, set_and_register=True):
     fullpath = os.path.abspath(settings.CORPORA_FILE)
     print(f"Using django corpus configuration at: {fullpath}")
     corpora, initial_tables = _get_or_load_corpora(slug)
-    print("CORP", list(corpora.keys()))
     corpus = corpora[slug]
     table = initial_tables[slug]
     layout = make_explore_page(corpus, table, slug, spec=spec)
