@@ -236,10 +236,13 @@ def _get_corpus(slug):
     try:
         from .main import CORPORA
     except ImportError:
-        from explorer.main import load_explorer_app
+        from .main import load_explorer_app
         CORPORA = load_explorer_app()
+        # CORPORA, INITIAL_TABLES = _load_explorer_data()
     if slug in CORPORA:
-        return CORPORA[slug]
+        corpus = CORPORA[slug]
+        print(f"Corpus found for {slug}: {len(corpus)} tokens")
+        return corpus
     raise ValueError(f"CORPUS not found: {slug}")
     upload = os.path.join("uploads", slug, "conllu")
     corpus = Corpus(upload).load()
