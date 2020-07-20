@@ -35,7 +35,7 @@ def _start_parse_corpus_job(corpus):
 def explore(request, slug=None):
     if slug is None:
         slug = settings.BUZZWORD_SPECIFIC_CORPUS
-    app = load_layout(slug)
+    app = load_layout(slug, set_and_register=True)
     return render(request, "explore/explore.html")
 
 
