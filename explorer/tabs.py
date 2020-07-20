@@ -61,8 +61,8 @@ def _build_dataset_space(df, config):
     # no file extensions
     df["file"] = df["file"].str.replace(".conllu", "", regex=False)
     df["file"] = df["file"].str.replace("^.*/conllu/", "", regex=True)
-    max_row, max_col = settings.TABLE_SIZE
-    df = df.iloc[:max_row, :max_col]
+    # max_row, max_col = settings.TABLE_SIZE
+    # df = df.iloc[:max_row, :max_col]
     pieces = [
         dcc.Dropdown(
             id="search-target",
@@ -517,6 +517,7 @@ def make_explore_page(corpus, table, slug, spec=False):
     frequencies = _build_frequencies_space(corpus, table, config)
     chart = _build_chart_space(table, config)
     concordance = _build_concordance_space(corpus, config)
+    print(f"Corpus length (debug) {len(corpus)}")
     label = _make_search_name(config.name, len(corpus), dict(), 0)  # 0 == english
     search_from = [dict(value=0, label=label)]
     sty = {**style.MARGIN_5_MONO, **style.FRONT}
