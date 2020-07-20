@@ -82,6 +82,7 @@ def _load_explorer_data(multiprocess=False):
             print(f"Loading corpus into memory: {corpus.name} ...")
             opts = dict(add_governor=corpus.add_governor, multiprocess=multiprocess)
             buzz_corpus = buzz_corpus.load(**opts)
+            print(f"Corpus ({len(buzz_corpus)} tokens): {corpus.name}")
             buzz_corpus = _postprocess_corpus(buzz_corpus, corpus)
             cols = json.loads(corpus.drop_columns)
             if cols:
