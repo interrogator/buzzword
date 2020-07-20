@@ -111,14 +111,18 @@ def load_layout(slug, spec=False, set_and_register=True):
     """
     fullpath = os.path.abspath(settings.CORPORA_FILE)
     print(f"Using django corpus configuration at: {fullpath}")
-    corpora, initial_tables = _load_explorer_data()
-    corpus = _get_corpus(slug)
-    table = _get_initial_table(slug)
+    try:
+        corpus, table = CORPORA[slug], INITIAL_TABLES[slug]
+        print(f"Got {slug} corpus and table from memory")
+    except:
+        print(f"Couldn't get {slug} corpus and table from memory")
+        corpora, initial_tables = _load_explorer_data()
+        corpus = _get_corpus(slug)
+        table = _get_initial_table(slug)
     layout = make_explore_page(corpus, table, slug, spec=spec)
     if set_and_register:
         app.layout = layout
         register_callbacks()
-
     return app
 
 
@@ -136,6 +140,6 @@ def load_explorer_app():
     if settings.LOAD_LAYOUTS:
         for corpus in Corpus.objects.all():
             if not corpus.disabled:
-                load_layout(corpus.slug, set_and_register=False)
+                load_layout(corpus.slug, set_and_register=True)
                 # load_layout(corpus.slug, set_and_register=True)
     return CORPORA
