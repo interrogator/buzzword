@@ -24,7 +24,8 @@ from .helpers import (
     _update_frequencies,
 )
 from .lang import LANGUAGES
-from .main import CORPORA, INITIAL_TABLES, app
+from start.apps import corpora, initial_tables
+from .main import app
 from .strings import _make_search_name, _make_table_name, _search_error, _table_error
 
 # we can't keep tables in dcc.store, they are too big. so we keep all here with
@@ -117,7 +118,7 @@ for i in range(1, 6):
             this_table = session_tables[str(table_from)]
             df = FREQUENCY_TABLES[_tuple_or_list(this_table, tuple)]
         else:
-            df = INITIAL_TABLES[slug]
+            df = initial_tables[slug]
 
         # transpose and cut down items to plot
         if transpose:
@@ -203,7 +204,7 @@ def _new_search(
     conf = CorpusModel.objects.get(slug=slug)
     max_row, max_col = settings.TABLE_SIZE
 
-    specs, corpus = _get_specs_and_corpus(search_from, session_search, CORPORA, slug)
+    specs, corpus = _get_specs_and_corpus(search_from, session_search, corpora, slug)
 
     # user clicked the show button, show search_from
     if show_dataset and show_dataset != session_clicks_show:
@@ -255,7 +256,7 @@ def _new_search(
     # if the user has done clear history
     if cleared and cleared != session_clicks_clear:
         session_search.clear()
-        corpus = CORPORA[slug]
+        corpus = corpora[slug]
         corpus_size = len(corpus)
         corpus = corpus.iloc[:max_row, :max_col]
         cols, data = _update_conll(corpus, False, drop_govs=conf.add_governor)
@@ -313,7 +314,7 @@ def _new_search(
     this_search += [new_value, len(df), list(df["_n"])]
     if found_results:
         session_search[new_value] = _tuple_or_list(this_search, list)
-        corpus = CORPORA[slug]
+        corpus = corpora[slug]
         df = df.iloc[:max_row, :max_col]
         current_cols, current_data = _update_conll(df, True, conf.add_governor)
     else:
@@ -416,7 +417,7 @@ def _new_table(
     # because no option below can return initial table, rows can now be deleted
     row_deletable = True
 
-    specs, corpus = _get_specs_and_corpus(search_from, session_search, CORPORA, slug)
+    specs, corpus = _get_specs_and_corpus(search_from, session_search, corpora, slug)
 
     # figure out sort, subcorpora,relative and keyness
     sort = sort or "total"
@@ -473,14 +474,14 @@ def _new_table(
             table = FREQUENCY_TABLES[_tuple_or_list(value, tuple)]
             # todo: more here?
         else:
-            table = INITIAL_TABLES[slug]
+            table = initial_tables[slug]
     else:
         # generate table
         method = "table"
         table = getattr(corpus, method)(
             show=show,
             subcorpora=subcorpora,
-            relative=relative if relative != "corpus" else CORPORA[slug],
+            relative=relative if relative != "corpus" else corpora[slug],
             keyness=keyness,
             sort=sort,
             multiindex_columns=False, # multiindex_columns,
@@ -562,7 +563,7 @@ def _new_conc(n_clicks, show, search_from, session_search, slug, **kwargs):
         msg = "Cannot concordance whole corpus. Do a search first."
         return no_update, no_update, True, msg
 
-    specs, corpus = _get_specs_and_corpus(search_from, session_search, CORPORA, slug)
+    specs, corpus = _get_specs_and_corpus(search_from, session_search, corpora, slug)
 
     met = ["file", "s", "i"]
     # todo: corpus may not be loaded. then how to know what metadata there is?

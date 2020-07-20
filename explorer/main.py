@@ -11,8 +11,6 @@ from buzz.constants import LANGUAGES, AVAILABLE_MODELS
 
 from django_plotly_dash import DjangoDash
 
-from explore.models import Language, Corpus
-
 from django.conf import settings
 from django.db import IntegrityError
 
@@ -22,13 +20,9 @@ from .helpers import (
     _postprocess_corpus,
     register_callbacks
 )
-from .tabs import make_explore_page
+
 
 app = DjangoDash("buzzword", suppress_callback_exceptions=True)
-
-
-CORPORA = dict()
-INITIAL_TABLES = dict()
 
 
 def _load_languages():
@@ -37,6 +31,7 @@ def _load_languages():
     """
     choices = [(k, v) for k, v in sorted(LANGUAGES.items()) if v in AVAILABLE_MODELS]
     print(f"Loading languages: {', '.join([i[0] for i in choices])}...")
+    from explore.models import Language
     for longname, short in choices:
         try:
             Language(name=longname, short=short).save()
@@ -50,6 +45,7 @@ def _load_corpora():
     """
     Load contents of corpora.json into DB as Corpus objects
     """
+    from explore.models import Corpus
     corpora_file = os.path.abspath(settings.CORPORA_FILE)
     print(f"Loading corpora, using corpus configuration at: {corpora_file}")
     with open(corpora_file) as fo:
@@ -59,14 +55,45 @@ def _load_corpora():
         print(f"Saving corpus model to DB: {modelled.slug}")
         modelled.save()
 
+
+def _get_or_load_corpora(slug=None):
+    try:
+        from start.apps import corpora, initial_tables
+        if corpora:
+            return corpora, initial_tables
+        else:
+            raise ValueError("Data not loaded yet.")
+    except:
+        corpora = dict()
+        initial_tables = dict()
+        corpora_file = os.path.abspath(settings.CORPORA_FILE)
+        print(f"* Loading corpora, using corpus configuration at: {corpora_file}")
+        with open(corpora_file) as fo:
+            data = json.load(fo)
+        for name, meta in data.items():
+            if slug and meta["slug"] != slug:
+                continue
+            corpus = Collection(meta["path"]).conllu.load(multiprocess=False)
+            corpora[meta["slug"]] = corpus
+            try:
+                display = json.loads(corpus["initial_table"])
+            except:
+                display = dict(show="p", subcorpora="file")
+            print(f"* Generating an initial table for {name} using {display}")
+            initial_table = corpus.table(**display)
+            initial_tables[meta["slug"]] = initial_table
+        return corpora, initial_tables
+
+
 def _load_explorer_data(multiprocess=False):
     """
     Load in all available corpora and make their initial tables
 
     This is run when the app starts up
     """
-    # corpora = dict()
-    # tables = dict()
+    from explore.models import Corpus
+    corpora = dict()
+    initial_tables = dict()
     for corpus in Corpus.objects.all():
         if corpus.disabled:
             print(f"Skipping corpus because it is disabled: {corpus.name}")
@@ -91,7 +118,7 @@ def _load_explorer_data(multiprocess=False):
             cols = json.loads(corpus.drop_columns)
             if cols:
                 buzz_corpus = buzz_corpus.drop(cols, axis=1, errors="ignore")
-            CORPORA[corpus.slug] = buzz_corpus
+            corpora[corpus.slug] = buzz_corpus
         else:
             print(f"NOT loading corpus into memory: {corpus.name} ...")
 
@@ -102,9 +129,9 @@ def _load_explorer_data(multiprocess=False):
             display = dict(show="p", subcorpora="file")
             print(f"Generating an initial table for {corpus.name} using {display}")
             initial_table = buzz_corpus.table(**display)
-            INITIAL_TABLES[corpus.slug] = initial_table
+            initial_tables[corpus.slug] = initial_table
 
-    # return corpora, tables
+    return corpora, initial_tables
 
 
 def load_layout(slug, spec=False, set_and_register=True):
@@ -115,16 +142,13 @@ def load_layout(slug, spec=False, set_and_register=True):
 
     This is the function called by explore.view.explore
     """
+    from .tabs import make_explore_page
     fullpath = os.path.abspath(settings.CORPORA_FILE)
     print(f"Using django corpus configuration at: {fullpath}")
-    try:
-        corpus, table = CORPORA[slug], INITIAL_TABLES[slug]
-        print(f"Got {slug} corpus and table from memory")
-    except KeyError:
-        print(f"Couldn't get {slug} corpus and table from memory")
-        corpora, initial_tables = _load_explorer_data()
-        corpus = _get_corpus(slug)
-        table = _get_initial_table(slug)
+    corpora, initial_tables = _get_or_load_corpora(slug)
+    print("CORP", list(corpora.keys()))
+    corpus = corpora[slug]
+    table = initial_tables[slug]
     layout = make_explore_page(corpus, table, slug, spec=spec)
     if set_and_register:
         app.layout = layout
@@ -136,9 +160,10 @@ def load_explorer_app():
     """
     Triggered during runserver, reload
     """
+    from explore.models import Corpus
     _load_languages()
     _load_corpora()
-    _load_explorer_data()
+    _get_or_load_corpora()
     # this can potentially save time: generate layouts for all datasets
     # before the pages are visited. comes at expense of some memory,
     # but the app should obviously be able to handle all datasets in use
@@ -147,4 +172,4 @@ def load_explorer_app():
             if not corpus.disabled:
                 load_layout(corpus.slug, set_and_register=True)
                 # load_layout(corpus.slug, set_and_register=True)
-    return CORPORA
+

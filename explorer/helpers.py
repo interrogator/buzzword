@@ -9,8 +9,6 @@ from django.conf import settings
 import pandas as pd
 from buzz.constants import SHORT_TO_COL_NAME, SHORT_TO_LONG_NAME
 from buzz.corpus import Corpus
-from explore.models import Corpus as CorpusModel
-from compare.models import PDF
 
 from .strings import _capitalize_first, _downloadable_name
 
@@ -233,20 +231,15 @@ def _get_corpus(slug):
     """
     Get corpus from slug, loading from uploads dir if need be
     """
-    try:
-        from .main import CORPORA
-    except ImportError:
-        from .main import load_explorer_app
-        CORPORA = load_explorer_app()
-        # CORPORA, INITIAL_TABLES = _load_explorer_data()
-    if slug in CORPORA:
-        corpus = CORPORA[slug]
+    from start.apps import corpora
+    if slug in corpora:
+        corpus = corpora[slug]
         print(f"Corpus found for {slug}: {len(corpus)} tokens")
         return corpus
     raise ValueError(f"CORPUS not found: {slug}")
     upload = os.path.join("uploads", slug, "conllu")
     corpus = Corpus(upload).load()
-    CORPORA[slug] = corpus
+    corpora[slug] = corpus
     return corpus
 
 
@@ -254,7 +247,11 @@ def _get_initial_table(slug):
     """
     Get or create the initial table for this slug
     """
+    from explore.models import Corpus as CorpusModel
     # todo: speed up by storing as INITIAL_TABLES?
+    from start.apps import initial_tables
+    if slug in initial_tables:
+        corpus = initial_tables[slug]
     corpus = _get_corpus(slug)
     default = dict(show="p", subcorpora="file")
     initial = CorpusModel.objects.get(slug=slug).initial_table
@@ -318,6 +315,7 @@ def _special_search(df, col, search_string, skip):
         return df.iloc[:0, :0], msg
 
 def _apply_conc_href(row, slug=None):
+    from compare.models import PDF
     file, match = row["file"], row["match"]
     pdf_name = os.path.basename(file).replace(".conllu", "")
     pdf = PDF.objects.get(slug=slug, name=pdf_name)
