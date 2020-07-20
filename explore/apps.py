@@ -18,6 +18,6 @@ class ExploreConfig(AppConfig):
             try:
                 print("Loading corpora from apps.py!")
                 import explorer.main
-                explorer.main.load_corpora()
+                explorer.main._load_corpora()
             except:
                 print("Load corpora from apps.py failed (OK during migrate etc)")

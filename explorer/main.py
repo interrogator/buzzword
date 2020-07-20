@@ -27,6 +27,10 @@ from .tabs import make_explore_page
 app = DjangoDash("buzzword", suppress_callback_exceptions=True)
 
 
+CORPORA = dict()
+INITIAL_TABLES = dict()
+
+
 def _load_languages():
     """
     Put all available languages into the DB
@@ -61,8 +65,8 @@ def _load_explorer_data(multiprocess=False):
 
     This is run when the app starts up
     """
-    corpora = dict()
-    tables = dict()
+    # corpora = dict()
+    # tables = dict()
     for corpus in Corpus.objects.all():
         if corpus.disabled:
             print(f"Skipping corpus because it is disabled: {corpus.name}")
@@ -76,7 +80,7 @@ def _load_explorer_data(multiprocess=False):
             print(f"No parsed data found for {corpus.path}")
             continue
         
-        corpora[corpus.slug] = buzz_corpus
+        # corpora[corpus.slug] = buzz_corpus
 
         if corpus.load:
             print(f"Loading corpus into memory: {corpus.name} ...")
@@ -87,7 +91,7 @@ def _load_explorer_data(multiprocess=False):
             cols = json.loads(corpus.drop_columns)
             if cols:
                 buzz_corpus = buzz_corpus.drop(cols, axis=1, errors="ignore")
-            corpora[corpus.slug] = buzz_corpus
+            CORPORA[corpus.slug] = buzz_corpus
         else:
             print(f"NOT loading corpus into memory: {corpus.name} ...")
 
@@ -98,9 +102,9 @@ def _load_explorer_data(multiprocess=False):
             display = dict(show="p", subcorpora="file")
             print(f"Generating an initial table for {corpus.name} using {display}")
             initial_table = buzz_corpus.table(**display)
-            tables[corpus.slug] = initial_table
+            INITIAL_TABLES[corpus.slug] = initial_table
 
-    return corpora, tables
+    # return corpora, tables
 
 
 def load_layout(slug, spec=False, set_and_register=True):
@@ -108,13 +112,15 @@ def load_layout(slug, spec=False, set_and_register=True):
     Django can import this function to set the correct dataset on explore page
 
     Return app instance, just in case django has a use for it.
+
+    This is the function called by explore.view.explore
     """
     fullpath = os.path.abspath(settings.CORPORA_FILE)
     print(f"Using django corpus configuration at: {fullpath}")
     try:
         corpus, table = CORPORA[slug], INITIAL_TABLES[slug]
         print(f"Got {slug} corpus and table from memory")
-    except:
+    except KeyError:
         print(f"Couldn't get {slug} corpus and table from memory")
         corpora, initial_tables = _load_explorer_data()
         corpus = _get_corpus(slug)
@@ -132,8 +138,7 @@ def load_explorer_app():
     """
     _load_languages()
     _load_corpora()
-    global CORPORA, INITIAL_TABLES
-    CORPORA, INITIAL_TABLES = _load_explorer_data()
+     _load_explorer_data()
     # this can potentially save time: generate layouts for all datasets
     # before the pages are visited. comes at expense of some memory,
     # but the app should obviously be able to handle all datasets in use
