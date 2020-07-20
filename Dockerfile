@@ -37,8 +37,5 @@ RUN \
     pip install uwsgi && \
     ln -s /buzzword/buzzword_nginx.conf /etc/nginx/sites-enabled/
 
-VOLUME /buzzword/static/corpora
-COPY static/corpora /buzzword/static/corpora
-
 #CMD python manage.py runserver 0.0.0.0:8000
 CMD service nginx start && uwsgi --ini /buzzword/uwsgi-docker.ini
