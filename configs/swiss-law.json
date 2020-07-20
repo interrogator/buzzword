@@ -4,7 +4,7 @@
     "language": "de",
     "path": "static/corpora/swiss-law",
     "desc": "Swiss legal texts",
-    "drop_columns": ["text", "parse"],
+    "drop_columns": ["text", "parse", "ent_id", "ent_iob"],
     "disabled": false,
     "date": "1809",
     "load": true,
