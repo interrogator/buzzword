@@ -138,7 +138,7 @@ def load_explorer_app():
     """
     _load_languages()
     _load_corpora()
-     _load_explorer_data()
+    _load_explorer_data()
     # this can potentially save time: generate layouts for all datasets
     # before the pages are visited. comes at expense of some memory,
     # but the app should obviously be able to handle all datasets in use
