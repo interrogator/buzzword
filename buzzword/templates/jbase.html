@@ -5,8 +5,8 @@
     <title>{% block title %}buzzword{% endblock %}</title>
     {% block header_content %}
       <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
-      <link href="{% static 'plugins/css/ace.min.css' %}" type="text/css" media="all" rel="stylesheet" />
-      <link href="{% static 'plugins/css/semantic.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+    <link href="{% static 'plugins/css/ace.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+    <link href="{% static 'plugins/css/semantic.min.css' %}" type="text/css" media="all" rel="stylesheet" />
       <link href="{% static 'plugins/css/resizable.min.css' %}" type="text/css" media="all" rel="stylesheet" />
       <link href="{% static 'martor/css/martor.min.css' %}" type="text/css" media="all" rel="stylesheet" />
       <link rel="stylesheet" href="{% static 'bootstrap.min.css' %}"/>
@@ -51,14 +51,6 @@
       <script type="text/javascript" src="{% static 'plugins/js/emojis.min.js' %}"></script>
       <script type="text/javascript" src="{% static 'martor/js/martor.min.js' %}"></script>
       <script type="text/javascript" src="{% static 'jquery.bootstrap.modal.forms.js' %}"></script>
-      <script type="text/javascript">
-        $(function () {
-          // Sign up button
-          $("#signup-btn").modalForm({
-              formURL: "{% url 'signup' %}"
-          });
-        });
-      </script>
       <script type="text/javascript">
         // this shows how we would add highlighting to the pdf at particular
         // coordinates. it could be done when moving from concordance to compare views...

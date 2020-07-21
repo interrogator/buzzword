@@ -14,14 +14,6 @@
     <body class="example">
     {% include "specific_nav.html" %}
     {%plotly_direct name="swisslaw"%}
-    <script type="text/javascript">
-      $(function () {
-        // Sign up button
-        $("#signup-btn").modalForm({
-          formURL: "{% url 'signup' %}"
-        });
-      });
-      </script>
     </body>
     {% plotly_footer %}
 </html>

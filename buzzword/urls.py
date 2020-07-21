@@ -7,6 +7,7 @@ urlpatterns = (
     [
         path("", include("start.urls")),
         path("", include("accounts.urls")),
+        path("accounts/", include("accounts.urls")),
         path("compare/", include("compare.urls")),
         path("explore/", include("explore.urls")),
         path("example/", include("example.urls")),

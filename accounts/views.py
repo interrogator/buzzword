@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import login, logout, authenticate
+from accounts.context_processors import CustomAuthForm
 from django import forms
 
 from django.conf import settings
@@ -8,6 +9,7 @@ from django.http import HttpResponseRedirect
 
 from .forms import CustomUserCreationForm
 
+from accounts.context_processors import CustomAuthForm
 import explore.models
 from start.views import start_specific, _get_markdown_content
 from buzzword.utils import _make_message
@@ -20,12 +22,21 @@ def logout_view(request):
     return start_specific(request, slug=slug)
 
 
-def login_view(request):
+def login(request):
     slug = settings.BUZZWORD_SPECIFIC_CORPUS
-    username = request.POST["username"]
-    password = request.POST["password"]
+    username = request.POST.get("username")
+    password = request.POST.get("password")
+    next_page = request.GET.get("next")
+    # next page means we need to authenticate them via a login modal
+    # and then send them there
+    if next_page:
+        context = {}
+        current_section = request.path.strip("/") or "home"
+        context["form"] = CustomAuthForm()
+        return render(request, 'login.html', context)
     user = authenticate(request, username=username, password=password)
-    template = loader.get_template(f"start/{slug}.html")
+    next_page = next_page or f"start/{slug}.html"
+    template = loader.get_template(next_page)
     go_home = {"login", "logout", "signup", "corpus_settings"}
     corpus = explore.models.Corpus.objects.get(slug=slug)
     current_section = None  # todo
@@ -38,6 +49,13 @@ def login_view(request):
     else:
         error = "Login unsuccessful. Please sign up or try again."
         _make_message(request, messages.WARNING, error)
+    # todo: there must be a fancy way to not hardcode this....
+    if "/compare/" in next_page:
+        from compare.views import browse_collection
+        return browse_collection(request, slug=slug)
+    elif "/explore/" in next_page:
+        from explore.views import explore
+        return explore(request, slug=slug)
     return HttpResponse(template.render(context, request))
 
 
@@ -84,9 +102,6 @@ def signup(request):
                 login(request, user)
             # or redirect?
         return start_specific(request, slug=slug)
-
-
-        
     else:
         form = CustomUserCreationForm()
         context["form"] = form
