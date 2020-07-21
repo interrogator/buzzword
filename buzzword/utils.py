@@ -11,9 +11,11 @@ def management_handling():
     return any(i in managers for i in sys.argv)
 
 
-def _make_message(request, level, msg):
+def _make_message(request, level, msg, safe=True):
     """
     Just add the message once
     """
+    safe = dict(extra_tags='safe') if safe else {}
+    safe = {}
     if msg not in [m.message for m in get_messages(request)]:
-        messages.add_message(request, level, msg)
+        messages.add_message(request, level, msg, **safe)

@@ -5,8 +5,8 @@ from django.contrib.auth.forms import AuthenticationForm
 
 
 class CustomAuthForm(AuthenticationForm):
-    username = forms.CharField(widget=TextInput(attrs={'class': 'validate form-control form-control-sm','placeholder': 'Username'}))
-    password = forms.CharField(widget=PasswordInput(attrs={'class':'validate form-control form-control-sm', 'placeholder':'Password'}))
+    username = forms.CharField(widget=TextInput(attrs={'class': 'validate form-control form-control-sm','placeholder': 'Username', "autocomplete": "username"}))
+    password = forms.CharField(widget=PasswordInput(attrs={'class':'validate form-control form-control-sm', 'placeholder':'Password', "autocomplete": "current-password"}))
 
 
 def forms(request):

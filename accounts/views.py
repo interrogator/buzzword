@@ -87,6 +87,7 @@ def signup(request):
     current_section = request.path.strip("/") or "home"
     corpus = Corpus.objects.get(slug=slug)
     context = {}
+    # user has tried to sign up
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
@@ -97,12 +98,18 @@ def signup(request):
             username = request.POST.get("username")
             password = request.POST.get("password")
             user = authenticate(request, username=username, password=password)
+            # registration successful
             if user:
                 django_login(request, user)
-            # or redirect?
+                msg = "Registration successful. You can now login using your username and password."
+                _make_message(request, messages.SUCCESS, msg)
+                return start_specific(request, slug=slug)
+
+        # registration unsuccessful
+        _make_message(request, messages.WARNING, form.errors, safe=True)
         return start_specific(request, slug=slug)
+    # user wants to sign up
     else:
         form = CustomUserCreationForm()
         context["form"] = form
-
-    return render(request, 'signup.html', context)
+        return render(request, 'signup.html', context)
