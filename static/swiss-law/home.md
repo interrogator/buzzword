@@ -29,18 +29,15 @@
 <div class="image-wrapper center">
   <img class="center" src="/static/bolt.jpg"/>
   <span style="text-align: center;">Visualise frequencies</span>
-</div>
+</div style="margin-bottom: 20px">
 
 <div class="image-wrapper center">
   <img class="center" src="/static/bolt.jpg"/>
   <span style="text-align: center;">Keyword-in-context</span>
-</div>
-
-<br>
-<br>
+</div style="margin-bottom: 20px">
 
 Sie ist auch besonders geeignet für interdisziplinäre respektive kollaborative digitale Projekte, wie sie z.B. im Zusammenhang der Digital Humanities oder der Digital (Legal) History vorkommen. Wenn Sie im Rahmen der Rechtsprechung respektive Rechtsanwendung rechtsvergleichend und die  historische Tiefenperspektive miteinbeziehen möchten, da kann *Sdilaw* ideal zum Zug kommen. 
- 
+
 Nicht zu vergessen sind die Möglichkeiten, die Sie durch das Hinzufügen von eigenen Datensets haben, die Sie separat oder im Zusammenhang mit den angebotenen Materialien durchsuchen oder digital analysieren können. 
 
 Das Portal ist als ausbaubares konzipiert. Es wird laufend erweitert mit Gesetzestexten über die Landesgrenzen hinaus sowie mit innerschweizerischen Materialien, die zu den Gesetzestexten in Verbindung gesetzt werden können, wie z.B. Ratsprotokolle. Es können auch neue nützliche Features und Interfaces implementiert werden.

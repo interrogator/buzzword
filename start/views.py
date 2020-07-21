@@ -28,7 +28,7 @@ def start(request):
     context = {"corpora": corpora, "navbar": navbar}
     return render(request, "start/start.html", context)
 
-#@login_required
+
 def start_specific(request, slug=None):
     """
     Load a unique website for this particular slug
@@ -38,7 +38,7 @@ def start_specific(request, slug=None):
     slug = slug or settings.BUZZWORD_SPECIFIC_CORPUS
     current_section = request.path.strip("/")
     go_home = {"login", "logout", "signup", "corpus_settings"}
-    if current_section in go_home or not current_section:
+    if any(i in current_section for i in go_home) or not current_section:
         current_section = "home"
     corpus = explore.models.Corpus.objects.get(slug=slug)
     content = _get_markdown_content(slug, current_section)

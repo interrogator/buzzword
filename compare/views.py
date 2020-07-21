@@ -1,6 +1,7 @@
 import os
 
 import django
+from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.core.paginator import Paginator
 from django.http import HttpResponse
@@ -16,6 +17,8 @@ from .utils import markdown_to_buzz_input, store_buzz_raw
 from buzzword.utils import _make_message
 from explore.models import Corpus
 
+
+@login_required
 def browse_collection(request, slug=None):
     """
     Main compare/correct view, showing PDF beside its OCR output

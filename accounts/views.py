@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth import login as django_login
+from django.contrib.auth import logout, authenticate
 from accounts.context_processors import CustomAuthForm
 from django import forms
 
@@ -10,11 +11,12 @@ from django.http import HttpResponseRedirect
 from .forms import CustomUserCreationForm
 
 from accounts.context_processors import CustomAuthForm
-import explore.models
+from explore.models import Corpus
 from start.views import start_specific, _get_markdown_content
 from buzzword.utils import _make_message
 from django.template import loader
 from django.http import HttpResponse
+
 
 def logout_view(request):
     logout(request)
@@ -26,43 +28,40 @@ def login(request):
     slug = settings.BUZZWORD_SPECIFIC_CORPUS
     username = request.POST.get("username")
     password = request.POST.get("password")
-    next_page = request.GET.get("next")
-    # next page means we need to authenticate them via a login modal
-    # and then send them there
-    if next_page:
-        context = {}
-        current_section = request.path.strip("/") or "home"
-        context["form"] = CustomAuthForm()
-        return render(request, 'login.html', context)
+    nextpage = request.GET.get("next")
+
+    # next page means we need to authenticate them and send to nextpage
+    if nextpage:
+
+        error = f"Registration/login required for the {nextpage.strip('/').capitalize()} page."
+        _make_message(request, messages.WARNING, error)
+        corpus = Corpus.objects.get(slug=slug)
+        content = _get_markdown_content(slug, "home")
+        context = {"corpus": corpus, "navbar": "home", "content": content}
+        return render(request, f"start/{slug}.html", context)
+
     user = authenticate(request, username=username, password=password)
-    next_page = next_page or f"start/{slug}.html"
-    template = loader.get_template(next_page)
+    nextpage = nextpage or f"start/{slug}.html"
+    template = loader.get_template(nextpage)
     go_home = {"login", "logout", "signup", "corpus_settings"}
-    corpus = explore.models.Corpus.objects.get(slug=slug)
+    corpus = Corpus.objects.get(slug=slug)
     current_section = None  # todo
     if current_section in go_home or not current_section:
         current_section = "home"
     content = _get_markdown_content(slug, current_section)
     context = {"corpus": corpus, "navbar": current_section, "content": content}
     if user:
-        login(request, user)
+        django_login(request, user)
     else:
         error = "Login unsuccessful. Please sign up or try again."
         _make_message(request, messages.WARNING, error)
-    # todo: there must be a fancy way to not hardcode this....
-    if "/compare/" in next_page:
-        from compare.views import browse_collection
-        return browse_collection(request, slug=slug)
-    elif "/explore/" in next_page:
-        from explore.views import explore
-        return explore(request, slug=slug)
     return HttpResponse(template.render(context, request))
 
 
 def corpus_settings(request):
     fields = ("name", "desc")
     formset_factory = forms.modelformset_factory(
-        explore.models.Corpus, fields=fields, extra=0
+        Corpus, fields=fields, extra=0
     )
 
     if request.method == "POST":
@@ -70,7 +69,7 @@ def corpus_settings(request):
         if formset.is_valid():
             formset.save()
 
-    corpora = explore.models.Corpus.objects.all()
+    corpora = Corpus.objects.all()
     formset = formset_factory(queryset=corpora)
     context = {
         "corpora": corpora,
@@ -86,7 +85,7 @@ def signup(request):
     # todo: swisslaw only
     slug = settings.BUZZWORD_SPECIFIC_CORPUS
     current_section = request.path.strip("/") or "home"
-    corpus = explore.models.Corpus.objects.get(slug=slug)
+    corpus = Corpus.objects.get(slug=slug)
     context = {}
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
@@ -99,7 +98,7 @@ def signup(request):
             password = request.POST.get("password")
             user = authenticate(request, username=username, password=password)
             if user:
-                login(request, user)
+                django_login(request, user)
             # or redirect?
         return start_specific(request, slug=slug)
     else:
