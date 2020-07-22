@@ -2,6 +2,10 @@
 
 # deployment script to run on server for buzzword swisslaw
 
+# Run it like this to get the container ID:
+
+#     ID=$(./configs/swiss-law-deploy.sh)
+
 git checkout swisslaw
 git pull
 
@@ -17,3 +21,4 @@ ID=$(sudo docker run -itd -p 80:8000 \
 sudo docker exec -it $ID python manage.py migrate
 sudo docker exec -it $ID python manage.py load_languages
 sudo docker exec -it $ID python manage.py load_corpora
+echo "$ID"
