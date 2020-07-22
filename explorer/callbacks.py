@@ -22,6 +22,7 @@ from .helpers import (
     _update_concordance,
     _update_conll,
     _update_frequencies,
+    _make_multiword_query
 )
 from .lang import LANGUAGES
 from start.apps import corpora, initial_tables
@@ -280,11 +281,16 @@ def _new_search(
 
     found_results = True
 
+    
+    if " " in search_string:
+        search_string, multiword = _make_multiword_query(search_string, col, no_use_regex)
+        col = "d"
+
     if not exists:
         # todo: more cleanup for this, it's ugly!
         # tricky searches
         if col in {"t", "d", "describe"}:
-            df, msg = _special_search(corpus, col, search_string, skip)
+            df, msg = _special_search(corpus, col, search_string, skip, multiword)
         # do ngramming stuff
         # if gram_select:
         #   df = getattr(corpus.near, col)(search_string, distance=gram_select)
@@ -310,6 +316,12 @@ def _new_search(
         if not len(df) and not msg:
             found_results = False
             msg = "No results found, sorry."
+
+    # multiword queries add info to the dataset, the _position column. so, update this...
+    if multiword:
+        reference = corpora[slug]
+        reference["_position"] = df["_position"]
+        corpora[slug] = reference
 
     this_search += [new_value, len(df), list(df["_n"])]
     if found_results:

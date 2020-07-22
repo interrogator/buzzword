@@ -298,7 +298,7 @@ def _get_corpora_json_contents(corpora_file):
         return json.loads(fo.read())
 
 
-def _special_search(df, col, search_string, skip):
+def _special_search(df, col, search_string, skip, multiword):
     """
     Perform nonstandard search types (tgrep, depgrep, describe)
 
@@ -307,7 +307,7 @@ def _special_search(df, col, search_string, skip):
     mapped = dict(t="tgrep", d="depgrep", describe="describe")
     try:
         # note, describe inverse is nonfunctional!
-        matches = getattr(df, mapped[col])(search_string, inverse=skip)
+        matches = getattr(df, mapped[col])(search_string, inverse=skip, multiword=multiword)
         return matches, None
     except Exception as error:
         msg = f"search error for {col} ({search_string}): {type(error)}: {error}"
@@ -329,3 +329,28 @@ def _add_links_to_conc(conc, slug):
     """
     conc["match"] = conc.apply(_apply_conc_href, axis=1, slug=slug)
     return conc
+
+
+def _make_multiword_query(query, col, regex):
+    """
+    Turns a query with spaces into a multiword depgrep query!
+
+    Vorbericht für jedermann
+
+    becomes
+
+    'w"Vorbericht" + (w"für" + w"jedermann")'
+    """
+    out = []
+    tokens = [i.strip() for i in query.split(" ")]
+    boundary = "/" if regex else '"'
+    # # A + B       A immediately precedes B.
+    rightbracks = ")" * (len(tokens) - 2)
+    last_token = len(tokens) - 1
+    for i, token in enumerate(tokens):
+        leftbrack = "" if i in {0, last_token} else "("
+        unit = f"{leftbrack}{col}{boundary}{token}{boundary}"
+        if i+1 == len(tokens):
+            unit += rightbracks
+        out.append(unit)
+    return " + ".join(out), len(tokens)
