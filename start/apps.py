@@ -1,5 +1,5 @@
 from django.apps import AppConfig
-from explorer.main import _get_or_load_corpora, _load_languages
+from explorer.main import _get_or_load_corpora
 from buzzword.utils import management_handling
 
 class StartConfig(AppConfig):
