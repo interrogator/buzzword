@@ -503,6 +503,10 @@ def _new_table(
         if relative is not False or keyness:
             table = table.round(2)
 
+        # untested
+        if table.index.name == "file":
+            table.index = table.index.to_series().apply(os.path.basename)
+
         # cannot hash a corpus, which relative may be.
         # none will denote corpus as reference
         if isinstance(relative, pd.DataFrame):

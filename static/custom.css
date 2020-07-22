@@ -82,10 +82,11 @@ p, ul, ol {
 
 /* control height of dash tables! */
 .explore .dash-spreadsheet-inner {
-  min-height: 60vh !important;
-  max-height: 70vh !important;
-  min-width: 99vw !important;
-  max-width: 99vw !important;
+  height: 80vh !important;
+  min-height: 80vh !important;
+  max-height: 80vh !important;
+  min-width: 98vw !important;
+  max-width: 98vw !important;
 }
 
 /* stop table from left-side cutoff */
@@ -174,4 +175,8 @@ input:invalid {
 .image-wrapper > span {
   display: inline-block;
   width: 100%;
+}
+
+.dash-spreadsheet {
+   height: fit-content !important;
 }

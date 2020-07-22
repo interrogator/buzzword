@@ -158,7 +158,7 @@ def _build_dataset_space(df, config):
         # style_as_list_view=True,
         css=[{"selector": ".show-hide", "rule": "display: none"}],
         virtualization=True,
-        style_table={"overflow": "hidden", "height": "75vh"},
+        style_table={},
         fixed_rows={"headers": True, "data": 0},
         style_header=style.BOLD_DARK,
         style_cell_conditional=style.LEFT_ALIGN,

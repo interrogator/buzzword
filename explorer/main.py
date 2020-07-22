@@ -81,6 +81,7 @@ def _get_or_load_corpora(slug=None):
                 display = dict(show="p", subcorpora="file")
             print(f"* Generating an initial table for {name} using {display}")
             initial_table = corpus.table(**display)
+            initial_table.index = initial_table.index.to_series().apply(os.path.basename)
             initial_tables[meta["slug"]] = initial_table
         return corpora, initial_tables
 
