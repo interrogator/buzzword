@@ -11,8 +11,6 @@ class StartConfig(AppConfig):
         # modules, that would take too much time.
         if not management_handling():
             global corpora, initial_tables
-            print("Loading languages in AppConfig")
-            _load_languages()
             print("Loading corpora in AppConfig")
             corpora, initial_tables = _get_or_load_corpora()
             print("AppConfig loaded")
