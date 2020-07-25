@@ -72,8 +72,8 @@ p, ul, ol {
 }
 
 .ace_editor {
-  min-height: 75vh !important;
-  max-height: 75vh !important;   
+  min-height: 67vh !important;
+  max-height: 67vh !important;   
 }
 
 #martor-description {
@@ -117,7 +117,6 @@ p input[type=password] {
 }
 
 .login-button {
-    margin-top:-5px;
 }
 
 input:invalid {
@@ -179,4 +178,17 @@ input:invalid {
 
 .dash-spreadsheet {
    height: fit-content !important;
+}
+
+.pipe {
+  display:inline-block;
+  color: rgba(255,255,255,.5);
+}
+
+.small-login {
+  margin-bottom: 5px;
+}
+
+.navbar {
+  height:85px;
 }

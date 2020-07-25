@@ -11,7 +11,7 @@ from buzz.constants import SHORT_TO_COL_NAME, SHORT_TO_LONG_NAME
 from buzz.corpus import Corpus
 
 from .strings import _capitalize_first, _downloadable_name
-
+from buzzword.utils import management_handling
 
 def _get_specs_and_corpus(search_from, searches, corpora, slug):
     """
@@ -115,17 +115,6 @@ def _update_frequencies(df, deletable, content_table):
     multicols = isinstance(df.columns, pd.MultiIndex)
     names = ["_" + str(x) for x in df.index.names]
     df.index.names = names
-    # col_order = list(df.index.names) + list(df.columns)
-    if not content_table:
-        df = df.reset_index()
-
-    # todo: improve this horrible code!
-    if "_file" in df.columns:
-        df["_file"] = df["_file"].apply(os.path.basename)
-    df = df.T
-    if "_file" in df.columns:
-        df["_file"] = df["_file"].apply(os.path.basename)
-    df = df.T
 
     if not multicols:
         columns = [
@@ -134,6 +123,8 @@ def _update_frequencies(df, deletable, content_table):
                 "id": i,
                 "deletable": deletable and "_" + i not in names,
                 "hideable": True,
+                "presentation": ("markdown" if i == "file" else None)
+
             }
             for i in df.columns
         ]
@@ -145,6 +136,7 @@ def _update_frequencies(df, deletable, content_table):
             "id": "-".join(i),
             "deletable": ["_" + x in names for x in i],
             "hideable": True,
+            "presentation": ("markdown" if i == "file" else None)
         }
         for i in df.columns
     ]
@@ -187,6 +179,8 @@ def _update_conll(df, deletable, drop_govs):
     # do not show file extension
     df["file"] = df["file"].str.replace(".conllu", "", regex=False)
     df["file"] = df["file"].str.replace(f"^.*/conllu/", "", regex=True)
+    df = _add_links(df, slug=slug, conc=False)
+
     df = df[[i for i in col_order if i is not None]]
     cannot_delete = {"s", "i"}
     columns = [
@@ -195,6 +189,7 @@ def _update_conll(df, deletable, drop_govs):
             "id": i,
             "deletable": i not in cannot_delete and deletable,
             "hideable": True,
+            "presentation": ("markdown" if i == "file" else None)
         }
         for i in df.columns
     ]
@@ -241,23 +236,6 @@ def _get_corpus(slug):
     corpus = Corpus(upload).load()
     corpora[slug] = corpus
     return corpus
-
-
-def _get_initial_table(slug):
-    """
-    Get or create the initial table for this slug
-    """
-    from explore.models import Corpus as CorpusModel
-    # todo: speed up by storing as INITIAL_TABLES?
-    from start.apps import initial_tables
-    if slug in initial_tables:
-        corpus = initial_tables[slug]
-    corpus = _get_corpus(slug)
-    default = dict(show="p", subcorpora="file")
-    initial = CorpusModel.objects.get(slug=slug).initial_table
-    if initial is not None:
-        default = json.loads(initial)
-    return corpus.table(**default)
 
 
 def _cast_query(query, col):
@@ -314,21 +292,24 @@ def _special_search(df, col, search_string, skip, multiword):
         print(msg)
         return df.iloc[:0, :0], msg
 
-def _apply_conc_href(row, slug=None):
+def _apply_href(row, slug=None, conc=True):
     from compare.models import PDF
-    file, match = row["file"], row["match"]
+    show_row = "match" if conc else "file"
+    file, match = row["file"], row[show_row]
     pdf_name = os.path.basename(file).replace(".conllu", "")
     pdf = PDF.objects.get(slug=slug, name=pdf_name)
     path = f"/compare/{slug}?page={pdf.num+1}"
     return f"[{match}]({path})"
 
 
-def _add_links_to_conc(conc, slug):
+def _add_links(df, slug, conc=True):
     """
     add a markdown href to the match
     """
-    conc["match"] = conc.apply(_apply_conc_href, axis=1, slug=slug)
-    return conc
+    if not management_handling():
+        show_row = "match" if conc else "file"
+        df[show_row] = df.apply(_apply_href, axis=1, slug=slug, conc=conc)
+    return df
 
 
 def _make_multiword_query(query, col, regex):

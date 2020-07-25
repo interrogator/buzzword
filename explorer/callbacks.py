@@ -13,7 +13,7 @@ from explore.models import Corpus as CorpusModel
 from django.conf import settings
 from .chart import _df_to_figure
 from .helpers import (
-    _add_links_to_conc,
+    _add_links,
     _cast_query,
     _get_specs_and_corpus,
     _special_search,
@@ -25,9 +25,14 @@ from .helpers import (
     _make_multiword_query
 )
 from .lang import LANGUAGES
-from start.apps import corpora, initial_tables
+
 from .main import app
 from .strings import _make_search_name, _make_table_name, _search_error, _table_error
+
+from buzzword.utils import management_handling
+
+if not management_handling():
+    from start.apps import corpora, initial_tables
 
 # we can't keep tables in dcc.store, they are too big. so we keep all here with
 # a tuple that can identify them (ideally, even dealing with user sessions)
@@ -587,7 +592,7 @@ def _new_conc(n_clicks, show, search_from, session_search, slug, **kwargs):
         met.append("speaker")
 
     conc = corpus.conc(show=show, metadata=met, window=(100, 100))
-    conc = _add_links_to_conc(conc, slug=slug)
+    conc = _add_links(conc, slug=slug, conc=True)
     conc["file"] = conc["file"].apply(os.path.basename)
     max_row, max_col = settings.TABLE_SIZE
     short = conc.iloc[:max_row, :max_col]

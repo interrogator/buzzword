@@ -6,24 +6,12 @@
 
 {% include "specific_nav.html" %}
 
-{% if messages %}
-    <ul class="messages">
-        {% for message in messages %}
-            <div style="margin-left: -28px; margin-right: 15px;" class="alert alert-dismissible fade show alert-{{ message.tags }}" role="alert">{{ message }}
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        {% endfor %}
-    </ul>
-{% endif %}
-
-<div style={% if not messages %} "margin-top:82px;" {% endif %}>
+<div style={% if not messages %} "margin-top:20px;" {% endif %}>
     <div class="container compare-container">
       <div class="row">
         <div class="col-sm">
             <div id="pdf-here">
-                <object data={{ pdf_filepath }} type="application/pdf" style="min-height:80vh;min-width:48vw">
+                <object data={{ pdf_filepath }} type="application/pdf" style="min-height:73vh;min-width:48vw">
                     <embed src={{ pdf_filepath }} type="application/pdf" />
                 </object>
                 {% include "comparenav.html" %}

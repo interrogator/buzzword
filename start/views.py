@@ -43,4 +43,5 @@ def start_specific(request, slug=None):
     corpus = explore.models.Corpus.objects.get(slug=slug)
     content = _get_markdown_content(slug, current_section)
     context = {"corpus": corpus, "navbar": current_section, "content": content}
-    return render(request, f"start/{slug}.html", context)
+    specific = "" if not settings.BUZZWORD_SPECIFIC_CORPUS else "-specific"
+    return render(request, f"start/start{specific}.html", context)

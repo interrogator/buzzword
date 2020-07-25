@@ -1,0 +1,15 @@
+{% extends "specific.html" %}
+{% load static %}
+{% load markdownify %}
+
+{% block title %}{{ corpus.name }}{% endblock %}
+
+{% block content %}
+
+<div class="container from-markdown" style="max-width: 800px;">
+{{ content|markdownify }}
+</div>
+
+<br><br>
+
+{% endblock %}

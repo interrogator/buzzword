@@ -15,7 +15,7 @@ from explore.models import Corpus as CorpusModel
 
 from . import style
 from .chart import CHART_TYPES, _df_to_figure
-from .helpers import _drop_cols_for_datatable, _get_cols, _update_frequencies, _add_links_to_conc
+from .helpers import _drop_cols_for_datatable, _get_cols, _update_frequencies, _add_links
 from .strings import _capitalize_first, _make_search_name, _make_table_name
 
 from django.conf import settings
@@ -66,6 +66,8 @@ def _build_dataset_space(df, config):
         df = df.iloc[:max_row]
     if max_col:
         df = df.iloc[:,:max_col]
+    if config.pdfs:
+        df = _add_links(df, slug=config.slug, conc=False)
     pieces = [
         dcc.Dropdown(
             id="search-target",
@@ -136,6 +138,7 @@ def _build_dataset_space(df, config):
             "id": i,
             "deletable": False,
             "hideable": True,
+            "presentation": ("markdown" if i == "file" else None)
         }
         for i in df.columns
     ]
@@ -233,7 +236,9 @@ def _build_frequencies_space(corpus, table, config):
     sort_drop = html.Div(sort_drop, style=style.TSTYLE)
     max_row, max_col = settings.TABLE_SIZE
     print(f"Making {max_row}x{max_col} table for {config.name} ...")
-    table = table.iloc[:10, :10]
+    table = table.iloc[:100, :100]
+    table = table.reset_index()
+    table = _add_links(table, slug=config.slug, conc=False)
     columns, data = _update_frequencies(table, False, False)
     print("Done!")
 
@@ -361,10 +366,9 @@ def _build_concordance_space(df, config):
     df = getattr(df.just, query["target"])(query["query"])
     df = df.conc(metadata=meta, window=(100, 100), n=max_conc)
     df["file"] = df["file"].apply(os.path.basename)
-    try:
-        df = _add_links_to_conc(df, slug=config.slug)
-    except:
-        pass
+    # why does this fail?
+    if config.pdfs:
+        df = _add_links(df, slug=config.slug, conc=True)
     print("Done!")
 
     just = ["left", "match", "right", "file", "s", "i"]

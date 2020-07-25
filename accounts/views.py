@@ -4,6 +4,7 @@ from django.contrib.auth import login as django_login
 from django.contrib.auth import logout, authenticate
 from accounts.context_processors import CustomAuthForm
 from django import forms
+from django.contrib.auth.models import User
 
 from django.conf import settings
 from django.http import HttpResponseRedirect
@@ -24,24 +25,25 @@ def logout_view(request):
     return start_specific(request, slug=slug)
 
 
-def login(request):
+def login(request, username=False, password=False):
     slug = settings.BUZZWORD_SPECIFIC_CORPUS
-    username = request.POST.get("username")
-    password = request.POST.get("password")
+    username = username or request.POST.get("username")
+    password = password or request.POST.get("password")
     nextpage = request.GET.get("next")
 
     # next page means we need to authenticate them and send to nextpage
     if nextpage:
-
         error = f"Registration/login required for the {nextpage.strip('/').capitalize()} page."
         _make_message(request, messages.WARNING, error)
         corpus = Corpus.objects.get(slug=slug)
         content = _get_markdown_content(slug, "home")
         context = {"corpus": corpus, "navbar": "home", "content": content}
-        return render(request, f"start/{slug}.html", context)
+        specific = "" if not settings.BUZZWORD_SPECIFIC_CORPUS else "-specific"
+        return render(request, f"start/start{specific}.html", context)
 
     user = authenticate(request, username=username, password=password)
-    nextpage = nextpage or f"start/{slug}.html"
+    specific = "" if not settings.BUZZWORD_SPECIFIC_CORPUS else "-specific"
+    nextpage = nextpage or f"start/start{specific}.html"
     template = loader.get_template(nextpage)
     go_home = {"login", "logout", "signup", "corpus_settings"}
     corpus = Corpus.objects.get(slug=slug)
@@ -87,6 +89,7 @@ def signup(request):
     current_section = request.path.strip("/") or "home"
     corpus = Corpus.objects.get(slug=slug)
     context = {}
+    success = "Registration successful. You are now logged in as {}."
     # user has tried to sign up
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
@@ -94,15 +97,14 @@ def signup(request):
             # save user in db...login
             form.request = request
             user = form.save()
-            user.backend = "django.contrib.auth.backends.ModelBackend"
+            # user.backend = "django.contrib.auth.backends.ModelBackend"
             username = request.POST.get("username")
-            password = request.POST.get("password")
+            password = request.POST.get("password1")
             user = authenticate(request, username=username, password=password)
             # registration successful
-            if user:
+            if user is not None:
                 django_login(request, user)
-                msg = "Registration successful. You can now login using your username and password."
-                _make_message(request, messages.SUCCESS, msg)
+                _make_message(request, messages.SUCCESS, success.format(username))
                 return start_specific(request, slug=slug)
 
         # registration unsuccessful
@@ -110,6 +112,7 @@ def signup(request):
         return start_specific(request, slug=slug)
     # user wants to sign up
     else:
+        print("WANT TO SIGN UP")
         form = CustomUserCreationForm()
         context["form"] = form
         return render(request, 'signup.html', context)

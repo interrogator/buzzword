@@ -253,6 +253,7 @@ MARKDOWNIFY_WHITELIST_TAGS = [
   'span',
   'strong',
   'ul'
+  'br'
 ]
 
 MARKDOWNIFY_WHITELIST_ATTRS = [
@@ -264,6 +265,8 @@ MARKDOWNIFY_WHITELIST_ATTRS = [
     'height',
     'display'
 ]
+
+LOGIN_VIEW = 'login'
 
 # BUZZWORD from env
 CORPORA_FILE = "corpora.json"

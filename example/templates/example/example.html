@@ -1,19 +1,23 @@
 {% load static %}
 <html>
     <head>
-    {% load plotly_dash%}
-    {% plotly_header %}
-    <script type="text/javascript" src="{% static 'jquery.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'bootstrap.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'jquery.bootstrap.modal.forms.js' %}"></script>
-    <link rel="stylesheet" href="{% static 'bootstrap.min.css' %}"/>
-    <link rel="stylesheet" href="{% static 'custom.css' %}"/>
-    <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+        {% load plotly_dash%}
+        {% plotly_header %}
 
+      <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+    <link href="{% static 'plugins/css/ace.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+    <link href="{% static 'plugins/css/semantic.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+      <link href="{% static 'plugins/css/resizable.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+      <link href="{% static 'martor/css/martor.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+      <link rel="stylesheet" href="{% static 'bootstrap.min.css' %}"/>
+      <link rel="stylesheet" href="{% static 'custom.css' %}"/>
+        <script type="text/javascript" src="{% static 'jquery.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'bootstrap.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'jquery.bootstrap.modal.forms.js' %}"></script>
     </head>
     <body class="example">
-    {% include "specific_nav.html" %}
-    {%plotly_direct name="swisslaw"%}
+        {% include "specific_nav.html" %}
+        {%plotly_direct name="swisslaw"%}
     </body>
     {% plotly_footer %}
 </html>

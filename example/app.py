@@ -22,7 +22,8 @@ css = "https://codepen.io/chriddyp/pen/bWLwgP.css"
 
 
 def _make_layout():
-    with open("static/swiss-law/example.json") as fo:
+    path = f"static/{settings.BUZZWORD_SPECIFIC_CORPUS}/example.json"
+    with open(path) as fo:
         text = json.load(fo)
     conc_space = concordance_space()
     text_style = {"maxWidth": "800px", "margin": "auto", "marginBottom": "40px"}

@@ -25,10 +25,6 @@ RUN \
     echo "BUZZWORD_SPECIFIC_CORPUS = 'swiss-law'" >> buzzword/settings.py && \
     echo "DEBUG = False" >> buzzword/settings.py
 
-# COPY buzzword/swiss-law/swiss-law-parsed /buzzword/swiss-law/swiss-law-parsed
-
-# RUN python manage.py migrate
-
 RUN chown www-data:www-data . && \
     chmod 777 . && \
     touch db.sqlite3 && \
@@ -39,5 +35,4 @@ RUN \
     pip install uwsgi && \
     ln -s /buzzword/buzzword_nginx.conf /etc/nginx/sites-enabled/
 
-#CMD python manage.py runserver 0.0.0.0:8000
 CMD service nginx start && uwsgi --ini /buzzword/uwsgi-docker.ini

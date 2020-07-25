@@ -26,7 +26,8 @@ def _register_urls():
     if not settings.BUZZWORD_SPECIFIC_CORPUS:
         urlpatterns += [path("", views.start, name="start")]
     else:
-        urlpatterns += [path("", views.start_specific)]
+        pages = {"", "about/", "howto/"}
+        urlpatterns += [path(x, views.start_specific) for x in pages]
     return urlpatterns
 
 
