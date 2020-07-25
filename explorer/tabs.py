@@ -238,6 +238,8 @@ def _build_frequencies_space(corpus, table, config):
     print(f"Making {max_row}x{max_col} table for {config.name} ...")
     table = table.iloc[:100, :100]
     table = table.reset_index()
+    table["file"] = table["file"].apply(os.path.basename)
+    table["file"] = table["file"].str.rstrip(".conllu")
     table = _add_links(table, slug=config.slug, conc=False)
     columns, data = _update_frequencies(table, False, False)
     print("Done!")
