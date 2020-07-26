@@ -45,7 +45,7 @@ def _make_layout():
         className="container",
         children=html.Div(
             className="row",
-            style={"height": "70vh", "marginBottom": "70px", "marginTop": "50px"},
+            style={"height": "70vh", "marginBottom": "10px", "marginTop": "50px"},
             children=[freq_space, freq_text]
         )
     )

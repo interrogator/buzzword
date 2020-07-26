@@ -41,7 +41,14 @@ def _distplot(df):
 
 
 def _heatmap(df):
-    return [go.Heatmap(z=df.T.values, x=list(df.index), y=list(df.columns))]
+    # todo: better interpolation handling
+    cols = [str(i) for i in df.columns]
+    if df.columns.names and df.columns.names[0] == "year":
+        cols = [f"year: {y}" for y in cols]
+    index = [str(i) for i in df.index.values]
+    if df.index.names and df.index.names[0] == "year":
+        index = [f"year: {y}" for y in index]
+    return [go.Heatmap(z=df.T.values, x=index, y=cols)]
 
 
 def _df_to_figure(df, kind="bar"):
@@ -69,7 +76,7 @@ def _df_to_figure(df, kind="bar"):
 
     layout["width"] = 1300
     # layout["height"] = 600
-    layout["margin"] = {"t": 0}
+    layout["margin"] = {"t": 40}
 
     if kind.startswith("stacked"):
         layout["barmode"] = "stack"
