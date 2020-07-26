@@ -6,6 +6,19 @@
 
 {% include "specific_nav.html" %}
 
+
+{% if messages %}
+  <ul class="messages">
+      {% for message in messages %}
+          <div style="margin-left: -28px; margin-right: 15px;" class="alert alert-dismissible fade show alert-{{ message.tags }}" role="alert">{{ message }}
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+      {% endfor %}
+  </ul>
+{% endif %}
+
 <div style={% if not messages %} "margin-top:20px;" {% endif %}>
     <div class="container compare-container">
       <div class="row">
@@ -20,7 +33,7 @@
         <div class="col-sm">
             <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
-                <div style="height:70vh;min-width:48vw">
+                <div style="height:70vh; min-width:42vw; margin-left:-10px;">
                     {{ form.description }}
                     <div class="float-right" style="margin-top:-10px;">
                         Describe your changes: 

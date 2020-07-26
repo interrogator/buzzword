@@ -15,13 +15,14 @@
   </head>
 
   <body style="height: 0%">
-    
     {% block content %}
+
       {% if specific_nav %}
         {% include "specific_nav.html" %}
       {% else %}
         {% include "nav.html" %}
       {% endif %}
+
     {% endblock %}
 
     {% block js %}

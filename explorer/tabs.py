@@ -18,6 +18,7 @@ from .chart import CHART_TYPES, _df_to_figure
 from .helpers import _drop_cols_for_datatable, _get_cols, _update_frequencies, _add_links
 from .strings import _capitalize_first, _make_search_name, _make_table_name
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 from .lang import LANGUAGES
 
@@ -240,7 +241,12 @@ def _build_frequencies_space(corpus, table, config):
     table = table.reset_index()
     table["file"] = table["file"].apply(os.path.basename)
     table["file"] = table["file"].str.rstrip(".conllu")
-    table = _add_links(table, slug=config.slug, conc=False)
+    # deal with a development-only situation where we don't have the pdf
+    # to match the conll data
+    try:
+        table = _add_links(table, slug=config.slug, conc=False)
+    except ObjectDoesNotExist:
+        pass
     columns, data = _update_frequencies(table, False, False)
     print("Done!")
 
@@ -429,19 +435,20 @@ def _build_concordance_space(df, config):
     return html.Div(id="display-concordance", children=[div])
 
 
-def _build_chart_space(table, config):
+def _build_chart_space(table, iterate_over=None, width="95vw"):
     """
     Div representing the chart tab
     """
     charts = []
-    for chart_num, kind in [
+    iterate_over = iterate_over or [
         (1, "stacked_bar"),
         (2, "line"),
         (3, "area"),
         (4, "heatmap"),
         (5, "bar"),
-    ]:
+    ]
 
+    for chart_num, kind in iterate_over:
         table_from = [dict(value=0, label=_make_table_name("initial"))]
         dropdown = dcc.Dropdown(
             id=f"chart-from-{chart_num}",
@@ -486,8 +493,8 @@ def _build_chart_space(table, config):
         }
         tools = list()
         for component in toolbar:
-            width = widths.get(component, "10%")
-            nstyle = {**style.CELL_MIDDLE_35, **{"width": width}}
+            this_width = widths.get(component, "10%")
+            nstyle = {**style.CELL_MIDDLE_35, **{"width": this_width}}
             div = html.Div(component, style=nstyle)
             if component == transpose:
                 div.title = "Transpose axes"
@@ -499,7 +506,7 @@ def _build_chart_space(table, config):
         chart_data = dict(
             id=f"chart-{chart_num}",
             figure=figure,
-            style={"height": "60vh", "width": "95vw"},
+            style={"height": "60vh", "width": width},
         )
         chart = dcc.Loading(type="default", children=[dcc.Graph(**chart_data)])
         chart_space = html.Div([toolbar, chart])
@@ -524,7 +531,7 @@ def make_explore_page(corpus, table, slug, spec=False):
     slug_div = html.Div(id="slug", title=slug, style={"display": "none"})
     dataset = _build_dataset_space(corpus, config)
     frequencies = _build_frequencies_space(corpus, table, config)
-    chart = _build_chart_space(table, config)
+    chart = _build_chart_space(table)
     concordance = _build_concordance_space(corpus, config)
     print(f"Corpus length (debug) {len(corpus)}")
     label = _make_search_name(config.name, len(corpus), dict(), 0)  # 0 == english

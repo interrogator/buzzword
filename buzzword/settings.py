@@ -181,13 +181,13 @@ AUTHENTICATION_BACKENDS = (
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Europe/Zurich"
 
 USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
@@ -275,7 +275,7 @@ LOAD_LAYOUTS = True
 # explorer settings 
 DROP_COLUMNS = {"text", "parse"}
 PAGE_SIZE = 25
-TABLE_SIZE = (2000, 200)
+TABLE_SIZE = (100, 20)
 ADD_GOVERNOR = False
 MAX_CONC = 999
 MAX_DATASET_ROWS = None

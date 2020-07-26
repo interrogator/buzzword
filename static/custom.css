@@ -192,3 +192,7 @@ input:invalid {
 .navbar {
   height:85px;
 }
+
+.example .django-plotly-dash {
+  margin-top: -100px;
+}

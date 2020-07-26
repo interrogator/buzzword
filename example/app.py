@@ -18,27 +18,119 @@ from buzz.constants import SHORT_TO_COL_NAME
 from explorer.strings import _capitalize_first
 from explorer.helpers import _get_corpus
 from explorer import style
-css = "https://codepen.io/chriddyp/pen/bWLwgP.css"
 
 
 def _make_layout():
     path = f"static/{settings.BUZZWORD_SPECIFIC_CORPUS}/example.json"
     with open(path) as fo:
         text = json.load(fo)
-    conc_space = concordance_space()
+
+    try:
+        corpus = _get_corpus(settings.BUZZWORD_SPECIFIC_CORPUS)
+    # migrate handling
+    except TypeError as error:
+        print(f"Problem: {str(error)}")
+        return html.Div("")
+
+    freq_space, table = _freq_space(corpus)
+    chart_space = _chart_space(table)
+    conc_space = _concordance_space(corpus)
+
     text_style = {"maxWidth": "800px", "margin": "auto", "marginBottom": "40px"}
+    sty = {"maxWidth": "40vw", "minWidth": "40vw", "marginLeft": "100px"}
+    freq_text = dcc.Markdown(text["freq"], style={}, className="col-sm")
+
+    freq_and_text = html.Div(
+        className="container",
+        children=html.Div(
+            className="row",
+            style={"height": "70vh", "marginBottom": "70px"},
+            children=[freq_space, freq_text]
+        )
+    )
+
+    text_style = {"maxWidth": "800px", "margin": "auto", "marginBottom": "40px"}
+    sty = {"maxWidth": "40vw", "minWidth": "40vw", "marginLeft": "100px"}
+    chart_text = dcc.Markdown(text["vis"], style={}, className="col-sm")
+
+    chart_and_text = html.Div(
+        className="container",
+        children=html.Div(
+            className="row",
+            style={"height": "90vh"},
+            children=[chart_text, chart_space]
+        )
+    )
+
     children = [dcc.Markdown(text["intro"], style={**text_style, **{"marginTop": "140px"}}),
-                dcc.Markdown(text["freq"], style=text_style),
-                dcc.Markdown(text["calc"], style=text_style),
-                dcc.Markdown(text["vis"], style=text_style),
+                freq_and_text,
+                # dcc.Markdown(text["calc"], style=text_style),
+                chart_and_text,
                 dcc.Markdown(text["conc"], style=text_style),
                 conc_space,
                 dcc.Markdown(text["end"], style=text_style)]
-    layout = html.Div(children)
+    layout = dcc.Loading(html.Div(children), fullscreen=True)
     return layout
 
 
-def concordance_space():
+def _chart_space(table):
+    from explorer.tabs import _build_chart_space
+    iterate_over = [(1, "stacked_bar")]
+    return _build_chart_space(table, iterate_over, width="60vw")
+
+
+def _freq_space(corpus):
+    query_space = dcc.Input(
+            id="conc-query-string",
+            type="text",
+            placeholder="Enter search query...",
+            size="60",
+            style=style.MARGIN_5_MONO,
+    )
+
+    style_index = style.FILE_INDEX
+    table, columns, data = _quick_freq(corpus, None)
+    style_index["if"]["column_id"] = table.index.name
+
+    freq_table = dcc.Loading(
+        type="default",
+        children=[
+            dash_table.DataTable(
+                id="example-freq",
+                columns=columns,
+                data=data,
+                editable=False,
+                #style_cell={
+                #    **style.HORIZONTAL_PAD_5,
+                #    **{"maxWidth": "145px", "minWidth": "60px"},
+                #},
+                filter_action="native",
+                sort_action="native",
+                sort_mode="multi",
+                row_deletable=False,
+                selected_rows=[],
+                page_current=0,
+                page_size=10,
+                page_action="native",
+                fixed_rows={"headers": True, "data": 0},
+                #virtualization=True,
+                style_table={"width": "40vw"},
+                style_header=style.BOLD_DARK,
+                style_cell_conditional=style.LEFT_ALIGN,
+                style_data_conditional=[style_index] + style.STRIPES,
+                merge_duplicate_headers=True,
+                export_format="xlsx",
+                export_headers="display",
+                css=[{"selector": ".show-hide", "rule": "display: none"}],
+            )
+        ],
+    )
+
+    styled = {"maxWidth": "50vw", "minWidth": "50vw", "height": "35vh", "marginBottom": "70px"}
+    freq_space = html.Div([freq_table], style=styled, className="col-sm")
+    return freq_space, table
+
+def _concordance_space(corpus):
     query_space = dcc.Input(
             id="conc-query-string",
             type="text",
@@ -50,7 +142,7 @@ def concordance_space():
     tstyle = dict(width="100%", marginBottom="10px", **style.CELL_MIDDLE_35)
     toolbar = html.Div([html.Div(i, style=tstyle) for i in (query_space, search)])
     style_data = [style.STRIPES[0], style.INDEX[0]] + style.CONC_LMR
-    columns, data = _quick_concordance("gegen")
+    columns, data = _quick_concordance(corpus, "wein")
     rule = (
         "display: inline; white-space: inherit; "
         + "overflow: inherit; text-overflow: inherit;"
@@ -82,25 +174,37 @@ def concordance_space():
                     style_cell_conditional=style.LEFT_ALIGN_CONC,
                     style_data_conditional=style_data,
                     merge_duplicate_headers=True,
-                    export_format="xlsx",
-                    export_headers="display",
+                    #export_format="xlsx",
+                    #export_headers="display",
                 )
             ],
         )
-        #style={"display": "table"}
     )
-    extra = {"height": "35vh", "minWidth": "1200px", "maxWidth": "1200px", "margin": "auto"}
-    windowed = {**style.VERTICAL_MARGINS, **extra}
+    windowed = {"maxWidth": "80vw", "marginLeft": "50px", "marginRight": "50px", "marginBottom": "70px"}
     conc_space = html.Div([toolbar, conc_table], style=windowed)
     return conc_space
 
-def _quick_concordance(query):
-    try:
-        corpus = _get_corpus(settings.BUZZWORD_SPECIFIC_CORPUS)
-    # migrate handling :(
-    except TypeError:
-        return [], []
-    df = corpus.just.word(query, exact_match=True)
+
+def _quick_freq(corpus, query):
+    df = corpus.just.wordclass.NOUN.just.word("[A-Za-z]{3,}", regex=True)
+    df = df.table(subcorpora="year", show="l", relative=True).round(2).iloc[:,:50].T
+
+    columns = [
+        {
+            "name": i,
+            "id": i,
+            "deletable": False,
+            "hideable": True,
+            "presentation": False
+        }
+        for i in df.columns
+    ]
+    data = df.to_dict("rows")
+    return df, columns, data
+
+
+def _quick_concordance(corpus, query):
+    df = corpus.just.word(query, exact_match=True, case=False)
     df = df.conc(n=999, window=(80, 80), metadata=["year", "file", "s"])
     df["file"] = df["file"].apply(os.path.basename)
     just = ["left", "match", "right", "year", "file", "s"]
@@ -121,7 +225,7 @@ def _quick_concordance(query):
     return columns, data
 
 
-app = DjangoDash("swisslaw", external_stylesheets=[css], suppress_callback_exceptions=True)
+app = DjangoDash(settings.BUZZWORD_SPECIFIC_CORPUS, suppress_callback_exceptions=True)
 app.layout = _make_layout()
 
 
@@ -134,6 +238,11 @@ app.layout = _make_layout()
 def _simple_concordance(do_conc, query):
     if not do_conc:
         return no_update
-    columns, data = _quick_concordance(query)
+    try:
+        corpus = _get_corpus(settings.BUZZWORD_SPECIFIC_CORPUS)
+    # migrate handling
+    except TypeError:
+        return [], []
+    columns, data = _quick_concordance(corpus, query.strip())
     return columns, data
 

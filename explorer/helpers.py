@@ -6,6 +6,7 @@ import json
 import os
 
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 import pandas as pd
 from buzz.constants import SHORT_TO_COL_NAME, SHORT_TO_LONG_NAME
 from buzz.corpus import Corpus
@@ -176,11 +177,10 @@ def _update_conll(df, deletable, drop_govs):
     df = _drop_cols_for_datatable(df, drop_govs)
     col_order = ["file", "s", "i"] + list(df.columns)
     df = df.reset_index()
-    # do not show file extension
+    # do not show file extension, todo: one expression
     df["file"] = df["file"].str.replace(".conllu", "", regex=False)
     df["file"] = df["file"].str.replace(f"^.*/conllu/", "", regex=True)
     df = _add_links(df, slug=slug, conc=False)
-
     df = df[[i for i in col_order if i is not None]]
     cannot_delete = {"s", "i"}
     columns = [
@@ -305,10 +305,16 @@ def _apply_href(row, slug=None, conc=True):
 def _add_links(df, slug, conc=True):
     """
     add a markdown href to the match
+
+    try/except is basically for runserver/development stuff
     """
-    if not management_handling():
-        show_row = "match" if conc else "file"
-        df[show_row] = df.apply(_apply_href, axis=1, slug=slug, conc=conc)
+    try:
+        if not management_handling():
+            show_row = "match" if conc else "file"
+            df[show_row] = df.apply(_apply_href, axis=1, slug=slug, conc=conc)
+    except ObjectDoesNotExist:
+        print("Unable to add links, hopefully because this is management command.")
+        return df
     return df
 
 
