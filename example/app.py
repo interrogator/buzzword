@@ -46,8 +46,8 @@ def _make_layout():
         children=html.Div(
             className="row",
             style={"height": "70vh", "marginBottom": "10px", "marginTop": "50px"},
-            children=[freq_space, freq_text]
-        )
+            children=[freq_space, freq_text],
+        ),
     )
 
     text_style = {"maxWidth": "800px", "margin": "auto", "marginBottom": "40px"}
@@ -56,35 +56,43 @@ def _make_layout():
 
     chart_and_text = html.Div(
         className="container",
-        children=html.Div(
-            className="row",
-            children=[chart_text, chart_space]
-        ),
-        style={"marginBottom": "50px"}
+        children=html.Div(className="row", children=[chart_text, chart_space]),
+        style={"marginBottom": "50px"},
     )
 
-    children = [dcc.Markdown(text["intro"], style={**text_style, **{"marginTop": "140px"}}),
-                html.Img(src="/static/swiss-law/search-1.png", style={"width": "70%", "marginTop": "-30px", "marginBottom": "30px"}, className="center"),
-                dcc.Markdown(text["intro2"], style={**text_style, **{"marginBottom": "40px"}}),
-                html.Img(src="/static/swiss-law/search-2.png", style={"width": "70%", "marginTop": "-30px", "marginBottom": "30px"}, className="center"),
-                freq_and_text,
-                # dcc.Markdown(text["calc"], style=text_style),
-                chart_and_text,
-                dcc.Markdown(text["conc"], style=text_style),
-                conc_space,
-                dcc.Markdown(text["end"], style=text_style)]
+    children = [
+        dcc.Markdown(text["intro"], style={**text_style, **{"marginTop": "140px"}}),
+        html.Img(
+            src="/static/swiss-law/search-1.png",
+            style={"width": "70%", "marginTop": "-30px", "marginBottom": "30px"},
+            className="center",
+        ),
+        dcc.Markdown(text["intro2"], style={**text_style, **{"marginBottom": "40px"}}),
+        html.Img(
+            src="/static/swiss-law/search-2.png",
+            style={"width": "70%", "marginTop": "-30px", "marginBottom": "30px"},
+            className="center",
+        ),
+        freq_and_text,
+        # dcc.Markdown(text["calc"], style=text_style),
+        chart_and_text,
+        dcc.Markdown(text["conc"], style=text_style),
+        conc_space,
+        dcc.Markdown(text["end"], style=text_style),
+    ]
     layout = dcc.Loading(html.Div(children), fullscreen=True)
     return layout
 
 
 def _chart_space(table):
     from explorer.tabs import _build_chart_space
+
     iterate_over = [(1, "stacked_bar")]
     return _build_chart_space(table, iterate_over, width="60vw", no_from_select=True)
 
 
 def _freq_space(corpus):
-    
+
     style_index = style.FILE_INDEX
     table, columns, data = _quick_freq(corpus, None)
     style_index["if"]["column_id"] = table.index.name
@@ -97,10 +105,10 @@ def _freq_space(corpus):
                 columns=columns,
                 data=data,
                 editable=False,
-                #style_cell={
+                # style_cell={
                 #    **style.HORIZONTAL_PAD_5,
                 #    **{"maxWidth": "145px", "minWidth": "60px"},
-                #},
+                # },
                 filter_action="native",
                 sort_action="native",
                 sort_mode="multi",
@@ -110,14 +118,14 @@ def _freq_space(corpus):
                 page_size=10,
                 page_action="native",
                 fixed_rows={"headers": True, "data": 0},
-                #virtualization=True,
-                #style_table={"width": "40vw"},
+                # virtualization=True,
+                # style_table={"width": "40vw"},
                 style_header=style.BOLD_DARK,
                 style_cell_conditional=style.LEFT_ALIGN,
                 style_data_conditional=[style_index] + style.STRIPES,
                 merge_duplicate_headers=True,
-                #export_format="xlsx",
-                #export_headers="display",
+                # export_format="xlsx",
+                # export_headers="display",
                 css=[{"selector": ".show-hide", "rule": "display: none"}],
             )
         ],
@@ -127,31 +135,36 @@ def _freq_space(corpus):
     freq_space = html.Div([freq_table], style=styled, className="col-sm")
     return freq_space, table
 
+
 def _concordance_space(corpus):
     query_space = dcc.Input(
-            id="conc-query-string",
-            type="text",
-            placeholder="Enter search query...",
-            size="90vw",
-            style={**style.MARGIN_5_MONO, **{"marginRight": "10px"}},
-            className="input-lg form-control"
+        id="conc-query-string",
+        type="text",
+        placeholder="Enter search query...",
+        size="90vw",
+        style={**style.MARGIN_5_MONO, **{"marginRight": "10px"}},
+        className="input-lg form-control",
     )
-    search = html.Button("Search", id="do-conc", style=style.MARGIN_5_MONO, className="form-control")
+    search = html.Button(
+        "Search", id="do-conc", style=style.MARGIN_5_MONO, className="form-control"
+    )
     tstyle = dict(width="100%", marginBottom="10px", **style.CELL_MIDDLE_35)
-    toolbar = html.Div([html.Div(i, style=tstyle) for i in (query_space, search)], style={"marginBottom": "5px"})
-    style_data = [style.STRIPES[0], style.INDEX[0]] + style.CONC_LMR
-    columns, data = _quick_concordance(corpus, "wein")
-    rule = (
-        "display: inline; white-space: inherit; "
-        + "overflow: inherit; text-overflow: inherit;"
+    toolbar = html.Div(
+        [html.Div(i, style=tstyle) for i in (query_space, search)], style={"marginBottom": "5px"}
     )
+    style_data = [style.STRIPES[0], style.INDEX[0]] + style.CONC_LMR
+    columns, data = _quick_concordance(corpus, "ordnung")
+    rule = "display: inline; white-space: inherit; " + "overflow: inherit; text-overflow: inherit;"
     conc_table = html.Div(
         dcc.Loading(
             type="default",
             children=[
                 dash_table.DataTable(
                     id="example-conc",
-                    css=[{"selector": ".dash-cell div.dash-cell-value", "rule": rule}, {"selector": ".show-hide", "rule": "display: none"}],
+                    css=[
+                        {"selector": ".dash-cell div.dash-cell-value", "rule": rule},
+                        {"selector": ".show-hide", "rule": "display: none"},
+                    ],
                     columns=columns,
                     data=data,
                     editable=False,
@@ -165,39 +178,38 @@ def _concordance_space(corpus):
                     fixed_rows={"headers": True, "data": 0},
                     page_current=0,
                     page_size=10,
-                    #virtualization=True,
-                    #style_table={'width': '50vw'},
+                    # virtualization=True,
+                    # style_table={'width': '50vw'},
                     style_as_list_view=True,
                     style_header=style.BOLD_DARK,
                     style_cell_conditional=style.LEFT_ALIGN_CONC,
                     style_data_conditional=style_data,
                     merge_duplicate_headers=True,
-                    #export_format="xlsx",
-                    #export_headers="display",
+                    # export_format="xlsx",
+                    # export_headers="display",
                 )
             ],
         )
     )
-    windowed = {"maxWidth": "80vw", "marginLeft": "50px", "marginRight": "50px", "marginBottom": "70px"}
+    windowed = {
+        "maxWidth": "80vw",
+        "marginLeft": "50px",
+        "marginRight": "50px",
+        "marginBottom": "70px",
+    }
     conc_space = html.Div([toolbar, conc_table], style=windowed)
     return conc_space
 
 
 def _quick_freq(corpus, query):
     df = corpus.just.wordclass.NOUN.just.word("[A-Za-z]{3,}", regex=True)
-    df = df.table(subcorpora="year", show="l", relative=True).round(2).iloc[:,:50].T
+    df = df.table(subcorpora="year", show="l", relative=True).round(2).iloc[:, :50].T
     df.index.names = ["lemma"]
 
-    this_df =  df.reset_index()
+    this_df = df.reset_index()
 
     columns = [
-        {
-            "name": i,
-            "id": i,
-            "deletable": False,
-            "hideable": True,
-            "presentation": False
-        }
+        {"name": i, "id": i, "deletable": False, "hideable": True, "presentation": False}
         for i in this_df.columns
     ]
     data = this_df.to_dict("rows")
@@ -218,7 +230,7 @@ def _quick_concordance(corpus, query):
             "id": i,
             "deletable": i not in ["left", "match", "right"],
             "hideable": True,
-            "presentation": ("markdown" if i == "match" else None)
+            "presentation": ("markdown" if i == "match" else None),
         }
         for i in df.columns
     ]
@@ -231,10 +243,9 @@ app.layout = _make_layout()
 
 
 @app.expanded_callback(
-    [Output("example-conc", "columns"),
-    Output("example-conc", "data")],
+    [Output("example-conc", "columns"), Output("example-conc", "data")],
     [Input("do-conc", "n_clicks")],
-    [State("conc-query-string", "value")]
+    [State("conc-query-string", "value")],
 )
 def _simple_concordance(do_conc, query, **kwargs):
     if not do_conc:
@@ -258,11 +269,7 @@ def _simple_concordance(do_conc, query, **kwargs):
     ],
 )
 def _new_chart(
-    n_clicks,
-    chart_type,
-    top_n,
-    transpose,
-    **kwargs,
+    n_clicks, chart_type, top_n, transpose, **kwargs,
 ):
     """
     Make new chart by kind. Do it 5 times, once for each chart space
