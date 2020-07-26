@@ -5,14 +5,13 @@
 # Run it like this to get the container ID:
 
 #     ID=$(./configs/swiss-law-deploy.sh)
-
-echo "MAKE SURE YOU SET PASSWORD ENVIRONMENT VARIABLE: $PASSWORD"
+echo "MAKE SURE YOU PASSED IN PASSWORD: !$"
 
 git checkout swisslaw
 git pull
 
 # build the image (note, data is still missing)
-sudo docker build - < Dockerfile --build-arg DJANGO_SUPERUSER_PASSWORD=$PASSWORD --no-cache -t buzzword:swisslaw
+sudo docker build - < Dockerfile --build-arg DJANGO_SUPERUSER_PASSWORD=!$ --no-cache -t buzzword:swisslaw
 
 # add settings and data in as volume
 ID=$(sudo docker run -itd -p 80:8000 \
