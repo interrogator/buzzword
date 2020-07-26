@@ -80,7 +80,7 @@ def _make_layout():
         conc_space,
         dcc.Markdown(text["end"], style=text_style),
     ]
-    layout = dcc.Loading(html.Div(children), fullscreen=True)
+    layout = html.Div(children)
     return layout
 
 
@@ -99,6 +99,7 @@ def _freq_space(corpus):
 
     freq_table = dcc.Loading(
         type="default",
+        fullscreen=False,
         children=[
             dash_table.DataTable(
                 id="example-freq",
@@ -157,6 +158,7 @@ def _concordance_space(corpus):
     rule = "display: inline; white-space: inherit; " + "overflow: inherit; text-overflow: inherit;"
     conc_table = html.Div(
         dcc.Loading(
+            fullscreen=False,
             type="default",
             children=[
                 dash_table.DataTable(
@@ -174,10 +176,10 @@ def _concordance_space(corpus):
                     sort_mode="multi",
                     row_deletable=True,
                     selected_rows=[],
-                    page_action="none",
+                    page_action="native",
                     fixed_rows={"headers": True, "data": 0},
                     page_current=0,
-                    page_size=10,
+                    page_size=50,
                     # virtualization=True,
                     # style_table={'width': '50vw'},
                     style_as_list_view=True,
