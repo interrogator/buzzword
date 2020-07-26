@@ -6,11 +6,13 @@
 
 #     ID=$(./configs/swiss-law-deploy.sh)
 
+echo "MAKE SURE YOU SET PASSWORD ENVIRONMENT VARIABLE: $PASSWORD"
+
 git checkout swisslaw
 git pull
 
 # build the image (note, data is still missing)
-sudo docker build - < Dockerfile --no-cache -t buzzword:swisslaw
+sudo docker build - < Dockerfile --build-arg DJANGO_SUPERUSER_PASSWORD=$PASSWORD --no-cache -t buzzword:swisslaw
 
 # add settings and data in as volume
 ID=$(sudo docker run -itd -p 80:8000 \
@@ -21,4 +23,8 @@ ID=$(sudo docker run -itd -p 80:8000 \
 sudo docker exec -it $ID python manage.py migrate
 sudo docker exec -it $ID python manage.py load_languages
 sudo docker exec -it $ID python manage.py load_corpora
+sudo docker exec -it $ID python manage.py do_ocr
+sudo docker exec -it $ID python manage.py createsuperuser --noinput --username danny --email danny@swisslaw.com
+sudo docker exec -it $ID python manage.py createsuperuser --noinput --username martin.kurz --email martin@swisslaw.com
+
 echo "$ID"
