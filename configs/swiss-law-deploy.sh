@@ -21,11 +21,6 @@ if [ -z "$(git show-ref refs/heads/$BRANCH)" ]; then
     exit 1
 fi
 
-# ensure db file is there (not required to this here since db is inside container)
-# touch db.sqlite3
-# sudo chown www-data:www-data db.sqlite3
-# sudo chmod 777 db.sqlite3
-
 # get latest repo
 git checkout $BRANCH
 git pull
@@ -37,7 +32,7 @@ sudo docker build - < Dockerfile --no-cache -t $TAG
 # now kill and delete the old container if running
 sudo docker stop $NAME
 sudo docker container rm $NAME
-# sudo docker container kill $(docker ps -q)
+
 touch db.sqlite3
 
 # add settings, db and data in as volume
