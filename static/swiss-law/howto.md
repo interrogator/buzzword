@@ -1,6 +1,6 @@
 <br><br>
 
-# How to: user guide
+# **How to**: *user guide*
 
 ## Wie gehen Sie vor?
 

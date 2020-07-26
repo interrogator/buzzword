@@ -1,6 +1,7 @@
 <br><br>
 
-# Über das Projekt: Impressum/Team
+# **Über das Projekt**:
+### *Impressum/Team*
 
 **Swiss Digital Law Discovery Sdilaw**
 **Universität Zürich UZH, Rechtswissenschaftliches Institut, Zentrum für rechtsgeschichtliche Forschung, Rämistrasse 74, 8001 Zürich**

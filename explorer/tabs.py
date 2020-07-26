@@ -219,7 +219,7 @@ def _build_frequencies_space(corpus, table, config):
         ],
         placeholder="Relative/keyness calculation",
     )
-    relative_drop = html.Div(relative_drop, style=style.TSTYLE)
+    relative_drop = html.Div(relative_drop, style={**style.TSTYLE, **{"width": "21%"}})
     sort_drop = dcc.Dropdown(
         id="sort-for-table",
         style={**style.MARGIN_5_MONO, **style.NEAR_FRONT},
@@ -288,7 +288,7 @@ def _build_frequencies_space(corpus, table, config):
         ],
     )
 
-    sty = {"width": "20%", **style.CELL_MIDDLE_35, **style.MARGIN_5_MONO}
+    sty = {"width": "22%", **style.CELL_MIDDLE_35, **style.MARGIN_5_MONO}
 
     multi = html.Span(
         children=[

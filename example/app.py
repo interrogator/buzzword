@@ -37,9 +37,15 @@ def _make_layout():
     chart_space = _chart_space(table)
     conc_space = _concordance_space(corpus)
 
-    text_style = {"maxWidth": "800px", "margin": "auto", "marginBottom": "40px"}
-    sty = {"maxWidth": "40vw", "minWidth": "40vw", "marginLeft": "100px"}
-    freq_text = dcc.Markdown(text["freq"], style={}, className="col-sm")
+    freq_text = dcc.Markdown(text["freq"], style={}, className="row")
+    freq_img = html.Img(
+            src="/static/swiss-law/freq-toolbar.png",
+            width="110%",
+            #style={"width": "10%"},  # "marginTop": "-30px", "marginBottom": "30px"
+            className="row",
+    )
+    freq_text2 = dcc.Markdown(text["freq2"], style={}, className="row")
+    freq_text = html.Div([freq_text, freq_img, freq_text2], className="container col-md-7")
 
     freq_and_text = html.Div(
         className="container",
@@ -61,7 +67,8 @@ def _make_layout():
     )
 
     children = [
-        dcc.Markdown(text["intro"], style={**text_style, **{"marginTop": "140px"}}),
+        dcc.Markdown("# **Swiss Digital Law Discovery** (*Sdilaw*):", style={**text_style, **{"marginTop": "140px", "marginBottom": "20px"}}),
+        dcc.Markdown(text["intro"], style=text_style),
         html.Img(
             src="/static/swiss-law/search-1.png",
             style={"width": "70%", "marginTop": "-30px", "marginBottom": "30px"},
@@ -132,8 +139,8 @@ def _freq_space(corpus):
         ],
     )
 
-    styled = {"maxWidth": "50vw", "minWidth": "50vw", "height": "35vh", "marginBottom": "70px"}
-    freq_space = html.Div([freq_table], style=styled, className="col-sm")
+    styled = {"maxWidth": "33vw", "minWidth": "33vw", "height": "35vh", "marginBottom": "70px"}
+    freq_space = html.Div([freq_table], style=styled, className="col-md-4")
     return freq_space, table
 
 
