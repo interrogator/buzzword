@@ -13,12 +13,12 @@ CHART_TYPES = {
 
 
 def _bar_chart(row):
-    return dict(x=list(row.index), y=list(row), type="bar", name=row.name)
+    return dict(x=list(row.index), y=list(row), type="bar", name=str(row.name))
 
 
 def _line_chart(row):
     return go.Scatter(
-        x=list(row.index), y=list(row), mode="lines+markers", name=row.name
+        x=list(row.index), y=list(row), mode="lines+markers", name=str(row.name)
     )
 
 
@@ -29,13 +29,13 @@ def _area_chart(row):
         hoverinfo="x+y",
         mode="lines",
         stackgroup="one",
-        name=row.name,
+        name=str(row.name),
     )
 
 
 def _distplot(df):
     data = df.T.values
-    labels = df.columns
+    labels = [str(i) for i in df.columns]
     result = ff.create_distplot(data, labels)
     return result["data"], result["layout"]
 
@@ -68,6 +68,8 @@ def _df_to_figure(df, kind="bar"):
         datapoints = df.apply(plotter)
 
     layout["width"] = 1300
+    # layout["height"] = 600
+    layout["margin"] = {"t": 0}
 
     if kind.startswith("stacked"):
         layout["barmode"] = "stack"

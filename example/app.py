@@ -17,6 +17,7 @@ from django.conf import settings
 from buzz.constants import SHORT_TO_COL_NAME
 from explorer.strings import _capitalize_first
 from explorer.helpers import _get_corpus
+from explorer.chart import _df_to_figure
 from explorer import style
 
 
@@ -44,25 +45,28 @@ def _make_layout():
         className="container",
         children=html.Div(
             className="row",
-            style={"height": "70vh", "marginBottom": "70px"},
+            style={"height": "70vh", "marginBottom": "70px", "marginTop": "50px"},
             children=[freq_space, freq_text]
         )
     )
 
     text_style = {"maxWidth": "800px", "margin": "auto", "marginBottom": "40px"}
     sty = {"maxWidth": "40vw", "minWidth": "40vw", "marginLeft": "100px"}
-    chart_text = dcc.Markdown(text["vis"], style={}, className="col-sm")
+    chart_text = dcc.Markdown(text["vis"], style={"marginTop": "100px"}, className="col-sm")
 
     chart_and_text = html.Div(
         className="container",
         children=html.Div(
             className="row",
-            style={"height": "90vh"},
             children=[chart_text, chart_space]
-        )
+        ),
+        style={"marginBottom": "50px"}
     )
 
     children = [dcc.Markdown(text["intro"], style={**text_style, **{"marginTop": "140px"}}),
+                html.Img(src="/static/swiss-law/search-1.png", style={"width": "70%", "marginTop": "-30px", "marginBottom": "30px"}, className="center"),
+                dcc.Markdown(text["intro2"], style={**text_style, **{"marginBottom": "40px"}}),
+                html.Img(src="/static/swiss-law/search-2.png", style={"width": "70%", "marginTop": "-30px", "marginBottom": "30px"}, className="center"),
                 freq_and_text,
                 # dcc.Markdown(text["calc"], style=text_style),
                 chart_and_text,
@@ -76,18 +80,11 @@ def _make_layout():
 def _chart_space(table):
     from explorer.tabs import _build_chart_space
     iterate_over = [(1, "stacked_bar")]
-    return _build_chart_space(table, iterate_over, width="60vw")
+    return _build_chart_space(table, iterate_over, width="60vw", no_from_select=True)
 
 
 def _freq_space(corpus):
-    query_space = dcc.Input(
-            id="conc-query-string",
-            type="text",
-            placeholder="Enter search query...",
-            size="60",
-            style=style.MARGIN_5_MONO,
-    )
-
+    
     style_index = style.FILE_INDEX
     table, columns, data = _quick_freq(corpus, None)
     style_index["if"]["column_id"] = table.index.name
@@ -114,13 +111,13 @@ def _freq_space(corpus):
                 page_action="native",
                 fixed_rows={"headers": True, "data": 0},
                 #virtualization=True,
-                style_table={"width": "40vw"},
+                #style_table={"width": "40vw"},
                 style_header=style.BOLD_DARK,
                 style_cell_conditional=style.LEFT_ALIGN,
                 style_data_conditional=[style_index] + style.STRIPES,
                 merge_duplicate_headers=True,
-                export_format="xlsx",
-                export_headers="display",
+                #export_format="xlsx",
+                #export_headers="display",
                 css=[{"selector": ".show-hide", "rule": "display: none"}],
             )
         ],
@@ -135,12 +132,13 @@ def _concordance_space(corpus):
             id="conc-query-string",
             type="text",
             placeholder="Enter search query...",
-            size="60",
-            style=style.MARGIN_5_MONO,
+            size="90vw",
+            style={**style.MARGIN_5_MONO, **{"marginRight": "10px"}},
+            className="input-lg form-control"
     )
-    search = html.Button("Search", id="do-conc", style=style.MARGIN_5_MONO)
+    search = html.Button("Search", id="do-conc", style=style.MARGIN_5_MONO, className="form-control")
     tstyle = dict(width="100%", marginBottom="10px", **style.CELL_MIDDLE_35)
-    toolbar = html.Div([html.Div(i, style=tstyle) for i in (query_space, search)])
+    toolbar = html.Div([html.Div(i, style=tstyle) for i in (query_space, search)], style={"marginBottom": "5px"})
     style_data = [style.STRIPES[0], style.INDEX[0]] + style.CONC_LMR
     columns, data = _quick_concordance(corpus, "wein")
     rule = (
@@ -188,6 +186,9 @@ def _concordance_space(corpus):
 def _quick_freq(corpus, query):
     df = corpus.just.wordclass.NOUN.just.word("[A-Za-z]{3,}", regex=True)
     df = df.table(subcorpora="year", show="l", relative=True).round(2).iloc[:,:50].T
+    df.index.names = ["lemma"]
+
+    this_df =  df.reset_index()
 
     columns = [
         {
@@ -197,9 +198,9 @@ def _quick_freq(corpus, query):
             "hideable": True,
             "presentation": False
         }
-        for i in df.columns
+        for i in this_df.columns
     ]
-    data = df.to_dict("rows")
+    data = this_df.to_dict("rows")
     return df, columns, data
 
 
@@ -229,13 +230,13 @@ app = DjangoDash(settings.BUZZWORD_SPECIFIC_CORPUS, suppress_callback_exceptions
 app.layout = _make_layout()
 
 
-@app.callback(
+@app.expanded_callback(
     [Output("example-conc", "columns"),
     Output("example-conc", "data")],
     [Input("do-conc", "n_clicks")],
     [State("conc-query-string", "value")]
 )
-def _simple_concordance(do_conc, query):
+def _simple_concordance(do_conc, query, **kwargs):
     if not do_conc:
         return no_update
     try:
@@ -246,3 +247,42 @@ def _simple_concordance(do_conc, query):
     columns, data = _quick_concordance(corpus, query.strip())
     return columns, data
 
+
+@app.expanded_callback(
+    Output("chart-1", "figure"),
+    [Input("figure-button-1", "n_clicks")],
+    [
+        State("chart-type-1", "value"),
+        State("chart-top-n-1", "value"),
+        State("chart-transpose-1", "on"),
+    ],
+)
+def _new_chart(
+    n_clicks,
+    chart_type,
+    top_n,
+    transpose,
+    **kwargs,
+):
+    """
+    Make new chart by kind. Do it 5 times, once for each chart space
+    """
+    # before anything is loaded, do nothing
+    if n_clicks is None:
+        return no_update
+
+    try:
+        corpus = _get_corpus(settings.BUZZWORD_SPECIFIC_CORPUS)
+    # migrate handling
+    except TypeError:
+        return [], []
+
+    df, _, _ = _quick_freq(corpus, None)
+
+    # transpose and cut down items to plot
+    if transpose:
+        df = df.T
+    df = df.iloc[:, :top_n]
+
+    # generate chart
+    return _df_to_figure(df, chart_type)

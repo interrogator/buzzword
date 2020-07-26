@@ -5,6 +5,7 @@ django-bootstrap-modal-forms==2.0.0
 django-widget-tweaks==1.4.8
 dpd-static-support==0.0.5
 dash-bootstrap-components==0.10.3
+plotly==4.9.0
 whitenoise==4.1.4
 # buzz>=4.0.0  # making manual for now because no release
 flask==1.1.2

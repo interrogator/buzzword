@@ -101,6 +101,7 @@ def _build_dataset_space(df, config):
             placeholder="Enter search query...",
             size="60",
             style=style.MARGIN_5_MONO,
+            className="input-lg form-control"
         ),
         html.Div(
             id="regex-box",
@@ -435,7 +436,7 @@ def _build_concordance_space(df, config):
     return html.Div(id="display-concordance", children=[div])
 
 
-def _build_chart_space(table, iterate_over=None, width="95vw"):
+def _build_chart_space(table, iterate_over=None, width="95vw", no_from_select=False):
     """
     Div representing the chart tab
     """
@@ -450,12 +451,15 @@ def _build_chart_space(table, iterate_over=None, width="95vw"):
 
     for chart_num, kind in iterate_over:
         table_from = [dict(value=0, label=_make_table_name("initial"))]
-        dropdown = dcc.Dropdown(
-            id=f"chart-from-{chart_num}",
-            options=table_from,
-            value=0,
-            style=style.MARGIN_5_MONO,
-        )
+        if not no_from_select:
+            dropdown = dcc.Dropdown(
+                id=f"chart-from-{chart_num}",
+                options=table_from,
+                value=0,
+                style=style.MARGIN_5_MONO,
+            )
+        else:
+            dropdown = html.Div("", style={"display": "none"})
         types = [
             dict(label=_capitalize_first(i).replace("_", " "), value=i)
             for i in sorted(CHART_TYPES)
@@ -470,7 +474,7 @@ def _build_chart_space(table, iterate_over=None, width="95vw"):
             theme=DAQ_THEME,
             id=f"chart-transpose-{chart_num}",
             on=False,
-            style={"verticalAlign": "middle"},
+            style={"verticalAlign": "middle", "marginLeft": "10px", "marginRight": "10px"},
         )
         top_n = dcc.Input(
             id=f"chart-top-n-{chart_num}",
@@ -479,15 +483,16 @@ def _build_chart_space(table, iterate_over=None, width="95vw"):
             min=1,
             max=99,
             value=7,
-            style=style.MARGIN_5_MONO,
+            style={**style.MARGIN_5_MONO, **{"marginRight": "20px"}},
+            className="form-control input-lg"
         )
         update = html.Button("Update", id=f"figure-button-{chart_num}")
 
         toolbar = [dropdown, chart_type, top_n, transpose, update]
         widths = {
-            dropdown: "65%",
+            dropdown: "60%" if not no_from_select else "0%",
             chart_type: "25%",
-            top_n: "3%",
+            top_n: "8%",
             transpose: "4%",
             update: "13%",
         }
@@ -501,7 +506,7 @@ def _build_chart_space(table, iterate_over=None, width="95vw"):
             elif component == top_n:
                 div.title = "Number of entries to display"
             tools.append(div)
-        toolbar = html.Div(tools, style=style.VERTICAL_MARGINS)
+        toolbar = html.Div(tools, style=style.VERTICAL_MARGINS, className="chart-toolbar")
         figure = _df_to_figure(table, kind=kind)
         chart_data = dict(
             id=f"chart-{chart_num}",
