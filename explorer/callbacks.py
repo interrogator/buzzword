@@ -1,6 +1,7 @@
 """
 buzzword explorer: callbacks
 """
+from math import ceil
 import os
 import pandas as pd
 from buzz.exceptions import DataTypeError
@@ -22,7 +23,10 @@ from .helpers import (
     _update_concordance,
     _update_conll,
     _update_frequencies,
-    _make_multiword_query
+    _make_multiword_query,
+    _correct_page,
+    _filter_corpus,
+    _sort_corpus,
 )
 from .lang import LANGUAGES
 
@@ -36,13 +40,14 @@ if not management_handling():
 
 # we can't keep tables in dcc.store, they are too big. so we keep all here with
 # a tuple that can identify them (ideally, even dealing with user sessions)
+# todo: improve this
 FREQUENCY_TABLES = dict()
 
 
 @app.expanded_callback(
-    Output("input-box", "placeholder"), #Output("gram-select", "disabled")],  # swisslaw
+    Output("input-box", "placeholder"),  # Output("gram-select", "disabled")],  # swisslaw
     [Input("search-target", "value")],
-    [State("language-switch", "on")]
+    [State("language-switch", "on")],
 )
 def _correct_placeholder(value, lang, **kwargs):
     """
@@ -60,7 +65,7 @@ def _correct_placeholder(value, lang, **kwargs):
         "describe": 'Enter depgrep query (e.g. l"man" = f"nsubj")',
     }
     # disable_gram = value in mapped
-    return mapped.get(value, default)#, disable_gram
+    return mapped.get(value, default)  # , disable_gram
 
 
 @app.expanded_callback(
@@ -102,14 +107,7 @@ for i in range(1, 6):
         ],
     )
     def _new_chart(
-        n_clicks,
-        table_from,
-        chart_type,
-        top_n,
-        transpose,
-        session_tables,
-        slug,
-        **kwargs,
+        n_clicks, table_from, chart_type, top_n, transpose, session_tables, slug, **kwargs,
     ):
         """
         Make new chart by kind. Do it 5 times, once for each chart space
@@ -159,11 +157,17 @@ def _on_load_callback(n_clicks, **kwargs):
         Output("session-search", "data"),
         Output("session-clicks-clear", "data"),
         Output("session-clicks-show", "data"),
+        Output("session-clicks-search", "data"),
+        Output("session-current-conll-page", "data"),
+        Output("conll-view", "page_count"),
     ],
     [
         Input("search-button", "n_clicks"),
         Input("clear-history", "n_clicks"),
         Input("show-this-dataset", "n_clicks"),
+        Input("conll-view", "page_current"),
+        Input("conll-view", "sort_by"),
+        Input("conll-view", "filter_query"),
     ],
     [
         State("search-from", "value"),
@@ -171,19 +175,24 @@ def _on_load_callback(n_clicks, **kwargs):
         State("search-target", "value"),
         State("input-box", "value"),
         State("use-regex", "on"),
-        #State("gram-select", "value"),
+        # State("gram-select", "value"),
         State("search-from", "options"),
         State("session-search", "data"),
         State("session-clicks-clear", "data"),
         State("session-clicks-show", "data"),
+        State("session-clicks-search", "data"),
         State("slug", "title"),
-        State("language-switch", "on")
+        State("language-switch", "on"),
+        State("session-current-conll-page", "data"),
     ],
 )
 def _new_search(
     n_clicks,
     cleared,
     show_dataset,
+    page_current,
+    sort_by,
+    filter,
     search_from,
     skip,
     col,
@@ -194,8 +203,10 @@ def _new_search(
     session_search,
     session_clicks_clear,
     session_clicks_show,
+    session_clicks_search,
     slug,
     lang,
+    conll_page,
     **kwargs,
 ):
     """
@@ -204,19 +215,92 @@ def _new_search(
     Validate input, run the search, store data and display things
     """
     # the first callback, before anything is loaded
-    if n_clicks is None:
-        return [no_update] * 11
+    if n_clicks is None and page_current == conll_page and not sort_by and not filter:
+        return [no_update] * 14
+
+    doing_search = n_clicks is not None and n_clicks > session_clicks_search
 
     conf = CorpusModel.objects.get(slug=slug)
     max_row, max_col = settings.TABLE_SIZE
+    corpus_size = len(corpora[slug])
 
     specs, corpus = _get_specs_and_corpus(search_from, session_search, corpora, slug)
+
+    editable = bool(search_from)
+
+    # do filtering. if anything was done, filtered is true
+    corpus, filtered = _filter_corpus(corpus, filter, doing_search)
+
+    if filtered and not doing_search:
+        filtered_corpus_size = len(corpus)
+        corpus = _correct_page(corpus, page_current, settings.PAGE_SIZE)
+        cols, data = _update_conll(corpus, editable, drop_govs=conf.add_governor, slug=slug)
+        return [
+            cols,
+            data,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            ceil(filtered_corpus_size / settings.PAGE_SIZE),
+        ]
+
+    corpus, corpus_sorted = _sort_corpus(corpus, sort_by, doing_search)
+    if (corpus_sorted and not doing_search) or (not sort_by and not doing_search):
+        corpus = _correct_page(corpus, page_current, settings.PAGE_SIZE)
+        cols, data = _update_conll(corpus, editable, drop_govs=conf.add_governor, slug=slug)
+        return [
+            cols,
+            data,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+        ]
+
+    # if just changing page
+    if conll_page != page_current:
+        corpus_size = len(corpus)
+        corpus = _correct_page(corpus, page_current, settings.PAGE_SIZE)
+        cols, data = _update_conll(corpus, editable, drop_govs=conf.add_governor, slug=slug)
+        return [
+            cols,
+            data,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            page_current,
+            ceil(corpus_size / settings.PAGE_SIZE),
+        ]
 
     # user clicked the show button, show search_from
     if show_dataset and show_dataset != session_clicks_show:
         session_clicks_show = show_dataset
-        editable = bool(search_from)
-        cols, data = _update_conll(corpus, editable, drop_govs=conf.add_governor)
+        corpus_size = len(corpus)
+        corpus = _correct_page(corpus, page_current, settings.PAGE_SIZE)
+        cols, data = _update_conll(corpus, editable, drop_govs=conf.add_governor, slug=slug)
         return [
             cols,
             data,
@@ -229,8 +313,13 @@ def _new_search(
             no_update,
             no_update,
             session_clicks_show,
+            no_update,
+            no_update,
+            ceil(corpus_size / settings.PAGE_SIZE),
         ]
 
+    # there's a problem with the search
+    # todo: use messaging framework for this, not alert popup
     msg = _search_error(col, search_string)
     if msg:
         return [
@@ -245,16 +334,19 @@ def _new_search(
             no_update,
             no_update,
             no_update,
+            no_update,
+            no_update,
+            no_update,
         ]
 
+    # search number/id
     new_value = len(session_search) + 1
 
     # on first search, spec is slug name, so it goes here.
     this_search = [specs, col, skip, search_string]
 
-    exists = next(
-        (i for i in session_search.values() if this_search == list(i)[:5]), False
-    )
+    # have we already done this exact search?
+    exists = next((i for i in session_search.values() if this_search == list(i)[:5]), False)
     if exists:
         msg = "Table already exists. Switching to that one to save memory."
         df = corpus.iloc[exists[-1]]
@@ -264,8 +356,8 @@ def _new_search(
         session_search.clear()
         corpus = corpora[slug]
         corpus_size = len(corpus)
-        corpus = corpus.iloc[:max_row, :max_col]
-        cols, data = _update_conll(corpus, False, drop_govs=conf.add_governor)
+        corpus = _correct_page(corpus, page_current, settings.PAGE_SIZE)
+        cols, data = _update_conll(corpus, False, drop_govs=conf.add_governor, slug=slug)
         name = _make_search_name(conf.name, corpus_size, session_search, int(lang))
         search_from = [dict(value=0, label=name)]
         # set number of clicks at last moment
@@ -282,18 +374,22 @@ def _new_search(
             session_search,
             session_clicks_clear,
             session_clicks_show,
+            0,
+            conll_page,
+            ceil(corpus_size / settings.PAGE_SIZE),
         )
+
+    # if the query has spaces, we need to prepare for multiword search
+    multiword = " " in search_string.strip()
+    if multiword:
+        search_string, multiword = _make_multiword_query(search_string.strip(), col, no_use_regex)
+        col = "d"
 
     found_results = True
 
-    
-    if " " in search_string:
-        search_string, multiword = _make_multiword_query(search_string, col, no_use_regex)
-        col = "d"
-
+    # if the same search doesn't already exist
     if not exists:
-        # todo: more cleanup for this, it's ugly!
-        # tricky searches
+        # depgrep/tgrep search types
         if col in {"t", "d", "describe"}:
             df, msg = _special_search(corpus, col, search_string, skip, multiword)
         # do ngramming stuff
@@ -303,11 +399,8 @@ def _new_search(
         elif col not in {"t", "d", "describe"}:
             search = _cast_query(search_string, col)
             method = "just" if not skip else "skip"
-            if not no_use_regex:
-                extra = dict(regex=False, exact_match=True)
-            else:
-                extra = dict()
-
+            extra = dict() if no_use_regex else dict(regex=False, exact_match=True)
+            # try to do the just/skip search
             try:
                 df = getattr(getattr(corpus, method), col)(search, **extra)
             # todo: tell the user the problem?
@@ -317,6 +410,7 @@ def _new_search(
                 if isinstance(search, list):
                     search = search[0]
                 msg = msg.format(type(search), col, corpus[col].dtype)
+
         # if there are no results
         if not len(df) and not msg:
             found_results = False
@@ -328,24 +422,35 @@ def _new_search(
         reference["_position"] = df["_position"]
         corpora[slug] = reference
 
+    # add the results of this search to the session data
     this_search += [new_value, len(df), list(df["_n"])]
-    if found_results:
-        session_search[new_value] = _tuple_or_list(this_search, list)
-        corpus = corpora[slug]
-        df = df.iloc[:max_row, :max_col]
-        current_cols, current_data = _update_conll(df, True, conf.add_governor)
-    else:
-        current_cols, current_data = no_update, no_update
 
+    # if the search was successful
+    if found_results:
+        # store the search info
+        session_search[new_value] = _tuple_or_list(this_search, list)
+        # figure out pagination
+        df, _ = _filter_corpus(df, filter, False)
+        df, _ = _sort_corpus(df, sort_by, False)
+        num_pages = ceil(len(df) / settings.PAGE_SIZE)
+        df = _correct_page(df, page_current, settings.PAGE_SIZE)
+        current_cols, current_data = _update_conll(df, True, conf.add_governor, slug=slug)
+    # if no results, keep the current data
+    else:
+        current_cols, current_data, num_pages = no_update, no_update, no_update
+
+    # if there are no problems, add this search to the search_from dropdown
     if not msg:
-        name = _make_search_name(this_search, len(corpus), session_search, int(lang))
+        name = _make_search_name(this_search, corpus_size, session_search, int(lang))
         new_option = dict(value=new_value, label=name)
         index_for_option = next(
             i for i, s in enumerate(search_from_options) if s["value"] == search_from
         )
         search_from_options.insert(index_for_option + 1, new_option)
+    # if the search was already done, get the id of that one
     elif exists:
         new_value = exists[-3]
+    # if there was a problem, revert to the parent corpus/search
     else:
         new_value = search_from
     return (
@@ -360,6 +465,9 @@ def _new_search(
         session_search,
         session_clicks_clear,
         session_clicks_show,
+        n_clicks,
+        conll_page,
+        num_pages,
     )
 
 
@@ -380,10 +488,7 @@ def _new_search(
         Output("session-tables", "data"),
         Output("session-clicks-table", "data"),
     ],
-    [
-        Input("table-button", "n_clicks"),
-        Input("freq-table", "data_previous"),
-    ],
+    [Input("table-button", "n_clicks"), Input("freq-table", "data_previous"),],
     [
         State("freq-table", "columns"),
         State("freq-table", "data"),
@@ -463,7 +568,7 @@ def _new_table(
         keyness,
         sort,
         # multiindex_columns,
-        #content_table,
+        # content_table,
     ]
     this_table_tuple = _tuple_or_list(this_table_list, tuple)
 
@@ -501,7 +606,7 @@ def _new_table(
             relative=relative if relative != "corpus" else corpora[slug],
             keyness=keyness,
             sort=sort,
-            multiindex_columns=False, # multiindex_columns,
+            multiindex_columns=False,  # multiindex_columns,
             show_frequencies=relative is not False and relative is not None,
         )
         # round df if floats are used
@@ -511,6 +616,7 @@ def _new_table(
         # untested
         if table.index.name == "file":
             table.index = table.index.to_series().apply(os.path.basename)
+            table.index = table.index.to_series().str.replace(".conllu", "", regex=False)
 
         # cannot hash a corpus, which relative may be.
         # none will denote corpus as reference
@@ -557,47 +663,71 @@ def _new_table(
         Output("conc-table", "data"),
         Output("dialog-conc", "displayed"),
         Output("dialog-conc", "message"),
+        Output("session-clicks-conc", "data"),
+        Output("session-current-conc-page", "data"),
     ],
-    [Input("update-conc", "n_clicks")],
+    [
+        Input("update-conc", "n_clicks"),
+        Input("conc-table", "page_current"),
+        Input("conc-table", "sort_by"),
+        Input("conc-table", "filter_query"),
+    ],
     [
         State("show-for-conc", "value"),
         State("search-from", "value"),
         State("session-search", "data"),
         State("slug", "title"),
+        State("session-clicks-conc", "data"),
+        State("session-current-conc-page", "data"),
     ],
 )
-def _new_conc(n_clicks, show, search_from, session_search, slug, **kwargs):
+def _new_conc(
+    n_clicks,
+    page_current,
+    sort_by,
+    filter,
+    show,
+    search_from,
+    session_search,
+    slug,
+    session_clicks_conc,
+    conc_page,
+    **kwargs,
+):
     """
-    Callback for concordance. We just pick what to show and where from...
+    Callback for concordance. Handles filter, sort, pagination and update
     """
-    if n_clicks is None:
-        return [no_update] * 4
+    if n_clicks is None and page_current == conc_page and not sort_by and not filter:
+        return [no_update] * 6
 
-    conf = CorpusModel.objects.get(slug=slug)
-
-    # easy validation!
-    msg = "" if show else "No choice made for match formatting."
-    if not show:
-        return no_update, no_update, True, msg
-
-    if not search_from:
-        msg = "Cannot concordance whole corpus. Do a search first."
-        return no_update, no_update, True, msg
+    # input validation
+    msg = False
+    if not show and not sort_by and not filter:
+        msg = "No choice made for match formatting."
+        return no_update, no_update, True, msg, no_update, no_update
+    if not search_from and not sort_by and not filter:
+        msg = "Cannot concordance whole corpus. Please do a search first."
+        return no_update, no_update, True, msg, no_update, no_update
 
     specs, corpus = _get_specs_and_corpus(search_from, session_search, corpora, slug)
 
     met = ["file", "s", "i"]
-    # todo: corpus may not be loaded. then how to know what metadata there is?
-    if isinstance(corpus, pd.DataFrame) and "speaker" in corpus.columns:
-        met.append("speaker")
+    if isinstance(corpus, pd.DataFrame):
+        for feat in {"speaker", "year"}:
+            if feat in corpus.columns:
+                met.append("speaker")
 
     conc = corpus.conc(show=show, metadata=met, window=(100, 100))
     conc = _add_links(conc, slug=slug, conc=True)
     conc["file"] = conc["file"].apply(os.path.basename)
-    max_row, max_col = settings.TABLE_SIZE
-    short = conc.iloc[:max_row, :max_col]
-    cols, data = _update_concordance(short, deletable=True)
-    return cols, data, bool(msg), msg
+    conc["file"] = conc["file"].str.replace(".conllu", "", regex=False)
+
+    # yes, these are named corpus, but they are fine on conc as well
+    conc, corpus_sorted = _sort_corpus(conc, sort_by, False)
+    conc, corpus_filtered = _filter_corpus(conc, filter, False)
+    conc = _correct_page(conc, page_current, settings.PAGE_SIZE)
+    cols, data = _update_concordance(conc, deletable=True)
+    return cols, data, bool(msg), msg, n_clicks, page_current
 
 
 @app.expanded_callback(
@@ -605,6 +735,9 @@ def _new_conc(n_clicks, show, search_from, session_search, slug, **kwargs):
     [Input("skip-switch", "on")],
 )
 def _matching_not_matching(on, **kwargs):
+    """
+    Change the text for matching/not matching
+    """
     text = "matching" if not on else "not matching"
     classname = "colour-off" if not on else "colour-on"
     return text, classname
@@ -615,6 +748,9 @@ def _matching_not_matching(on, **kwargs):
     [Input("use-regex", "on")],
 )
 def _use_regex(on, **kwargs):
+    """
+    Colour and change the text for simple/regex search
+    """
     text = "simple search" if not on else "regular expression"
     classname = "colour-off" if not on else "colour-on"
     return text, classname
@@ -626,6 +762,9 @@ def _use_regex(on, **kwargs):
     [State("multiindex-switch", "on")],
 )
 def _multiindex(_, show, on, **kwargs):
+    """
+    Multiindexing --- disabled currently
+    """
     if not show or len(show) < 2:
         return True, False
     return False, on
@@ -636,6 +775,9 @@ def _multiindex(_, show, on, **kwargs):
     [Input("language-switch", "on")],
 )
 def _switch_language(on, **kwargs):
+    """
+    Switch the text of the active language
+    """
     text = "English" if not on else "German"
     classname = "colour-off" if not on else "colour-on"
     return text, classname
@@ -646,9 +788,7 @@ language_states = [State(c, f) for c, f in sorted(LANGUAGES) if f]
 
 
 @app.expanded_callback(
-    language_outputs,
-    [Input("language-switch", "on")],
-    language_states,
+    language_outputs, [Input("language-switch", "on")], language_states,
 )
 def _change_language(lang, *args, **kwargs):
     """
@@ -657,14 +797,3 @@ def _change_language(lang, *args, **kwargs):
     if lang is None:
         return no_update
     return [v[int(lang)] for (_, f), v in sorted(LANGUAGES.items()) if f]
-
-
-#app.clientside_callback(
-#    """
-#    function() {
-#        return Math.round( window.innerHeight/30 );
-#    }
-#    """,
-#    Output('conc-table', 'page_size'),
-#    [Input('everything', 'value')]
-#)

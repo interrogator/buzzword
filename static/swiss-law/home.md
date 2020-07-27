@@ -14,26 +14,3 @@ Unsere Ziele sind: Bestmögliche Bedingungen zu schaffen für Recherchen zur Ges
 Dazu bieten wir grundlegende Such- und Browse-Möglichkeiten sowie state-of-the-art Analyse- und Visualisierungstools – interaktiv und kollaborativ.
 
 Mehr zum Projekt unter dem Menutab [*About Project*](/about).
-
-
-<div class="image-wrapper center">
-  <img class="center" src="/static/swiss-law/browse.jpg"/>
-  <span style="text-align: center;">Browse collection</span>
-</div>
-
-<div class="image-wrapper center">
-  <img class="center" src="/static/swiss-law/compare.jpg"/>
-  <span style="text-align: center;">Correct transcriptions</span>
-</div>
-
-<div class="image-wrapper center">
-  <img class="center" src="/static/swiss-law/visualise.jpg"/>
-  <span style="text-align: center;">Visualise frequencies</span>
-</div>
-
-<div class="image-wrapper center">
-  <img class="center" src="/static/swiss-law/conc.jpg"/>
-  <span style="text-align: center;">Keyword-in-context</span>
-</div>
-<br/>
-<br/>

@@ -79,7 +79,7 @@ def _get_or_load_corpora(slug=None):
             try:
                 display = json.loads(corpus["initial_table"])
             except:
-                display = dict(show="p", subcorpora="file")
+                display = dict(show="p", subcorpora="year")
             print(f"* Generating an initial table for {name} using {display}")
             initial_table = corpus.table(**display)
             initial_table = initial_table.drop("file", axis=1, errors="ignore")
@@ -128,7 +128,7 @@ def _load_explorer_data(multiprocess=False):
         if getattr(corpus, "initial_table", False):
             display = json.loads(corpus.initial_table)
         else:
-            display = dict(show="p", subcorpora="file")
+            display = dict(show="p", subcorpora="year")
             print(f"Generating an initial table for {corpus.name} using {display}")
             initial_table = buzz_corpus.table(**display)
             initial_tables[corpus.slug] = initial_table

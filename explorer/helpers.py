@@ -170,7 +170,7 @@ def _update_concordance(df, deletable):
     return columns, df.to_dict("rows")
 
 
-def _update_conll(df, deletable, drop_govs):
+def _update_conll(df, deletable, drop_govs, slug=None):
     """
     Turn DF into dash table data for conll
     """
@@ -229,7 +229,6 @@ def _get_corpus(slug):
     from start.apps import corpora
     if slug in corpora:
         corpus = corpora[slug]
-        print(f"Corpus found for {slug}: {len(corpus)} tokens")
         return corpus
     raise ValueError(f"CORPUS not found: {slug}")
     upload = os.path.join("uploads", slug, "conllu")
@@ -341,3 +340,79 @@ def _make_multiword_query(query, col, regex):
             unit += rightbracks
         out.append(unit)
     return " + ".join(out), len(tokens)
+
+
+def split_filter_part(filter_part):
+    """
+    From https://dash.plotly.com/datatable/callbacks
+    """
+    operators = [['ge ', '>='],
+                 ['le ', '<='],
+                 ['lt ', '<'],
+                 ['gt ', '>'],
+                 ['ne ', '!='],
+                 ['eq ', '='],
+                 ['contains '],
+                 ['datestartswith ']]
+
+    for operator_type in operators:
+        for operator in operator_type:
+            if operator in filter_part:
+                name_part, value_part = filter_part.split(operator, 1)
+                name = name_part[name_part.find('{') + 1: name_part.rfind('}')]
+
+                value_part = value_part.strip()
+                v0 = value_part[0]
+                if (v0 == value_part[-1] and v0 in ("'", '"', '`')):
+                    value = value_part[1: -1].replace('\\' + v0, v0)
+                else:
+                    try:
+                        value = float(value_part)
+                    except ValueError:
+                        value = value_part
+
+                # word operators need spaces after them in the filter string,
+                # but we don't want these later
+                return name, operator_type[0].strip(), value
+
+    return [None] * 3
+
+
+def _correct_page(corpus, page_current, page_size):
+    return corpus.iloc[page_current*page_size:(page_current+1)*page_size]
+
+
+def _filter_corpus(corpus, filter, doing_search=False):
+    if doing_search:
+        return corpus, False
+    filtering_expressions = filter.split(' && ') if filter is not None else []
+    if filtering_expressions:
+        for filter_part in filtering_expressions:
+            col_name, operator, filter_value = split_filter_part(filter_part)
+            if operator in {'eq', 'ne', 'lt', 'le', 'gt', 'ge'}:
+                # these operators match pandas series operator method names
+                corpus = corpus.loc[getattr(corpus[col_name], operator)(filter_value)]
+            elif operator == 'contains':
+                corpus = corpus.loc[corpus[col_name].str.contains(filter_value)]
+            elif operator == 'datestartswith':
+                # this is a simplification of the front-end filtering logic,
+                # only works with complete fields in standard format
+                corpus = corpus.loc[corpus[col_name].str.startswith(filter_value)]
+    return corpus, bool(filtering_expressions)
+
+
+def _sort_corpus(corpus, sort_by, doing_search=False):
+    if doing_search:
+        return corpus, False
+    # if sorting
+    if sort_by and len(sort_by):
+        corpus = corpus.sort_values(
+            [col['column_id'] for col in sort_by],
+            ascending=[
+                col['direction'] == 'asc'
+                for col in sort_by
+            ],
+            inplace=False
+        )
+    sort_by = bool(len(sort_by)) if sort_by else False
+    return corpus, sort_by

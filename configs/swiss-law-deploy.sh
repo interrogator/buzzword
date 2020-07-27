@@ -24,7 +24,7 @@ sudo docker exec -it $ID python manage.py load_languages
 sudo docker exec -it $ID python manage.py load_corpora
 sudo docker exec -it $ID python manage.py do_ocr
 echo "Creating superusers with password: $PASSWORD"
-sudo docker exec -it $ID python manage.py createsuperuser --noinput --username danny --email danny@swisslaw.com
-sudo docker exec -it $ID python manage.py createsuperuser --noinput --username martin.kurz --email martin@swisslaw.com
+sudo docker exec -it $ID python manage.py createsuperuser --noinput --username danny --email danny@testing.com
+sudo docker exec -it $ID python manage.py createsuperuser --noinput --username martin.kurz --email martin@testing.com
 
 echo "$ID"

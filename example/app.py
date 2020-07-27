@@ -21,6 +21,26 @@ from explorer.chart import _df_to_figure
 from explorer import style
 
 
+WORDCLASSES = {
+    "ADJ",
+    "ADP",
+    "ADV",
+    "AUX",
+    "CCONJ",
+    "DET",
+    "INTJ",
+    "NOUN",
+    "NUM",
+    "PART",
+    "PRON",
+    "PROPN",
+    "PUNCT",
+    "SCONJ",
+    "VERB",
+    "X",
+}
+
+
 def _make_layout():
     path = f"static/{settings.BUZZWORD_SPECIFIC_CORPUS}/example.json"
     with open(path) as fo:
@@ -38,27 +58,30 @@ def _make_layout():
     conc_space = _concordance_space(corpus)
 
     freq_text = dcc.Markdown(text["freq"], style={}, className="row")
-    freq_img = html.Img(
-            src="/static/swiss-law/freq-toolbar.png",
-            width="110%",
-            #style={"width": "10%"},  # "marginTop": "-30px", "marginBottom": "30px"
-            className="row",
-    )
+    freq_img = html.Img(src="/static/swiss-law/freq-toolbar.png", width="110%", className="row",)
     freq_text2 = dcc.Markdown(text["freq2"], style={}, className="row")
-    freq_text = html.Div([freq_text, freq_img, freq_text2], className="container col-md-7")
+    freq_text = html.Div(
+        [freq_text, freq_img, freq_text2],
+        style={"marginLeft": "30px"},
+        className="container col-7 col-md-7 col-lg-7 col-xl-7 col-xxl-7",
+    )
 
     freq_and_text = html.Div(
         className="container",
         children=html.Div(
             className="row",
-            style={"height": "70vh", "marginBottom": "10px", "marginTop": "50px"},
+            style={"marginBottom": "10px", "marginTop": "50px"},
             children=[freq_space, freq_text],
         ),
     )
 
-    text_style = {"maxWidth": "800px", "margin": "auto", "marginBottom": "40px"}
+    text_style = {"maxWidth": "1000px", "margin": "auto", "marginBottom": "40px"}
     sty = {"maxWidth": "40vw", "minWidth": "40vw", "marginLeft": "100px"}
-    chart_text = dcc.Markdown(text["vis"], style={"marginTop": "100px"}, className="col-sm")
+    chart_text = dcc.Markdown(
+        text["vis"],
+        style={"marginTop": "50px"},
+        className="col-7 col-md-7 col-lg-4 col-xl-4 col-xxl-4",
+    )
 
     chart_and_text = html.Div(
         className="container",
@@ -67,17 +90,30 @@ def _make_layout():
     )
 
     children = [
-        dcc.Markdown("# **Swiss Digital Law Discovery** (*Sdilaw*):", style={**text_style, **{"marginTop": "140px", "marginBottom": "20px"}}),
+        dcc.Markdown(
+            "# **Swiss Digital Law Discovery** (*Sdilaw*):",
+            style={**text_style, **{"marginTop": "140px", "marginBottom": "20px"}},
+        ),
         dcc.Markdown(text["intro"], style=text_style),
         html.Img(
             src="/static/swiss-law/search-1.png",
-            style={"width": "70%", "marginTop": "-30px", "marginBottom": "30px"},
+            style={
+                "width": "70%",
+                "marginTop": "-30px",
+                "marginBottom": "30px",
+                "maxWidth": "1000px",
+            },
             className="center",
         ),
         dcc.Markdown(text["intro2"], style={**text_style, **{"marginBottom": "40px"}}),
         html.Img(
             src="/static/swiss-law/search-2.png",
-            style={"width": "70%", "marginTop": "-30px", "marginBottom": "30px"},
+            style={
+                "width": "70%",
+                "marginTop": "-30px",
+                "marginBottom": "30px",
+                "maxWidth": "1000px",
+            },
             className="center",
         ),
         freq_and_text,
@@ -87,7 +123,9 @@ def _make_layout():
         conc_space,
         dcc.Markdown(text["end"], style=text_style),
     ]
-    layout = html.Div(children)
+    layout = html.Div(children, className="col-12 col-md-12 col-lg-12 col-xl-12 col-xxl-12")
+    layout = html.Div(layout, className="row")
+    layout = html.Div(layout, className="container")
     return layout
 
 
@@ -95,13 +133,33 @@ def _chart_space(table):
     from explorer.tabs import _build_chart_space
 
     iterate_over = [(1, "stacked_bar")]
-    return _build_chart_space(table, iterate_over, width="60vw", no_from_select=True)
+    space = _build_chart_space(
+        table, iterate_over, width="100%", height="400px", no_from_select=True
+    )
+    return html.Div(space, className="col-6 col-md-6 col-lg-8 col-xl-8 col-xxl-8")
 
 
-def _freq_space(corpus):
+def _freq_space(corpus, wordclass="NOUN"):
+
+    wordclass = wordclass.upper() if wordclass.upper() in WORDCLASSES else "NOUN"
 
     style_index = style.FILE_INDEX
-    table, columns, data = _quick_freq(corpus, None)
+
+    select_wordclass = dcc.Dropdown(
+        placeholder="Features to show",
+        multi=False,
+        id="example-wordclass-dropdown",
+        options=[dict(value=k, label=k) for k in sorted(WORDCLASSES)],
+        value="NOUN",
+        className="pull-right",
+        style={
+            **style.MARGIN_5_MONO,
+            **style.FRONT,
+            **{"marginLeft": "0px", "width": "100%", "marginBottom": "5px"},
+        },
+    )
+
+    table, columns, data = _quick_freq(corpus, wordclass=wordclass)
     style_index["if"]["column_id"] = table.index.name
 
     freq_table = dcc.Loading(
@@ -139,8 +197,8 @@ def _freq_space(corpus):
         ],
     )
 
-    styled = {"maxWidth": "33vw", "minWidth": "33vw", "height": "35vh", "marginBottom": "70px"}
-    freq_space = html.Div([freq_table], style=styled, className="col-md-4")
+    column = "col-4 col-md-4 col-lg-4 col-xl-4 col-xxl-4 float-left"
+    freq_space = html.Div([select_wordclass, freq_table], style={}, className=column)
     return freq_space, table
 
 
@@ -210,8 +268,9 @@ def _concordance_space(corpus):
     return conc_space
 
 
-def _quick_freq(corpus, query):
-    df = corpus.just.wordclass.NOUN.just.word("[A-Za-z]{3,}", regex=True)
+def _quick_freq(corpus, wordclass="NOUN"):
+
+    df = getattr(corpus.just.wordclass, wordclass).just.word("[A-Za-z]{3,}", regex=True)
     df = df.table(subcorpora="year", show="l", relative=True).round(2).iloc[:, :50].T
     df.index.names = ["lemma"]
 
@@ -269,16 +328,34 @@ def _simple_concordance(do_conc, query, **kwargs):
 
 
 @app.expanded_callback(
-    Output("chart-1", "figure"),
+    [Output("example-freq", "columns"), Output("example-freq", "data")],
+    [Input("example-wordclass-dropdown", "value")],
+    [],
+)
+def _simple_freq(wordclass, **kwargs):
+    if not wordclass:
+        return no_update
+    try:
+        corpus = _get_corpus(settings.BUZZWORD_SPECIFIC_CORPUS)
+    # migrate handling
+    except TypeError:
+        return [], []
+    _, columns, data = _quick_freq(corpus, wordclass=wordclass)
+    return columns, data
+
+
+@app.expanded_callback(
+    Output("chart-holder-1", "children"),
     [Input("figure-button-1", "n_clicks")],
     [
         State("chart-type-1", "value"),
         State("chart-top-n-1", "value"),
         State("chart-transpose-1", "on"),
+        State("example-wordclass-dropdown", "value"),
     ],
 )
 def _new_chart(
-    n_clicks, chart_type, top_n, transpose, **kwargs,
+    n_clicks, chart_type, top_n, transpose, wordclass, **kwargs,
 ):
     """
     Make new chart by kind. Do it 5 times, once for each chart space
@@ -293,7 +370,7 @@ def _new_chart(
     except TypeError:
         return [], []
 
-    df, _, _ = _quick_freq(corpus, None)
+    df, _, _ = _quick_freq(corpus, wordclass=wordclass)
 
     # transpose and cut down items to plot
     if transpose:
@@ -301,4 +378,7 @@ def _new_chart(
     df = df.iloc[:, :top_n]
 
     # generate chart
-    return _df_to_figure(df, chart_type)
+    figure = _df_to_figure(df, kind=chart_type, width="100%")
+    chart_data = dict(id="chart-1", figure=figure, style=dict(width="100%", height="400px"),)
+    chart = dcc.Graph(**chart_data)
+    return chart

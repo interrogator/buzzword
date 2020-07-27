@@ -3,6 +3,7 @@
     <head>
         {% load plotly_dash%}
         {% plotly_header %}
+        <title>{{corpus.name}}: Example investigation</title>
 
       <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
     <link href="{% static 'plugins/css/ace.min.css' %}" type="text/css" media="all" rel="stylesheet" />
@@ -15,7 +16,7 @@
         <script type="text/javascript" src="{% static 'bootstrap.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'jquery.bootstrap.modal.forms.js' %}"></script>
     </head>
-    <body class="example">
+    <body class="example" style="z-index: 900;">
         {% include "specific_nav.html" %}
         <br><br>
         {%plotly_direct name="swiss-law"%}

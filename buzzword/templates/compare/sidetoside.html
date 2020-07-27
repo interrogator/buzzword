@@ -1,7 +1,7 @@
 {% extends "jbase.html" %}
 {% load static %}
 {% load martortags %}
-{% block title %}buzzword: compare{% endblock %}
+{% block title %}{{corpus.name}}: compare{% endblock %}
 {% block content %}
 
 {% include "specific_nav.html" %}
@@ -21,10 +21,10 @@
 
 <div style={% if not messages %} "margin-top:20px;" {% endif %}>
     <div class="container compare-container">
-      <div class="row">
+      <div class="row" style="padding-bottom:10px">
         <div class="col-sm">
             <div id="pdf-here">
-                <object data={{ pdf_filepath }} type="application/pdf" style="min-height:73vh;min-width:48vw">
+                <object data={{ pdf_filepath }} type="application/pdf" style="min-height:85vh;min-width:48vw">
                     <embed src={{ pdf_filepath }} type="application/pdf" />
                 </object>
                 {% include "comparenav.html" %}
@@ -33,7 +33,7 @@
         <div class="col-sm">
             <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
-                <div style="height:70vh; min-width:42vw; margin-left:-10px;">
+                <div style="height:80vh; min-width:42vw; margin-left:-10px;">
                     {{ form.description }}
                     <div class="float-right" style="margin-top:-10px;">
                         Describe your changes: 

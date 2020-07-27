@@ -31,16 +31,19 @@
       {% endblock %}
     </div>
   {% endblock body %}
-      <script type="text/javascript" src="{% static 'jquery.min.js' %}"></script>
-      <script type="text/javascript" src="{% static 'bootstrap.min.js' %}"></script>
-      <script type="text/javascript" src="{% static 'jquery.bootstrap.modal.forms.js' %}"></script>
-      <script type="text/javascript">
-        $(function () {
-          // Sign up button
-          $("#signup-btn").modalForm({
-              formURL: "{% url 'signup' %}"
-          });
-        });
-      </script>
   </body>
+  {% block footer %}
+    <script type="text/javascript" src="{% static 'jquery.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'bootstrap.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'bootstrap.bundle.js' %}"></script>
+    <script type="text/javascript" src="{% static 'jquery.bootstrap.modal.forms.js' %}"></script>
+    <script type="text/javascript">
+      $(function () {
+        // Sign up button
+        $("#signup-btn").modalForm({
+            formURL: "{% url 'signup' %}"
+        });
+      });
+    </script>
+  {% endblock footer %}
 </html>

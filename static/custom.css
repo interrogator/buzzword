@@ -72,8 +72,8 @@ p, ul, ol {
 }
 
 .ace_editor {
-  min-height: 67vh !important;
-  max-height: 67vh !important;   
+  min-height: 79vh !important;
+  max-height: 79vh !important;   
 }
 
 #martor-description {
@@ -82,9 +82,9 @@ p, ul, ol {
 
 /* control height of dash tables! */
 .explore .dash-spreadsheet-inner {
-  height: 80vh !important;
-  min-height: 80vh !important;
-  max-height: 80vh !important;
+  height: 71vh !important;
+  min-height: 71vh !important;
+  max-height: 71vh !important;
   min-width: 98vw !important;
   max-width: 98vw !important;
 }
@@ -150,7 +150,7 @@ input:invalid {
   display: block;
   margin-left: auto;
   margin-right: auto;
-  width: 20%;
+  width: 500px;
   text-align: center
 }
 
@@ -208,4 +208,33 @@ input:invalid {
 .example #chart-from-1 {
   display: none;
   width: 1px;
+}
+
+#conll-view .previous-next-container {
+  position:fixed;
+  bottom:0;
+  margin-left: 80%;
+  background-color: white;
+}
+
+
+.example @media (min-width: 1430px) {
+  .container {
+    max-width: 1400px;
+  }
+}
+
+.nav-item {
+  z-index: 999;
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  height: 100px;
+  width: 100px;
+  color:black;
+}
+
+.glyphicon.glyphicon-chevron-right{
+   color:red;
 }

@@ -22,6 +22,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 from .lang import LANGUAGES
 
+from math import ceil
+
 DAQ_THEME = {
     "dark": False,
     "detail": "#007439",
@@ -39,9 +41,13 @@ def _make_storage():
     tables_store = dcc.Store(id="session-tables", data=dict())
     click_clear = dcc.Store(id="session-clicks-clear", data=-1)
     click_show = dcc.Store(id="session-clicks-show", data=-1)
+    click_search = dcc.Store(id="session-clicks-search", data=-1)
+    click_conc = dcc.Store(id="session-clicks-conc", data=-1)
     click_table = dcc.Store(id="session-clicks-table", data=-1)
+    conll_page = dcc.Store(id="session-current-conll-page", data=0)
+    conc_page = dcc.Store(id="session-current-conc-page", data=0)
     content = html.Div(id="page-content")
-    stores = [search_store, tables_store, click_clear, click_show, click_table]
+    stores = [search_store, tables_store, click_clear, click_show, click_search, click_conc, click_table, conll_page, conc_page]
     return html.Div(stores + [content])
 
 
@@ -59,6 +65,8 @@ def _build_dataset_space(df, config):
     cols = extra + cols
     df = _drop_cols_for_datatable(df, config.add_governor)
     df = df.reset_index()
+    corpus_size = len(df)
+    df = df.iloc[:settings.PAGE_SIZE]
     # no file extensions
     df["file"] = df["file"].str.replace(".conllu", "", regex=False)
     df["file"] = df["file"].str.replace("^.*/conllu/", "", regex=True)
@@ -152,18 +160,20 @@ def _build_dataset_space(df, config):
         data=data,
         # editable=True,
         style_cell={**style.HORIZONTAL_PAD_5, **{"minWidth": "60px"}},
-        filter_action="native",
-        sort_action="native",
+        filter_action="custom",
+        sort_action="custom",
         sort_mode="multi",
+        sort_by=[],
         row_deletable=False,
         selected_rows=[],
-        page_action="none",
+        page_action="custom",
         page_current=0,
-        # page_size=20,
+        page_size=settings.PAGE_SIZE,
+        page_count=ceil(corpus_size/settings.PAGE_SIZE),
         # style_as_list_view=True,
         css=[{"selector": ".show-hide", "rule": "display: none"}],
-        virtualization=True,
-        style_table={},
+        # virtualization=True,
+        # style_table={},
         fixed_rows={"headers": True, "data": 0},
         style_header=style.BOLD_DARK,
         style_cell_conditional=style.LEFT_ALIGN,
@@ -240,14 +250,13 @@ def _build_frequencies_space(corpus, table, config):
     print(f"Making {max_row}x{max_col} table for {config.name} ...")
     table = table.iloc[:100, :100]
     table = table.reset_index()
-    table["file"] = table["file"].apply(os.path.basename)
-    table["file"] = table["file"].str.rstrip(".conllu")
-    # deal with a development-only situation where we don't have the pdf
-    # to match the conll data
-    try:
-        table = _add_links(table, slug=config.slug, conc=False)
-    except ObjectDoesNotExist:
-        pass
+    if "file" in table.columns:
+        table["file"] = table["file"].apply(os.path.basename)
+        table["file"] = table["file"].str.rstrip(".conllu")
+        try:
+            table = _add_links(table, slug=config.slug, conc=False)
+        except ObjectDoesNotExist:
+            pass
     columns, data = _update_frequencies(table, False, False)
     print("Done!")
 
@@ -375,6 +384,7 @@ def _build_concordance_space(df, config):
     df = getattr(df.just, query["target"])(query["query"])
     df = df.conc(metadata=meta, window=(100, 100), n=max_conc)
     df["file"] = df["file"].apply(os.path.basename)
+    df["file"] = df["file"].str.replace(".conllu", "", regex=False)
     # why does this fail?
     if config.pdfs:
         df = _add_links(df, slug=config.slug, conc=True)
@@ -410,12 +420,12 @@ def _build_concordance_space(df, config):
                 data=data,
                 editable=True,
                 style_cell={**style.HORIZONTAL_PAD_5, **{"minWidth": "60px"}},
-                filter_action="native",
-                sort_action="native",
+                filter_action="custom",
+                sort_action="custom",
                 sort_mode="multi",
                 row_deletable=True,
                 selected_rows=[],
-                page_action="native",
+                page_action="custom",
                 fixed_rows={"headers": True, "data": 0},
                 page_current=0,
                 page_size=12,
@@ -436,7 +446,7 @@ def _build_concordance_space(df, config):
     return html.Div(id="display-concordance", children=[div])
 
 
-def _build_chart_space(table, iterate_over=None, width="95vw", no_from_select=False):
+def _build_chart_space(table, iterate_over=None, width="95vw", no_from_select=False, height="60vh"):
     """
     Div representing the chart tab
     """
@@ -511,9 +521,9 @@ def _build_chart_space(table, iterate_over=None, width="95vw", no_from_select=Fa
         chart_data = dict(
             id=f"chart-{chart_num}",
             figure=figure,
-            style={"height": "60vh", "width": width},
+            style={"height": height, "width": width},
         )
-        chart = dcc.Loading(type="default", children=[dcc.Graph(**chart_data)])
+        chart = dcc.Loading(type="default", id=f"chart-holder-{chart_num}", children=[dcc.Graph(**chart_data)])
         chart_space = html.Div([toolbar, chart])
         name = f"Chart #{chart_num}"
         summary = html.Summary(name, id=f"chart-num-{chart_num}", style=style.CHART_SUMMARY)
