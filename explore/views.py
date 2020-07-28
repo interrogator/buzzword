@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 
 from explore.models import Corpus
 from explorer.main import load_layout
+from explorer.helpers import register_callbacks
 from explorer.strings import _slug_from_name
 from .forms import UploadCorpusForm
 
@@ -33,9 +34,10 @@ def _start_parse_corpus_job(corpus):
 
 @login_required
 def explore(request, slug=None):
+    from explorer.main import app
+    register_callbacks()
     if slug is None:
         slug = settings.BUZZWORD_SPECIFIC_CORPUS
-    app = load_layout(slug, set_and_register=True)
     context = {"corpus": Corpus.objects.get(slug=slug)}
     return render(request, "explore/explore.html", context=context)
 

@@ -23,9 +23,6 @@ from .helpers import (
 )
 
 
-app = DjangoDash("buzzword", suppress_callback_exceptions=True)
-
-
 def _load_languages():
     """
     Put all available languages into the DB
@@ -136,7 +133,7 @@ def _load_explorer_data(multiprocess=False):
     return corpora, initial_tables
 
 
-def load_layout(slug, spec=False, set_and_register=True):
+def load_layout(slug, spec=False, set_and_register=True, return_layout=False):
     """
     Django can import this function to set the correct dataset on explore page
 
@@ -151,10 +148,19 @@ def load_layout(slug, spec=False, set_and_register=True):
     corpus = corpora[slug]
     table = initial_tables[slug]
     layout = make_explore_page(corpus, table, slug, spec=spec)
+    if return_layout:
+        return layout
     if set_and_register:
         app.layout = layout
         register_callbacks()
     return app
+
+
+def get_layout(slug):
+    """
+    Wrapper to get layout
+    """
+    return load_layout(slug, return_layout=True)
 
 
 def load_explorer_app():
@@ -172,5 +178,7 @@ def load_explorer_app():
         for corpus in Corpus.objects.all():
             if not corpus.disabled:
                 load_layout(corpus.slug, set_and_register=True)
-                # load_layout(corpus.slug, set_and_register=True)
 
+
+app = DjangoDash("buzzword", suppress_callback_exceptions=True)
+app.layout = get_layout
