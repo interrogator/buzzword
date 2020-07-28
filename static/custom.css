@@ -235,6 +235,27 @@ input:invalid {
   color:black;
 }
 
-.glyphicon.glyphicon-chevron-right{
-   color:red;
+.carousel-caption {
+    position: relative;
+    left: auto;
+    right: auto;
+    bottom:-1px;
+    color: black;
+}
+
+.row-login li {
+  margin-right: -50px;
+}
+
+.row-login li input {
+  height: 30px;
+}
+
+.small-login {
+  margin-left: -150px;
+  width: 120px !important;
+}
+
+.login-password {
+  width: 120px !important;
 }

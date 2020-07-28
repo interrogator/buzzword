@@ -98,7 +98,9 @@ def browse_collection(request, slug=None):
                 previous=plaintext,
                 pdf=pdf,
                 username=request.user.username,
-                user=user
+                user=user,
+                # superuser corrections are automatically accepted
+                accepted=request.user.is_superuser
             )
             updated.save()
             initial = {"description": new_text, "commit_msg": default_commit}

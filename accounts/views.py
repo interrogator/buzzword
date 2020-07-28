@@ -33,7 +33,13 @@ def login(request, username=False, password=False):
 
     # next page means we need to authenticate them and send to nextpage
     if nextpage:
-        error = f"Registration/login required for the {nextpage.strip('/').capitalize()} page."
+        # quickfix for these names...
+        nextpage = nextpage.strip('/').capitalize()
+        if nextpage == "Compare":
+            nextpage = "Browse & correct"
+        if nextpage == "Explore":
+            nextpage = "Analyse"
+        error = f"Registration/login required for the {nextpage} page."
         _make_message(request, messages.WARNING, error)
         corpus = Corpus.objects.get(slug=slug)
         content = _get_markdown_content(slug, "home")

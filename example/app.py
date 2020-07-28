@@ -126,7 +126,7 @@ def _make_layout():
     layout = html.Div(children, className="col-12 col-md-12 col-lg-12 col-xl-12 col-xxl-12")
     layout = html.Div(layout, className="row")
     layout = html.Div(layout, className="container")
-    return layout
+    return dcc.Loading(layout, fullscreen=False)
 
 
 def _chart_space(table):
@@ -162,11 +162,7 @@ def _freq_space(corpus, wordclass="NOUN"):
     table, columns, data = _quick_freq(corpus, wordclass=wordclass)
     style_index["if"]["column_id"] = table.index.name
 
-    freq_table = dcc.Loading(
-        type="default",
-        fullscreen=False,
-        children=[
-            dash_table.DataTable(
+    freq_table = dash_table.DataTable(
                 id="example-freq",
                 columns=columns,
                 data=data,
@@ -194,8 +190,6 @@ def _freq_space(corpus, wordclass="NOUN"):
                 # export_headers="display",
                 css=[{"selector": ".show-hide", "rule": "display: none"}],
             )
-        ],
-    )
 
     column = "col-4 col-md-4 col-lg-4 col-xl-4 col-xxl-4 float-left"
     freq_space = html.Div([select_wordclass, freq_table], style={}, className=column)
