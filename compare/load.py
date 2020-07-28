@@ -84,7 +84,7 @@ def load_tif_pdf_plaintext(corpus):
             with open(path, "r") as fo:
                 plaintext = fo.read()
             ocr = OCRUpdate(
-                slug=corpus.slug, commit_msg="OCR result", text=plaintext, pdf=pdf
+                slug=corpus.slug, commit_msg="OCR result", text=plaintext, pdf=pdf, accepted=True
             )
             ocr.save()
         else:
@@ -128,7 +128,7 @@ def load_tif_pdf_plaintext(corpus):
             plaintext = _remove_junk(plaintext, corpus.language.short)
 
             ocr, ocr_created = OCRUpdate.objects.get_or_create(
-                slug=corpus.slug, commit_msg="OCR result", text=plaintext, pdf=pdf
+                slug=corpus.slug, commit_msg="OCR result", text=plaintext, pdf=pdf, accepted=True
             )
             if ocr_created:
                 print(f"Stored OCR result for {tif_path} in DB...")

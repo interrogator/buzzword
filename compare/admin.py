@@ -1,10 +1,11 @@
 from django.db import models
-from django.contrib import admin
+from django.contrib import admin, messages
 
 from martor.widgets import AdminMartorWidget
 from martor.models import MartorField
 
 from .models import Post, OCRUpdate, PDF
+
 
 
 
@@ -19,13 +20,13 @@ class PostAdmin(admin.ModelAdmin):
 
 @admin.register(OCRUpdate)
 class OCRUpdateAdmin(admin.ModelAdmin):
-    list_display = ["username", "user", "slug", "commit_msg", "timestamp", "previous", "text"]
+    list_display = ["username", "user", "accepted", "slug", "commit_msg", "timestamp", "previous", "text"]
     #formfield_overrides = {
     #    MartorField: {"widget": AdminMartorWidget},
     #    models.TextField: {"widget": AdminMartorWidget},
     #}
 
-    actions = []
+    actions = ["accept_correction"]
 
     def accept_correction(self, request, queryset):
         """
@@ -33,6 +34,7 @@ class OCRUpdateAdmin(admin.ModelAdmin):
 
         https://docs.djangoproject.com/en/3.0/ref/contrib/admin/actions/
         """
+        queryset.update(accepted=True)
         msg = f"{len(queryset)} changes accepted."
         self.message_user(request, msg, messages.SUCCESS)
 

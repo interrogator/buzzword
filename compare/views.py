@@ -43,8 +43,20 @@ def browse_collection(request, slug=None):
     pdf = all_pdfs.get(slug=slug, num=page_number - 1)
     pdf_path = os.path.relpath(pdf.path)
     template = loader.get_template("compare/sidetoside.html")
+    # get all the updates for this particular pdf
     this_pdf = OCRUpdate.objects.filter(pdf=pdf)
-    plaintext = this_pdf.latest("timestamp").text
+    # of these, get the latest ocr update submitted by this user
+    user_latest = this_pdf.filter(username=request.user.username)
+    if user_latest:
+        user_latest = user_latest.latest("timestamp")
+    # also get the latest ACCEPTED ocr
+    regular_latest = this_pdf.filter(accepted=True).latest("timestamp")
+    # if there is a user latest, and it's newer than the latest accepted, show that
+    if user_latest and user_latest.timestamp >= regular_latest.timestamp:
+        plaintext = user_latest.text
+    # otherwise, show the latest accepted text
+    else:
+        plaintext = regular_latest.text
 
     default_commit = f"Update {os.path.splitext(os.path.basename(pdf_path))[0]}"
     form_data = {"description": plaintext, "commit_msg": default_commit}

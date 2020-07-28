@@ -45,3 +45,4 @@ class OCRUpdate(models.Model):
     pdf = models.ForeignKey(PDF, on_delete=models.PROTECT)
     username = models.CharField(max_length=200, blank=False, unique=False)
     user = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True)
+    accepted = models.BooleanField(default=False)
