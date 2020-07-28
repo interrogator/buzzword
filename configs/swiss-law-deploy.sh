@@ -11,11 +11,13 @@ git checkout swisslaw
 git pull
 
 # build the image (note, data is still missing)
+DJANGO_SUPERUSER_PASSWORD="${@: -1}"
 sudo docker build - < Dockerfile --build-arg DJANGO_SUPERUSER_PASSWORD="${@: -1}" --no-cache -t buzzword:swisslaw
 
 # add settings and data in as volume
 ID=$(sudo docker run -itd -p 80:8000 \
     --mount type=bind,source="$(pwd)"/buzzword/settings.py,target=/buzzword/buzzword/settings.py \
+    --mount type=bind,source="$(pwd)"/db.sqlite3,target=/buzzword/db.sqlite3 \
     --mount type=bind,source="$(pwd)"/static/corpora,target=/buzzword/static/corpora \
     buzzword:swisslaw 2>&1)
 
