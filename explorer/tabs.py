@@ -193,7 +193,7 @@ def _build_dataset_space(df, config):
     )
     data_space = html.Div([search_space, conll_table])
     div = html.Div(id="dataset-container", children=data_space)
-    return html.Div(id="display-dataset", children=[div])
+    return html.Div(id="display-dataset-1", children=[div])
 
 
 def _build_frequencies_space(corpus, table, config):
