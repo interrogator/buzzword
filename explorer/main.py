@@ -156,10 +156,11 @@ def load_layout(slug, spec=False, set_and_register=True, return_layout=False):
     return app
 
 
-def get_layout(slug):
+def get_layout():
     """
     Wrapper to get layout
     """
+    slug = settings.BUZZWORD_SPECIFIC_CORPUS
     return load_layout(slug, return_layout=True)
 
 
