@@ -551,8 +551,7 @@ def make_explore_page(corpus, table, slug, spec=False):
     print(f"Corpus length (debug) {len(corpus)}")
     label = _make_search_name(config.name, len(corpus), dict(), 0)  # 0 == english
     search_from = [dict(value=0, label=label)]
-    sty = {**style.MARGIN_5_MONO, **style.FRONT}
-    show = html.Button("Show", id="show-this-dataset", style=sty)
+    show = html.Button("Show", id="show-this-dataset", style=style.MARGIN_5_MONO)
     show.title = "Show the selected corpus or search result in the Dataset tab"
     clear = html.Button("Clear history", id="clear-history", style=style.MARGIN_5_MONO)
     langselect = html.Div(

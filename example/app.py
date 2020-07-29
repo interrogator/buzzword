@@ -126,7 +126,8 @@ def _make_layout():
     layout = html.Div(children, className="col-12 col-md-12 col-lg-12 col-xl-12 col-xxl-12")
     layout = html.Div(layout, className="row")
     layout = html.Div(layout, className="container")
-    return dcc.Loading(layout, fullscreen=False)
+    return dcc.Loading(layout, fullscreen=False, id="example-loading")
+    # return layout
 
 
 def _chart_space(table):
@@ -162,15 +163,18 @@ def _freq_space(corpus, wordclass="NOUN"):
     table, columns, data = _quick_freq(corpus, wordclass=wordclass)
     style_index["if"]["column_id"] = table.index.name
 
-    freq_table = dash_table.DataTable(
+    freq_table = html.Div(
+        dcc.Loading(
+            id="freq-loading",
+            className="hide-loading",
+            fullscreen=False,
+            type="default",
+            children=[
+                dash_table.DataTable(
                 id="example-freq",
                 columns=columns,
                 data=data,
                 editable=False,
-                # style_cell={
-                #    **style.HORIZONTAL_PAD_5,
-                #    **{"maxWidth": "145px", "minWidth": "60px"},
-                # },
                 filter_action="native",
                 sort_action="native",
                 sort_mode="multi",
@@ -180,16 +184,21 @@ def _freq_space(corpus, wordclass="NOUN"):
                 page_size=10,
                 page_action="native",
                 fixed_rows={"headers": True, "data": 0},
-                # virtualization=True,
-                # style_table={"width": "40vw"},
                 style_header=style.BOLD_DARK,
-                style_cell_conditional=style.LEFT_ALIGN,
-                style_data_conditional=[style_index] + style.STRIPES,
+                style_cell={'width': "16%"},
+                style_cell_conditional=[
+                    {'if': {'column_id': 'lemma'},
+                     'width': '52%'}
+                ],
+                style_data_conditional=style.STRIPES,
                 merge_duplicate_headers=True,
                 # export_format="xlsx",
                 # export_headers="display",
                 css=[{"selector": ".show-hide", "rule": "display: none"}],
-            )
+                )
+            ]
+        )
+    )
 
     column = "col-4 col-md-4 col-lg-4 col-xl-4 col-xxl-4 float-left"
     freq_space = html.Div([select_wordclass, freq_table], style={}, className=column)
@@ -217,6 +226,8 @@ def _concordance_space(corpus):
     rule = "display: inline; white-space: inherit; " + "overflow: inherit; text-overflow: inherit;"
     conc_table = html.Div(
         dcc.Loading(
+            id="conc-loading",
+            className="hide-loading",
             fullscreen=False,
             type="default",
             children=[
@@ -271,12 +282,18 @@ def _quick_freq(corpus, wordclass="NOUN"):
     this_df = df.reset_index()
 
     columns = [
-        {"name": i, "id": i, "deletable": False, "hideable": True, "presentation": False}
-        for i in this_df.columns
+        {
+            "name": x,
+            "id": x,
+            "deletable": False,
+            "hideable": True,
+            "presentation": False,
+            "width": "15%" if i else "55%" 
+        } 
+        for i, x in enumerate(this_df.columns)
     ]
     data = this_df.to_dict("rows")
     return df, columns, data
-
 
 def _quick_concordance(corpus, query):
     df = corpus.just.word(query, exact_match=True, case=False)
@@ -305,20 +322,20 @@ app.layout = _make_layout()
 
 
 @app.expanded_callback(
-    [Output("example-conc", "columns"), Output("example-conc", "data")],
+    [Output("example-conc", "columns"), Output("example-conc", "data"), Output("example-loading", "className"), Output("freq-loading", "className"), Output("conc-loading", "className")],
     [Input("do-conc", "n_clicks")],
     [State("conc-query-string", "value")],
 )
 def _simple_concordance(do_conc, query, **kwargs):
     if not do_conc:
-        return no_update
+        return no_update, no_update, "hide-loading", "", ""
     try:
         corpus = _get_corpus(settings.BUZZWORD_SPECIFIC_CORPUS)
     # migrate handling
     except TypeError:
-        return [], []
+        return [], [], "hide-loading", "", ""
     columns, data = _quick_concordance(corpus, query.strip())
-    return columns, data
+    return columns, data, "hide-loading", "", ""
 
 
 @app.expanded_callback(
@@ -327,8 +344,10 @@ def _simple_concordance(do_conc, query, **kwargs):
     [],
 )
 def _simple_freq(wordclass, **kwargs):
+    from time import sleep
     if not wordclass:
         return no_update
+    sleep(2)
     try:
         corpus = _get_corpus(settings.BUZZWORD_SPECIFIC_CORPUS)
     # migrate handling

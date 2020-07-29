@@ -715,7 +715,7 @@ def _new_conc(
     if isinstance(corpus, pd.DataFrame):
         for feat in {"speaker", "year"}:
             if feat in corpus.columns:
-                met.append("speaker")
+                met.append(feat)
 
     conc = corpus.conc(show=show, metadata=met, window=(100, 100))
     conc = _add_links(conc, slug=slug, conc=True)
