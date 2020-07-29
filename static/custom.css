@@ -259,7 +259,3 @@ input:invalid {
 .login-password {
   width: 120px !important;
 }
-
-.hide-loading {
-  display: none;
-}

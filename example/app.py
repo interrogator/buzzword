@@ -163,41 +163,31 @@ def _freq_space(corpus, wordclass="NOUN"):
     table, columns, data = _quick_freq(corpus, wordclass=wordclass)
     style_index["if"]["column_id"] = table.index.name
 
-    freq_table = html.Div(
-        dcc.Loading(
-            id="freq-loading",
-            className="hide-loading",
-            fullscreen=False,
-            type="default",
-            children=[
-                dash_table.DataTable(
-                id="example-freq",
-                columns=columns,
-                data=data,
-                editable=False,
-                filter_action="native",
-                sort_action="native",
-                sort_mode="multi",
-                row_deletable=False,
-                selected_rows=[],
-                page_current=0,
-                page_size=10,
-                page_action="native",
-                fixed_rows={"headers": True, "data": 0},
-                style_header=style.BOLD_DARK,
-                style_cell={'width': "16%"},
-                style_cell_conditional=[
-                    {'if': {'column_id': 'lemma'},
-                     'width': '52%'}
-                ],
-                style_data_conditional=style.STRIPES,
-                merge_duplicate_headers=True,
-                # export_format="xlsx",
-                # export_headers="display",
-                css=[{"selector": ".show-hide", "rule": "display: none"}],
-                )
-            ]
-        )
+    freq_table = dash_table.DataTable(
+        id="example-freq",
+        columns=columns,
+        data=data,
+        editable=False,
+        filter_action="native",
+        sort_action="native",
+        sort_mode="multi",
+        row_deletable=False,
+        selected_rows=[],
+        page_current=0,
+        page_size=10,
+        page_action="native",
+        fixed_rows={"headers": True, "data": 0},
+        style_header=style.BOLD_DARK,
+        style_cell={'width': "16%"},
+        style_cell_conditional=[
+            {'if': {'column_id': 'lemma'},
+             'width': '52%'}
+        ],
+        style_data_conditional=style.STRIPES,
+        merge_duplicate_headers=True,
+        # export_format="xlsx",
+        # export_headers="display",
+        css=[{"selector": ".show-hide", "rule": "display: none"}],
     )
 
     column = "col-4 col-md-4 col-lg-4 col-xl-4 col-xxl-4 float-left"
@@ -224,45 +214,36 @@ def _concordance_space(corpus):
     style_data = [style.STRIPES[0], style.INDEX[0]] + style.CONC_LMR
     columns, data = _quick_concordance(corpus, "ordnung")
     rule = "display: inline; white-space: inherit; " + "overflow: inherit; text-overflow: inherit;"
-    conc_table = html.Div(
-        dcc.Loading(
-            id="conc-loading",
-            className="hide-loading",
-            fullscreen=False,
-            type="default",
-            children=[
-                dash_table.DataTable(
-                    id="example-conc",
-                    css=[
-                        {"selector": ".dash-cell div.dash-cell-value", "rule": rule},
-                        {"selector": ".show-hide", "rule": "display: none"},
-                    ],
-                    columns=columns,
-                    data=data,
-                    editable=False,
-                    style_cell={**style.HORIZONTAL_PAD_5, **{"minWidth": "60px"}},
-                    filter_action="native",
-                    sort_action="native",
-                    sort_mode="multi",
-                    row_deletable=True,
-                    selected_rows=[],
-                    page_action="native",
-                    fixed_rows={"headers": True, "data": 0},
-                    page_current=0,
-                    page_size=50,
-                    # virtualization=True,
-                    # style_table={'width': '50vw'},
-                    style_as_list_view=True,
-                    style_header=style.BOLD_DARK,
-                    style_cell_conditional=style.LEFT_ALIGN_CONC,
-                    style_data_conditional=style_data,
-                    merge_duplicate_headers=True,
-                    # export_format="xlsx",
-                    # export_headers="display",
-                )
+    conc_table = dash_table.DataTable(
+            id="example-conc",
+            css=[
+                {"selector": ".dash-cell div.dash-cell-value", "rule": rule},
+                {"selector": ".show-hide", "rule": "display: none"},
             ],
-        )
+            columns=columns,
+            data=data,
+            editable=False,
+            style_cell={**style.HORIZONTAL_PAD_5, **{"minWidth": "60px"}},
+            filter_action="native",
+            sort_action="native",
+            sort_mode="multi",
+            row_deletable=True,
+            selected_rows=[],
+            page_action="native",
+            fixed_rows={"headers": True, "data": 0},
+            page_current=0,
+            page_size=50,
+            # virtualization=True,
+            # style_table={'width': '50vw'},
+            style_as_list_view=True,
+            style_header=style.BOLD_DARK,
+            style_cell_conditional=style.LEFT_ALIGN_CONC,
+            style_data_conditional=style_data,
+            merge_duplicate_headers=True,
+            # export_format="xlsx",
+            # export_headers="display",
     )
+
     windowed = {
         "maxWidth": "80vw",
         "marginLeft": "50px",
@@ -322,20 +303,20 @@ app.layout = _make_layout()
 
 
 @app.expanded_callback(
-    [Output("example-conc", "columns"), Output("example-conc", "data"), Output("example-loading", "className"), Output("freq-loading", "className"), Output("conc-loading", "className")],
+    [Output("example-conc", "columns"), Output("example-conc", "data")],
     [Input("do-conc", "n_clicks")],
     [State("conc-query-string", "value")],
 )
 def _simple_concordance(do_conc, query, **kwargs):
     if not do_conc:
-        return no_update, no_update, "hide-loading", "", ""
+        return no_update, no_update
     try:
         corpus = _get_corpus(settings.BUZZWORD_SPECIFIC_CORPUS)
     # migrate handling
     except TypeError:
-        return [], [], "hide-loading", "", ""
+        return [], []
     columns, data = _quick_concordance(corpus, query.strip())
-    return columns, data, "hide-loading", "", ""
+    return columns, data
 
 
 @app.expanded_callback(
