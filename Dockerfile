@@ -3,6 +3,8 @@ FROM python:3.7-slim-buster
 RUN apt-get update && \
     apt-get install -y git build-essential nginx tesseract-ocr libtesseract-dev
 
+RUN pip install --upgrade pip
+
 WORKDIR /
 
 RUN \
