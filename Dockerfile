@@ -24,8 +24,7 @@ WORKDIR /buzzword
 
 RUN \
     cp configs/swiss-law.json corpora.json && \
-    echo "BUZZWORD_SPECIFIC_CORPUS = 'swiss-law'" >> buzzword/settings.py && \
-    echo "DEBUG = False" >> buzzword/settings.py
+    echo "BUZZWORD_SPECIFIC_CORPUS = 'swiss-law'" >> buzzword/settings.py
 
 RUN chown www-data:www-data . && \
     chmod 777 . && \
