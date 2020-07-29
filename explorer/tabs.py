@@ -346,12 +346,10 @@ def _build_frequencies_space(corpus, table, config):
     return html.Div(id="display-frequencies", children=[div])
 
 
-def _build_concordance_space(df, config):
+def _build_concordance_space(df, conc, config, slug):
     """
     Div representing the concordance tab
     """
-    if isinstance(df, Corpus):
-        df = df.files[0].load()
     cols = _get_cols(df, config.add_governor)
     show_check = dcc.Dropdown(
         multi=True,
@@ -365,35 +363,11 @@ def _build_concordance_space(df, config):
     toolbar = [html.Div(i, style=tstyle) for i in [show_check, update]]
     conc_space = html.Div(toolbar, style=style.VERTICAL_MARGINS)
 
-    # todo, not respected for some reason?
+    num_conc = len(conc)
     max_row, max_col = settings.TABLE_SIZE
     max_conc = settings.MAX_CONC
+    conc = conc.iloc[:settings.PAGE_SIZE]
 
-    meta = ["file", "s", "i"]
-    if "speaker" in df.columns:
-        meta.append("speaker")
-
-    # do an initial search, potentially from corpora.json
-    # default to, get nouns
-    if config.initial_query:
-        query = json.loads(config.initial_query)
-    else:
-        query = {"target": "x", "query": "NOUN"}
-
-    print(f"Making concordance (max {max_conc}) for {config.name} ...")
-    df = getattr(df.just, query["target"])(query["query"])
-    df = df.conc(metadata=meta, window=(100, 100), n=max_conc)
-    df["file"] = df["file"].apply(os.path.basename)
-    df["file"] = df["file"].str.replace(".conllu", "", regex=False)
-    # why does this fail?
-    if config.pdfs:
-        df = _add_links(df, slug=config.slug, conc=True)
-    print("Done!")
-
-    just = ["left", "match", "right", "file", "s", "i"]
-    if "speaker" in df.columns:
-        just.append("speaker")
-    df = df[just]
     columns = [
         {
             "name": _capitalize_first(SHORT_TO_COL_NAME.get(i, i)),
@@ -402,10 +376,10 @@ def _build_concordance_space(df, config):
             "hideable": True,
             "presentation": ("markdown" if i == "match" else None)
         }
-        for i in df.columns
+        for i in conc.columns
     ]
     style_data = [style.STRIPES[0], style.INDEX[0]] + style.CONC_LMR
-    data = df.to_dict("rows")
+    data = conc.to_dict("rows")
     rule = (
         "display: inline; white-space: inherit; "
         + "overflow: inherit; text-overflow: inherit;"
@@ -428,9 +402,10 @@ def _build_concordance_space(df, config):
                 page_action="custom",
                 fixed_rows={"headers": True, "data": 0},
                 page_current=0,
-                page_size=12,
+                page_size=settings.PAGE_SIZE,
+                page_count=ceil(num_conc/settings.PAGE_SIZE),
                 #virtualization=True,
-                style_table={"overflow": "hidden"},
+                # style_table={"overflow": "hidden"},
                 style_as_list_view=True,
                 style_header=style.BOLD_DARK,
                 style_cell_conditional=style.LEFT_ALIGN_CONC,
@@ -534,7 +509,7 @@ def _build_chart_space(table, iterate_over=None, width="95vw", no_from_select=Fa
     return html.Div(id="display-chart", children=[div])
 
 
-def make_explore_page(corpus, table, slug, spec=False):
+def make_explore_page(corpus, table, conc, slug, spec=False):
     """
     Create every tab, as well as the top rows of stuff, and tab container
 
@@ -547,7 +522,7 @@ def make_explore_page(corpus, table, slug, spec=False):
     dataset = _build_dataset_space(corpus, config)
     frequencies = _build_frequencies_space(corpus, table, config)
     chart = _build_chart_space(table)
-    concordance = _build_concordance_space(corpus, config)
+    concordance = _build_concordance_space(corpus, conc, config, slug)
     print(f"Corpus length (debug) {len(corpus)}")
     label = _make_search_name(config.name, len(corpus), dict(), 0)  # 0 == english
     search_from = [dict(value=0, label=label)]

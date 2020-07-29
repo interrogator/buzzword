@@ -6,6 +6,8 @@ buzzword explorer: run on startup, corpus loading and app initialisation
 import json
 import os
 
+import pandas as pd
+
 from buzz.corpus import Collection
 from buzz.constants import LANGUAGES, AVAILABLE_MODELS
 
@@ -56,14 +58,15 @@ def _load_corpora():
 
 def _get_or_load_corpora(slug=None):
     try:
-        from start.apps import corpora, initial_tables
+        from start.apps import corpora, initial_tables, initial_concs
         if corpora:
-            return corpora, initial_tables
+            return corpora, initial_tables, initial_concs
         else:
             raise ValueError("Data not loaded yet.")
     except:
         corpora = dict()
         initial_tables = dict()
+        initial_concs = dict()
         corpora_file = os.path.abspath(settings.CORPORA_FILE)
         print(f"* Loading corpora, using corpus configuration at: {corpora_file}")
         with open(corpora_file) as fo:
@@ -81,7 +84,26 @@ def _get_or_load_corpora(slug=None):
             initial_table = corpus.table(**display)
             initial_table = initial_table.drop("file", axis=1, errors="ignore")
             initial_tables[meta["slug"]] = initial_table
-        return corpora, initial_tables
+
+            try:
+                search = json.loads(corpus["initial_query"])
+            except:
+                search = {"target": "x", "query": "NOUN"}
+            result = getattr(corpus.just, search["target"])(search["query"])
+
+            met = ["file", "s", "i"]
+            if isinstance(corpus, pd.DataFrame):
+                for feat in {"speaker", "year"}:
+                    if feat in corpus.columns:
+                        met.append(feat)
+            print(f"* Generating initial conc for {name} using {search}")
+            conc = result.conc(n=settings.MAX_CONC, metadata=met, window=(100, 100))
+            conc["file"] = conc["file"].apply(os.path.basename)
+            conc["file"] = conc["file"].str.replace(".conllu", "", regex=False)
+            if meta["pdfs"]:
+                conc = _add_links(conc, slug=meta["slug"], conc=True)
+            initial_concs[meta["slug"]] = conc
+        return corpora, initial_tables, initial_concs
 
 
 def _load_explorer_data(multiprocess=False):
@@ -144,10 +166,11 @@ def load_layout(slug, spec=False, set_and_register=True, return_layout=False):
     from .tabs import make_explore_page
     fullpath = os.path.abspath(settings.CORPORA_FILE)
     print(f"Using django corpus configuration at: {fullpath}")
-    corpora, initial_tables = _get_or_load_corpora(slug)
+    corpora, initial_tables, initial_concs = _get_or_load_corpora(slug)
     corpus = corpora[slug]
     table = initial_tables[slug]
-    layout = make_explore_page(corpus, table, slug, spec=spec)
+    conc = initial_concs[slug]
+    layout = make_explore_page(corpus, table, conc, slug, spec=spec)
     if return_layout:
         return layout
     if set_and_register:

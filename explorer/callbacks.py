@@ -36,7 +36,7 @@ from .strings import _make_search_name, _make_table_name, _search_error, _table_
 from buzzword.utils import management_handling
 
 if not management_handling():
-    from start.apps import corpora, initial_tables
+    from start.apps import corpora, initial_tables, initial_concs
 
 # we can't keep tables in dcc.store, they are too big. so we keep all here with
 # a tuple that can identify them (ideally, even dealing with user sessions)
@@ -700,27 +700,36 @@ def _new_conc(
     if n_clicks is None and page_current == conc_page and not sort_by and not filter:
         return [no_update] * 6
 
-    # input validation
     msg = False
-    if not show and not sort_by and not filter:
-        msg = "No choice made for match formatting."
-        return no_update, no_update, True, msg, no_update, no_update
-    if not search_from and not sort_by and not filter:
-        msg = "Cannot concordance whole corpus. Please do a search first."
-        return no_update, no_update, True, msg, no_update, no_update
 
-    specs, corpus = _get_specs_and_corpus(search_from, session_search, corpora, slug)
+    if not show:
+        show = "w"
 
-    met = ["file", "s", "i"]
-    if isinstance(corpus, pd.DataFrame):
-        for feat in {"speaker", "year"}:
-            if feat in corpus.columns:
-                met.append(feat)
+    if n_clicks and not search_from and show != "w":
+        msg = "You cannot concordance an entire corpus. Please do a search first."
+        return no_update, no_update, bool(msg), msg, n_clicks, page_current
 
-    conc = corpus.conc(show=show, metadata=met, window=(100, 100))
-    conc = _add_links(conc, slug=slug, conc=True)
-    conc["file"] = conc["file"].apply(os.path.basename)
-    conc["file"] = conc["file"].str.replace(".conllu", "", regex=False)
+    if not search_from and show == "w":
+        conc = initial_concs[slug]
+    else:
+        specs, corpus = _get_specs_and_corpus(search_from, session_search, corpora, slug)
+        met = ["file", "s", "i"]
+        if isinstance(corpus, pd.DataFrame):
+            for feat in {"speaker", "year"}:
+                if feat in corpus.columns:
+                    met.append(feat)
+
+        conc = corpus.conc(show=show, metadata=met, window=(100, 100), n=settings.MAX_CONC)
+        conc = _add_links(conc, slug=slug, conc=True)
+        conc["file"] = conc["file"].apply(os.path.basename)
+        conc["file"] = conc["file"].str.replace(".conllu", "", regex=False)
+
+    # if just changing page
+    if conc_page != page_current:
+        corpus_size = len(conc)
+        conc = _correct_page(conc, page_current, settings.PAGE_SIZE)
+        cols, data = _update_concordance(conc, True)
+        return cols, data, bool(msg), msg, n_clicks, page_current
 
     # yes, these are named corpus, but they are fine on conc as well
     conc, corpus_sorted = _sort_corpus(conc, sort_by, False)
