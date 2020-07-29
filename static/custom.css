@@ -211,8 +211,9 @@ input:invalid {
 }
 
 #conll-view .previous-next-container {
-  position:fixed;
-  bottom:0;
+  position: fixed;
+  bottom: 0;
+  right: 0;
   margin-left: 80%;
   background-color: white;
 }
