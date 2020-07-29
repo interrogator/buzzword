@@ -155,7 +155,6 @@ def _freq_space(corpus, wordclass="NOUN"):
         className="pull-right",
         style={
             **style.MARGIN_5_MONO,
-            **style.FRONT,
             **{"marginLeft": "0px", "width": "100%", "marginBottom": "5px"},
         },
     )

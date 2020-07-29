@@ -84,7 +84,7 @@ def _build_dataset_space(df, config):
             value="w",
             # title="Select the column you wish to search (e.g. word/lemma/POS) "
             # + ", or query language (e.g. Tgrep2, Depgrep)",
-            style={"width": "200px", "fontFamily": "monospace", **style.NEAR_FRONT},
+            style={"width": "200px", "fontFamily": "monospace"},
         ),
         # the matching/not matching button and its text
         html.Div(
@@ -583,7 +583,7 @@ def make_explore_page(corpus, table, slug, spec=False):
         "width": "50%",
         **style.HORIZONTAL_PAD_5,
         **style.BLOCK_MIDDLE_35,
-        **style.FRONT,
+        **style.NEAR_FRONT,
     }
     # remove the paddingTop, which is not needed in explore view
     nav = {k: v for k, v in style.NAV_HEADER.items() if k != "paddingTop"}
