@@ -29,7 +29,7 @@ sudo docker container kill $(docker ps -q)
 ID=$(sudo docker run -itd -p 80:8000 \
     --mount type=bind,source="$(pwd)"/buzzword/settings.py,target=/buzzword/buzzword/settings.py \
     --mount type=bind,source="$(pwd)"/static/corpora,target=/buzzword/static/corpora \
-    --mount type=bind,source="$(pwd)"/db.sqlite3,target=/buzzword/db.sqlite3 \
+    # --mount type=bind,source="$(pwd)"/db.sqlite3,target=/buzzword/db.sqlite3 \
     buzzword:swisslaw 2>&1)
 
 # all the commands we need to do to get configured
