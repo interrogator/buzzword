@@ -9,6 +9,12 @@ echo "MAKE SURE YOU PASSED IN PASSWORD: ${@: -1}"
 
 PASSWORD="${@: -1}"
 
+# ensure db file is there
+touch db.sqlite3
+sudo chown www-data:www-data db.sqlite3
+sudo chmod 777 db.sqlite3
+
+# get latest repo
 git checkout swisslaw
 git pull
 
@@ -19,12 +25,14 @@ sudo docker build - < Dockerfile --build-arg DJANGO_SUPERUSER_PASSWORD=$PASSWORD
 # now kill the old container if running
 sudo docker container kill $(docker ps -q)
 
-# add settings and data in as volume
+# add settings, db and data in as volume
 ID=$(sudo docker run -itd -p 80:8000 \
     --mount type=bind,source="$(pwd)"/buzzword/settings.py,target=/buzzword/buzzword/settings.py \
     --mount type=bind,source="$(pwd)"/static/corpora,target=/buzzword/static/corpora \
+    --mount type=bind,source="$(pwd)"/db.sqlite3,target=/buzzword/db.sqlite3 \
     buzzword:swisslaw 2>&1)
 
+# all the commands we need to do to get configured
 sudo docker exec -it $ID python manage.py migrate
 sudo docker exec -it $ID python manage.py load_languages
 sudo docker exec -it $ID python manage.py load_corpora
