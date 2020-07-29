@@ -618,6 +618,8 @@ def _new_table(
             table.index = table.index.to_series().apply(os.path.basename)
             table.index = table.index.to_series().str.replace(".conllu", "", regex=False)
 
+        table = table.reset_index()
+
         # cannot hash a corpus, which relative may be.
         # none will denote corpus as reference
         if isinstance(relative, pd.DataFrame):
