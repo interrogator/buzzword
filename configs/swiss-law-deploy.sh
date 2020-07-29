@@ -23,13 +23,12 @@ DJANGO_SUPERUSER_PASSWORD="${@: -1}"
 sudo docker build - < Dockerfile --build-arg DJANGO_SUPERUSER_PASSWORD=$PASSWORD --no-cache -t buzzword:swisslaw
 
 # now kill the old container if running
-sudo docker container kill $(docker ps -q)
+# sudo docker container kill $(docker ps -q)
 
 # add settings, db and data in as volume
 ID=$(sudo docker run -itd -p 80:8000 \
     --mount type=bind,source="$(pwd)"/buzzword/settings.py,target=/buzzword/buzzword/settings.py \
     --mount type=bind,source="$(pwd)"/static/corpora,target=/buzzword/static/corpora \
-    # --mount type=bind,source="$(pwd)"/db.sqlite3,target=/buzzword/db.sqlite3 \
     buzzword:swisslaw 2>&1)
 
 # all the commands we need to do to get configured
