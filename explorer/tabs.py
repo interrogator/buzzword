@@ -249,7 +249,13 @@ def _build_frequencies_space(corpus, table, config):
     max_row, max_col = settings.TABLE_SIZE
     print(f"Making {max_row}x{max_col} table for {config.name} ...")
     table = table.iloc[:100, :100]
+
+    style_index = style.FILE_INDEX
+    style_index["if"]["column_id"] = "year"
+    index_name = table.index.name
+
     table = table.reset_index()
+
     if "file" in table.columns:
         table["file"] = table["file"].apply(os.path.basename)
         table["file"] = table["file"].str.rstrip(".conllu")
@@ -257,12 +263,10 @@ def _build_frequencies_space(corpus, table, config):
             table = _add_links(table, slug=config.slug, conc=False)
         except ObjectDoesNotExist:
             pass
+
     columns, data = _update_frequencies(table, False, False)
     print("Done!")
 
-    # modify the style_index used for other tables to just work for this index
-    style_index = style.FILE_INDEX
-    style_index["if"]["column_id"] = table.index.name
     freq_table = dcc.Loading(
         type="default",
         children=[
@@ -288,7 +292,12 @@ def _build_frequencies_space(corpus, table, config):
                 #style_table={"overflowY": "scroll", "overflowX": "hidden"},
                 style_header=style.BOLD_DARK,
                 style_cell_conditional=style.LEFT_ALIGN,
-                style_data_conditional=[style_index] + style.STRIPES,
+                style_data_conditional=[{"if": {"column_id": index_name},
+                                            "backgroundColor": "#fafafa",
+                                            "color": "#555555",
+                                            "fontWeight": "bold",
+                                            "width": "20%",
+                                        }] + style.STRIPES,
                 merge_duplicate_headers=True,
                 #export_format="xlsx",
                 #export_headers="display",

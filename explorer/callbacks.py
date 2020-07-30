@@ -33,6 +33,8 @@ from .lang import LANGUAGES
 from .main import app
 from .strings import _make_search_name, _make_table_name, _search_error, _table_error
 
+from . import style
+
 from buzzword.utils import management_handling
 
 if not management_handling():
@@ -487,6 +489,7 @@ def _new_search(
         Output("freq-table", "row_deletable"),
         Output("session-tables", "data"),
         Output("session-clicks-table", "data"),
+        #Output("freq-table", "style_data_conditional")
     ],
     [Input("table-button", "n_clicks"), Input("freq-table", "data_previous"),],
     [
@@ -628,8 +631,12 @@ def _new_table(
         FREQUENCY_TABLES[this_table_tuple] = table
 
     if updating:
-        cols, data = no_update, no_update
+        cols, data, style_index = no_update, no_update, no_update
     else:
+
+        style_index = style.FILE_INDEX
+        style_index["if"]["column_id"] = table.index.name
+
         table = table.reset_index()
         max_row, max_col = settings.TABLE_SIZE
         tab = table.iloc[:max_row, :max_col]
@@ -640,6 +647,7 @@ def _new_table(
         table_name = _make_table_name(this_table_list)
         option = dict(value=idx, label=table_name)
         table_from_options.append(option)
+
     return (
         cols,
         data,
@@ -655,6 +663,7 @@ def _new_table(
         row_deletable,
         session_tables,
         session_click_table,
+        #style_index
     )
 
 
