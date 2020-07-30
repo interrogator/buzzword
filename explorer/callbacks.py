@@ -618,8 +618,6 @@ def _new_table(
             table.index = table.index.to_series().apply(os.path.basename)
             table.index = table.index.to_series().str.replace(".conllu", "", regex=False)
 
-        table = table.reset_index()
-
         # cannot hash a corpus, which relative may be.
         # none will denote corpus as reference
         if isinstance(relative, pd.DataFrame):
@@ -632,6 +630,7 @@ def _new_table(
     if updating:
         cols, data = no_update, no_update
     else:
+        table = table.reset_index()
         max_row, max_col = settings.TABLE_SIZE
         tab = table.iloc[:max_row, :max_col]
         # todo: swisslaw, multi and content
