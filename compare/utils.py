@@ -89,35 +89,67 @@ def store_buzz_raw(raw, slug, pdf_path, unwordwrap=False):
     return outpath
 
 
-def dump_latest(parse=False):
+def dump_latest(parse=False, slug=None):
     """
     Get the latest OCR corrections and build a parseable corpus
 
     Optionally, parse it
     """
-    slugs = set(OCRUpdate.objects.values_list("slug"))
+    slugs = {slug} if slug else set(OCRUpdate.objects.values_list("slug"))
     for slug in slugs:
         print(f"Storing latest and parsing: {slug}")
-        slug = slug[0]  # the set is a weird tuple thing
+        if isinstance(slug, tuple):
+            slug = slug[0]  # the set is a weird tuple thing
         corp = Corpus.objects.get(slug=slug)
         if not corp.pdfs:
             continue
         lang = corp.language.short
         # get the associated pdfs
         pdfs = PDF.objects.filter(slug=slug)
+        to_be_parsed = set()
+        old_versions = set()
         for pdf in pdfs:
-            updates = OCRUpdate.objects.filter(pdf=pdf, slug=slug)
-            plaintext = updates.latest("timestamp").text
-            store_buzz_raw(plaintext, slug, pdf.path, unwordwrap=True)
+            updates = OCRUpdate.objects.filter(pdf=pdf, slug=slug, accepted=True)
+            if not updates:
+                msg = f"No accepted OCR for {pdf.path}. Something is very wrong."
+                print(msg)
+                raise ValueError(msg)
+            # get latest accepted
+            latest = updates.latest("timestamp")
+            if latest.currently_parsed:
+                print(f"Latest version of {pdf.path} OCR is already parsed")
+            else:
+                store_buzz_raw(latest.text, slug, pdf.path, unwordwrap=True)
+                to_be_parsed.add(latest)
+            all_versions = OCRUpdate.objects.filter(pdf=pdf, slug=slug)
+            for version in all_versions:
+                if version != latest:
+                    old_versions.add(version)
         if parse:
             parsed_dir = os.path.expanduser(os.path.join(corp.path, "conllu"))
-            if os.path.isdir(parsed_dir):
-                shutil.rmtree(parsed_dir)
-            print(f"Parsing ({lang}): {corp.path}")
+            # now delete the conllu files that need to be reparsed
+            if not len(to_be_parsed):
+                print("Nothing to parse!")
+                return
+            print(f"Parsing {len(to_be_parsed)} files for {slug}...")
+            for ocr_update in to_be_parsed:
+                filename = ocr_update.pdf.name + ".conllu"
+                filepath = os.path.join(parsed_dir, filename)
+                if os.path.isfile(filepath):
+                    print(f"Deleting {filepath} so we can reparse it...")
+                    os.remove(filepath)
             coll = Collection(corp.path)
-            parsed = coll.parse(language=lang, multiprocess=False)
+            print(f"Parsing ({lang}): {corp.path}")
+            parsed = coll.parse(language=lang, multiprocess=False, just_missing=True)
             corp.parsed = True
             corp.save()
+            # now store info about which update is currently parsed
+            for update in to_be_parsed:
+                update.currently_parsed = True
+                update.save()
+            for old_version in old_versions:
+                old_version.currently_parsed = False
+                old_version.save()
             return parsed
 
 

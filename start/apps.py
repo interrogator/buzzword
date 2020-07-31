@@ -12,7 +12,7 @@ class StartConfig(AppConfig):
         if not management_handling():
             global corpora, initial_tables, initial_concs
             print("Loading corpora in AppConfig")
-            corpora, initial_tables, initial_concs = _get_or_load_corpora()
+            corpora, initial_tables, initial_concs = _get_or_load_corpora(force=False)
             print("AppConfig loaded")
         else:
             print("Not loading data because this is a management command.")

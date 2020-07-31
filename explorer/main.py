@@ -56,8 +56,10 @@ def _load_corpora():
         modelled.save()
 
 
-def _get_or_load_corpora(slug=None):
+def _get_or_load_corpora(slug=None, force=False):
     try:
+        if force:
+            raise Exception("You should never see this error.")
         from start.apps import corpora, initial_tables, initial_concs
         if corpora:
             return corpora, initial_tables, initial_concs
@@ -72,9 +74,13 @@ def _get_or_load_corpora(slug=None):
         with open(corpora_file) as fo:
             data = json.load(fo)
         for name, meta in data.items():
-            if slug and meta["slug"] != slug:
+            if (slug or force) and meta["slug"] != slug:
                 continue
-            corpus = Collection(meta["path"]).conllu.load(multiprocess=False)
+            corpus = Collection(meta["path"])
+            if not corpus.conllu:
+                print(f"No parsed data at {corpus.path}")
+                continue
+            corpus = corpus.conllu.load(multiprocess=False)
             corpora[meta["slug"]] = corpus
             try:
                 display = json.loads(corpus["initial_table"])
@@ -155,7 +161,7 @@ def _load_explorer_data(multiprocess=False):
     return corpora, initial_tables
 
 
-def load_layout(slug, spec=False, set_and_register=True, return_layout=False):
+def load_layout(slug, spec=False, set_and_register=True, return_layout=False, force=False):
     """
     Django can import this function to set the correct dataset on explore page
 
@@ -166,7 +172,7 @@ def load_layout(slug, spec=False, set_and_register=True, return_layout=False):
     from .tabs import make_explore_page
     fullpath = os.path.abspath(settings.CORPORA_FILE)
     print(f"Using django corpus configuration at: {fullpath}")
-    corpora, initial_tables, initial_concs = _get_or_load_corpora(slug)
+    corpora, initial_tables, initial_concs = _get_or_load_corpora(slug, force=force)
     corpus = corpora[slug]
     table = initial_tables[slug]
     conc = initial_concs[slug]
@@ -187,21 +193,21 @@ def get_layout():
     return load_layout(slug, return_layout=True)
 
 
-def load_explorer_app():
+def load_explorer_app(force=False):
     """
     Triggered during runserver, reload
     """
     from explore.models import Corpus
     _load_languages()
     _load_corpora()
-    _get_or_load_corpora()
+    _get_or_load_corpora(force=force)
     # this can potentially save time: generate layouts for all datasets
     # before the pages are visited. comes at expense of some memory,
     # but the app should obviously be able to handle all datasets in use
     if settings.LOAD_LAYOUTS:
         for corpus in Corpus.objects.all():
             if not corpus.disabled:
-                load_layout(corpus.slug, set_and_register=True)
+                load_layout(corpus.slug, set_and_register=True, force=force)
 
 
 app = DjangoDash("buzzword", suppress_callback_exceptions=True)

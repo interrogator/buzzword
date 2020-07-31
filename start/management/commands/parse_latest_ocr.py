@@ -14,4 +14,6 @@ class Command(RunServerCommand):
         print("Dumping and parsing latest OCR")
         #fullpath = os.path.abspath(settings.CORPORA_FILE)
         #_load_corpora(fullpath)
-        dump_latest(parse=True)
+        parsed = dump_latest(parse=True)
+        if not parsed:
+            print("Nothing to parse!")

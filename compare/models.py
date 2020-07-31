@@ -14,7 +14,7 @@ class PDF(models.Model):
         verbose_name = "PDF"
 
     slug = models.SlugField(max_length=255, unique=False)
-    path = models.TextField()
+    path = models.TextField(unique=True)
     name = models.CharField(max_length=200)
     num = models.IntegerField()
 
@@ -26,7 +26,7 @@ class TIF(models.Model):
         verbose_name = "TIF"
 
     slug = models.SlugField(max_length=255, unique=False)
-    path = models.TextField()
+    path = models.TextField(unique=True)
     name = models.CharField(max_length=200)
     num = models.IntegerField()
 
@@ -46,3 +46,4 @@ class OCRUpdate(models.Model):
     username = models.CharField(max_length=200, blank=False, unique=False)
     user = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True)
     accepted = models.BooleanField(default=False)
+    currently_parsed = models.BooleanField(default=False)
