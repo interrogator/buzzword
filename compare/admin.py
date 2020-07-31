@@ -23,11 +23,7 @@ class PostAdmin(admin.ModelAdmin):
 
 @admin.register(OCRUpdate)
 class OCRUpdateAdmin(admin.ModelAdmin):
-    list_display = ["username", "user", "accepted", "slug", "commit_msg", "timestamp", "previous", "text"]
-    #formfield_overrides = {
-    #    MartorField: {"widget": AdminMartorWidget},
-    #    models.TextField: {"widget": AdminMartorWidget},
-    #}
+    list_display = ["username", "accepted", "slug", "commit_msg", "timestamp", "previous", "text"]
 
     actions = ["accept_correction", "parse_latest"]
 
@@ -45,14 +41,15 @@ class OCRUpdateAdmin(admin.ModelAdmin):
         """
         slug = settings.BUZZWORD_SPECIFIC_CORPUS
         slugs = {slug}
-        msg = f"'{Corpus.objects.get(slug=slug).name}' reparsed."
+        
         for slug in slugs:
-            parsed = dump_latest(slug=slug, parse=True)
-            if not parsed:
+            num_parsed = dump_latest(slug=slug, parse=True)
+            if not num_parsed:
                 msg = "Nothing new to parse."
-            #_get_or_load_corpora(slug=slug, force=True)
+            else:
+                msg = f"{num_parsed} files reparsed for {Corpus.objects.get(slug=slug).name}"
+                self.message_user(request, msg, messages.SUCCESS)
             load_explorer_app(force=True)
-        self.message_user(request, msg, messages.SUCCESS)
 
 
     accept_correction.short_description = "Accept OCR update"
