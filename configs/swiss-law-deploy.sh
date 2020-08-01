@@ -38,10 +38,12 @@ sudo docker build - < Dockerfile --no-cache -t $TAG
 sudo docker stop $NAME
 sudo docker container rm $NAME
 # sudo docker container kill $(docker ps -q)
+touch db.sqlite3
 
 # add settings, db and data in as volume
 ID=$(sudo docker run -itd -p 8080:8000 \
     --mount type=bind,source="$(pwd)"/buzzword/settings.py,target=/buzzword/buzzword/settings.py \
+    --mount type=bind,source="$(pwd)"/db.sqlite3,target=/buzzword/db.sqlite3 \
     --mount type=bind,source="$(pwd)"/static/corpora,target=/buzzword/static/corpora \
     -e "DJANGO_SUPERUSER_PASSWORD=$DJANGO_SUPERUSER_PASSWORD" \
     --name $NAME \

@@ -9,7 +9,7 @@
     "date": "1809",
     "load": true,
     "url": "https://en.wikipedia.org/wiki/Switzerland",
-    "initial_table": {"show": "x", "subcorpora": "file"},
+    "initial_table": {"show": "x", "subcorpora": "year"},
     "initial_query": {"target": "x", "query": "VERB"},
     "pdfs": true
   }

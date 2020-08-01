@@ -150,7 +150,7 @@ def dump_latest(parse=False, slug=None):
             for old_version in old_versions:
                 old_version.currently_parsed = False
                 old_version.save()
-            return parsed
+            return len(to_be_parsed)
 
 
 def _is_meaningful(plaintext, language):
