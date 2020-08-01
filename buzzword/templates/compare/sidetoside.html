@@ -25,6 +25,9 @@
 
 <div style={% if not messages %} "margin-top:20px;" {% endif %}>
     <div class="container compare-container">
+        <!--this is how we'd do a pdf with viewerjs. not doing now, since it doesn't seem to provide many new features, and maybe exposes pagination we need to handle this ourselves.
+            make sure there is static/ViewerJs, and then:
+        <iframe src = "{{ pdf_filepath }}" width='400' height='300' allowfullscreen webkitallowfullscreen></iframe>-->
       <div class="row" style="padding-bottom:10px">
         <div class="col-sm">
             <div id="pdf-here">
@@ -51,4 +54,3 @@
     </div>
 </div>
 {% endblock %}
-

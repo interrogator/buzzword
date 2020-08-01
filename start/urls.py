@@ -19,7 +19,8 @@ def _register_urls():
     paths = f"^(?P<slug>{slugs})/"
 
     urlpatterns = [
-        re_path(paths, views.start_specific, name="start_specific")
+        re_path(paths, views.start_specific, name="start_specific"),
+        path("user/<str:username>/", views.user_profile, name="user_profile")
     ]
 
     # in specific mode, disallow the homepage, redirecting always to the specific

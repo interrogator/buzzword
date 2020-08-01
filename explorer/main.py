@@ -71,6 +71,7 @@ def _get_or_load_corpora(slug=None, force=False):
         initial_concs = dict()
         corpora_file = os.path.abspath(settings.CORPORA_FILE)
         print(f"* Loading corpora, using corpus configuration at: {corpora_file}")
+        
         with open(corpora_file) as fo:
             data = json.load(fo)
         for name, meta in data.items():

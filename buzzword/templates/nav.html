@@ -51,8 +51,8 @@
     {% if user.is_authenticated %}
     <div class="navbar-collapse collapse w-20 order-2 dual-collapse2">
         <ul class="navbar-nav mr-right">
-            <li class="nav-item">
-                <a style="cursor: default;" class="nav-link">{{ user.username }}</a>
+            <li class="nav-item {% if navbar == 'user' %}active{% endif %}">
+                <a class="nav-link" href="/user/{{user.username}}">{{ user.username }}</a>
             </li>
         <a class="btn btn-default logout" href="{% url 'logout' %}">Logout</a>
         </ul>

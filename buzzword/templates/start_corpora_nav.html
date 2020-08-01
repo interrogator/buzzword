@@ -1,0 +1,32 @@
+<div class="pagination">
+    <span class="step-links" style="width:100%">
+        {% if page_obj.has_previous %}
+            <a align='left' type='button' class='btn btn-primary' href="?page=1{{ spec }}">&laquo; first</a>
+            <a align='left' type='button' class='btn btn-primary' href="?page={{ page_obj.previous_page_number }}{{ spec }}">previous</a>
+        {% else %}
+            <a align='left' type='button' disabled class='btn btn-primary'>&laquo; first</a>
+            <a align='left' type='button' disabled class='btn btn-primary'>previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+
+        <span class="goto" align="right" style="margin-left: 50px">
+            Goto:
+            <form method="GET" align="right" style="display:inline-block;">
+                <input type="search" name="q" value="{{ request.GET.q }}" placeholder="Search..." aria-label="Search" id="search">
+                <button class="btn btn-primary" type="submit" name="action">Search</button>
+
+            </form>
+        </span>
+
+        {% if page_obj.has_next %}
+            <a align='right' type='button' class='btn btn-primary float-right' href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+            <a align='right' type='button' style="margin-right: 3px !important;" class='btn btn-primary float-right' href="?page={{ page_obj.next_page_number }}">next</a>
+        {% else %}
+            <a align='right' type='button' disabled class='btn btn-primary float-right'>last &raquo;</a>
+            <a align='right' type='button' style="margin-right: 3px !important;" disabled class='btn btn-primary float-right'>next</a>
+        {% endif %}
+    </span>
+</div>

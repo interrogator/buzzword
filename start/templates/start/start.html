@@ -17,18 +17,12 @@
     <br>
     <br>
     <div>
-    <!-- Search functionality -->
-        <nav class="navbar navbar-light justify-content-center mt-4">
-          <form class="form-inline">
-            <input class="form-control mr-sm-2" type="search" placeholder="Type a name" aria-label="Search" id="search">
-            <!-- <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button> -->
-          </form>
-        </nav>
 
         <!-- Cards -->
         <div class="layout-margin-8 mt-5">
           <div class="card-deck">
-            {% for corpus in corpora %}
+            <div class="card-columns">
+            {% for corpus in page_obj.object_list %}
             <div class="card card-shadow text-center">
               <div class="card-body">
                 <h4 class="card-title">{{corpus.name}}</h4>
@@ -45,10 +39,18 @@
             {% endfor %}
             </div>
           </div>
+          {% include "start_corpora_nav.html" %}
+          </div>
+          
+    </div>
+    <div class="container" style="max-width: 800px; margin-top:150px;">
+    <p>Or, upload your own...</p>
+    <br>
+    <br>
     </div>
 
 
-    <div id="carouselExampleIndicators" class="carousel slide center" data-ride="carousel" style="width:700px;">
+    <div id="carouselExampleIndicators" class="carousel slide center" data-ride="carousel" style="width:700px; margin-top:80px;">
       <ol class="carousel-indicators">
         <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
         <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
