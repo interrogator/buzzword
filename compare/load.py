@@ -1,10 +1,12 @@
 import os
-from .utils import store_buzz_raw, _is_meaningful, _handle_page_numbers
+from .utils import store_buzz_raw, _is_meaningful, _handle_page_numbers, _remove_junk
 from .models import PDF, OCRUpdate, TIF
 from django.db import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 
 import pyocr
+import pytesseract
+from pytesseract import Output
 
 from PIL import Image
 
@@ -39,7 +41,7 @@ def load_tif_pdf_plaintext(corpus):
     tot = len(collection.tiff.files)
     for i, tif_file in enumerate(collection.tiff.files):
         tif_path = tif_file.path
-        pdf_path = tif_path.replace('/tiff/', "/pdf/").replace(".tif", ".pdf")
+        pdf_path = tif_path.replace('/tiff/', "/pdf/").replace("/tif/", "/pdf/").replace(".tif", ".pdf")
         os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
         name = os.path.basename(tif_path)
         name = os.path.splitext(name)[0]
@@ -69,40 +71,69 @@ def load_tif_pdf_plaintext(corpus):
         # if there is already an OCRUpdate for this PDF, not much left to do
         # todo: fallback to preprocessed/txt ?? otherwise every reload causes
         # ocr to happen
-        try:
-            OCRUpdate.objects.get(pdf=pdf)
-            print(f"OCRUpdate already found for {tif.path}")
+        ocrs = OCRUpdate.objects.filter(pdf=pdf)
+        if ocrs:
             continue
-        except ObjectDoesNotExist:
-            pass
 
+        # if there are text files for this corpus
+        # and there are more or same amount as the tifs,
+        # get the text data and save as OCR result
         if collection.txt and len(collection.txt.files) >= tot:
             path = collection.txt.files[i].path
             print(f"Text file exists at {path}; skipping OCR")
             with open(path, "r") as fo:
                 plaintext = fo.read()
             ocr = OCRUpdate(
-                slug=corpus.slug, commit_msg="OCR result", text=plaintext, pdf=pdf
+                slug=corpus.slug, commit_msg="OCR result", text=plaintext, pdf=pdf, accepted=True
             )
             ocr.save()
         else:
             print(f"Doing OCR for {tif.path}")
 
-            # there is no OCRUpdate for this code; therefore we build and save it
+            # there is no OCRUpdate for this data; therefore we do OCR and save it
             plaintext = ocr_engine.image_to_string(
                 Image.open(tif_path),
                 lang=lang_chosen,
                 builder=pyocr.builders.TextBuilder(),
             )
-            plaintext = _handle_page_numbers(plaintext)
+            # this block would add meta coordinates to each word.
+            # the problem is, we can't load this text into the editor. and,
+            # if we strip out the tags, then when the user saves the data,
+            # we lose all the tags. so i can't see any way around this...
+            if False:
+                try:
+                    d = pytesseract.image_to_data(Image.open(tif_path), output_type=Output.DICT, lang="deu_frak2")
+                except:  # no text at all
+                    d = {}
+
+                n_boxes = len(d.get('level', []))
+
+                text_out = []
+                for i in range(n_boxes):
+                    text = d['text'][i]
+                    if not text:
+                        text = "\n"
+                    (x, y, w, h) = (d['left'][i], d['top'][i], d['width'][i], d['height'][i])
+                    if text != "\n":
+                        text = f"<meta x=\"{x}\" y=\"{y}\" w=\"{w}\" h=\"{h}\" >{text}</meta>"
+                    # d['conf'][i] == certainty
+                    text_out.append(text)
+                plaintext = "\n".join([i.strip(" ") for i in " ".join(text_out).splitlines()])
+
+            plaintext = _handle_page_numbers(plaintext, tif_path)
 
             if not _is_meaningful(plaintext, corpus.language.short):
                 plaintext = '<meta blank="true"/>'
 
-            ocr = OCRUpdate(
-                slug=corpus.slug, commit_msg="OCR result", text=plaintext, pdf=pdf
+            plaintext = _remove_junk(plaintext, corpus.language.short)
+
+            ocr, ocr_created = OCRUpdate.objects.get_or_create(
+                slug=corpus.slug, commit_msg="OCR result", text=plaintext, pdf=pdf, accepted=True
             )
-            print(f"Storing OCR result for {tif_path} in DB...")
-            ocr.save()
+            if ocr_created:
+                print(f"Stored OCR result for {tif_path} in DB...")
+            else:
+                print(f"OCR already exists in DB for: {tif_path}")
+
             # store the result as buzz plaintext corpus for parsing
             store_buzz_raw(plaintext, corpus.slug, pdf_path)

@@ -6,14 +6,13 @@ import json
 import os
 
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 import pandas as pd
 from buzz.constants import SHORT_TO_COL_NAME, SHORT_TO_LONG_NAME
 from buzz.corpus import Corpus
-from explore.models import Corpus as CorpusModel
-from compare.models import PDF
 
 from .strings import _capitalize_first, _downloadable_name
-
+from buzzword.utils import management_handling
 
 def _get_specs_and_corpus(search_from, searches, corpora, slug):
     """
@@ -117,9 +116,7 @@ def _update_frequencies(df, deletable, content_table):
     multicols = isinstance(df.columns, pd.MultiIndex)
     names = ["_" + str(x) for x in df.index.names]
     df.index.names = names
-    # col_order = list(df.index.names) + list(df.columns)
-    if not content_table:
-        df = df.reset_index()
+
     if not multicols:
         columns = [
             {
@@ -127,6 +124,8 @@ def _update_frequencies(df, deletable, content_table):
                 "id": i,
                 "deletable": deletable and "_" + i not in names,
                 "hideable": True,
+                "presentation": ("markdown" if i == "file" else None)
+
             }
             for i in df.columns
         ]
@@ -138,6 +137,7 @@ def _update_frequencies(df, deletable, content_table):
             "id": "-".join(i),
             "deletable": ["_" + x in names for x in i],
             "hideable": True,
+            "presentation": ("markdown" if i == "file" else None)
         }
         for i in df.columns
     ]
@@ -170,16 +170,17 @@ def _update_concordance(df, deletable):
     return columns, df.to_dict("rows")
 
 
-def _update_conll(df, deletable, drop_govs):
+def _update_conll(df, deletable, drop_govs, slug=None):
     """
     Turn DF into dash table data for conll
     """
     df = _drop_cols_for_datatable(df, drop_govs)
     col_order = ["file", "s", "i"] + list(df.columns)
     df = df.reset_index()
-    # do not show file extension
+    # do not show file extension, todo: one expression
     df["file"] = df["file"].str.replace(".conllu", "", regex=False)
     df["file"] = df["file"].str.replace(f"^.*/conllu/", "", regex=True)
+    df = _add_links(df, slug=slug, conc=False)
     df = df[[i for i in col_order if i is not None]]
     cannot_delete = {"s", "i"}
     columns = [
@@ -188,6 +189,7 @@ def _update_conll(df, deletable, drop_govs):
             "id": i,
             "deletable": i not in cannot_delete and deletable,
             "hideable": True,
+            "presentation": ("markdown" if i == "file" else None)
         }
         for i in df.columns
     ]
@@ -224,26 +226,15 @@ def _get_corpus(slug):
     """
     Get corpus from slug, loading from uploads dir if need be
     """
-    from .main import CORPORA
-    if slug in CORPORA:
-        return CORPORA[slug]
+    from start.apps import corpora
+    if slug in corpora:
+        corpus = corpora[slug]
+        return corpus
+    raise ValueError(f"CORPUS not found: {slug}")
     upload = os.path.join("uploads", slug, "conllu")
     corpus = Corpus(upload).load()
-    CORPORA[slug] = corpus
+    corpora[slug] = corpus
     return corpus
-
-
-def _get_initial_table(slug):
-    """
-    Get or create the initial table for this slug
-    """
-    # todo: speed up by storing as INITIAL_TABLES?
-    corpus = _get_corpus(slug)
-    default = dict(show="p", subcorpora="file")
-    initial = CorpusModel.objects.get(slug=slug).initial_table
-    if initial is not None:
-        default = json.loads(initial)
-    return corpus.table(**default)
 
 
 def _cast_query(query, col):
@@ -284,7 +275,7 @@ def _get_corpora_json_contents(corpora_file):
         return json.loads(fo.read())
 
 
-def _special_search(df, col, search_string, skip):
+def _special_search(df, col, search_string, skip, multiword):
     """
     Perform nonstandard search types (tgrep, depgrep, describe)
 
@@ -293,24 +284,135 @@ def _special_search(df, col, search_string, skip):
     mapped = dict(t="tgrep", d="depgrep", describe="describe")
     try:
         # note, describe inverse is nonfunctional!
-        matches = getattr(df, mapped[col])(search_string, inverse=skip)
+        matches = getattr(df, mapped[col])(search_string, inverse=skip, multiword=multiword)
         return matches, None
     except Exception as error:
         msg = f"search error for {col} ({search_string}): {type(error)}: {error}"
         print(msg)
         return df.iloc[:0, :0], msg
 
-def _apply_conc_href(row, slug=None):
-    file, match = row["file"], row["match"]
+def _apply_href(row, slug=None, conc=True):
+    from compare.models import PDF
+    show_row = "match" if conc else "file"
+    file, match = row["file"], row[show_row]
     pdf_name = os.path.basename(file).replace(".conllu", "")
     pdf = PDF.objects.get(slug=slug, name=pdf_name)
-    path = f"/compare/{slug}?page={pdf.num+1}&spec=true"
+    path = f"/compare/{slug}?page={pdf.num+1}"
     return f"[{match}]({path})"
 
 
-def _add_links_to_conc(conc, slug):
+def _add_links(df, slug, conc=True):
     """
     add a markdown href to the match
+
+    try/except is basically for runserver/development stuff
     """
-    conc["match"] = conc.apply(_apply_conc_href, axis=1, slug=slug)
-    return conc
+    try:
+        if not management_handling():
+            show_row = "match" if conc else "file"
+            df[show_row] = df.apply(_apply_href, axis=1, slug=slug, conc=conc)
+    except ObjectDoesNotExist:
+        print("Unable to add links, hopefully because this is management command.")
+        return df
+    return df
+
+
+def _make_multiword_query(query, col, regex):
+    """
+    Turns a query with spaces into a multiword depgrep query!
+
+    Vorbericht für jedermann
+
+    becomes
+
+    'w"Vorbericht" + (w"für" + w"jedermann")'
+    """
+    out = []
+    tokens = [i.strip() for i in query.split(" ")]
+    boundary = "/" if regex else '"'
+    # # A + B       A immediately precedes B.
+    rightbracks = ")" * (len(tokens) - 2)
+    last_token = len(tokens) - 1
+    for i, token in enumerate(tokens):
+        leftbrack = "" if i in {0, last_token} else "("
+        unit = f"{leftbrack}{col}{boundary}{token}{boundary}"
+        if i+1 == len(tokens):
+            unit += rightbracks
+        out.append(unit)
+    return " + ".join(out), len(tokens)
+
+
+def split_filter_part(filter_part):
+    """
+    From https://dash.plotly.com/datatable/callbacks
+    """
+    operators = [['ge ', '>='],
+                 ['le ', '<='],
+                 ['lt ', '<'],
+                 ['gt ', '>'],
+                 ['ne ', '!='],
+                 ['eq ', '='],
+                 ['contains '],
+                 ['datestartswith ']]
+
+    for operator_type in operators:
+        for operator in operator_type:
+            if operator in filter_part:
+                name_part, value_part = filter_part.split(operator, 1)
+                name = name_part[name_part.find('{') + 1: name_part.rfind('}')]
+
+                value_part = value_part.strip()
+                v0 = value_part[0]
+                if (v0 == value_part[-1] and v0 in ("'", '"', '`')):
+                    value = value_part[1: -1].replace('\\' + v0, v0)
+                else:
+                    try:
+                        value = float(value_part)
+                    except ValueError:
+                        value = value_part
+
+                # word operators need spaces after them in the filter string,
+                # but we don't want these later
+                return name, operator_type[0].strip(), value
+
+    return [None] * 3
+
+
+def _correct_page(corpus, page_current, page_size):
+    return corpus.iloc[page_current*page_size:(page_current+1)*page_size]
+
+
+def _filter_corpus(corpus, filter, doing_search=False):
+    if doing_search:
+        return corpus, False
+    filtering_expressions = filter.split(' && ') if filter is not None else []
+    if filtering_expressions:
+        for filter_part in filtering_expressions:
+            col_name, operator, filter_value = split_filter_part(filter_part)
+            if operator in {'eq', 'ne', 'lt', 'le', 'gt', 'ge'}:
+                # these operators match pandas series operator method names
+                corpus = corpus.loc[getattr(corpus[col_name], operator)(filter_value)]
+            elif operator == 'contains':
+                corpus = corpus.loc[corpus[col_name].str.contains(filter_value)]
+            elif operator == 'datestartswith':
+                # this is a simplification of the front-end filtering logic,
+                # only works with complete fields in standard format
+                corpus = corpus.loc[corpus[col_name].str.startswith(filter_value)]
+    return corpus, bool(filtering_expressions)
+
+
+def _sort_corpus(corpus, sort_by, doing_search=False):
+    if doing_search:
+        return corpus, False
+    # if sorting
+    if sort_by and len(sort_by):
+        corpus = corpus.sort_values(
+            [col['column_id'] for col in sort_by],
+            ascending=[
+                col['direction'] == 'asc'
+                for col in sort_by
+            ],
+            inplace=False
+        )
+    sort_by = bool(len(sort_by)) if sort_by else False
+    return corpus, sort_by

@@ -14,7 +14,7 @@ import tempfile
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
 
-DATA_UPLOAD_MAX_MEMORY_SIZE = 50000000
+DATA_UPLOAD_MAX_MEMORY_SIZE = 200000000
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -29,7 +29,8 @@ SECRET_KEY = "_^vo*lm=7o!zoj4c6zi*di!kw5ovar@*@%subhxmv*pu=)!-w5"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["127.0.0.1", "0.0.0.0", "localhost", "127.0.0.1:8000", "172.23.3.66"]
+
+ALLOWED_HOSTS = ["127.0.0.1", "0.0.0.0", "localhost", "127.0.0.1:8000", "172.23.3.66", "172.23.30.219"]
 
 # APPEND_SLASH = False
 
@@ -38,6 +39,7 @@ ALLOWED_HOSTS = ["127.0.0.1", "0.0.0.0", "localhost", "127.0.0.1:8000", "172.23.
 INSTALLED_APPS = [
     "dpd_static_support",
     "start.apps.StartConfig",
+    "example.apps.ExampleConfig",
     "explore.apps.ExploreConfig",
     "compare.apps.CompareConfig",
     "django_plotly_dash.apps.DjangoPlotlyDashConfig",
@@ -50,7 +52,9 @@ INSTALLED_APPS = [
     "guardian",
     "accounts",
     "martor",
-    "markdownify"
+    "markdownify",
+    "bootstrap_modal_forms",
+    "widget_tweaks"
 ]
 
 STATICFILES_FINDERS = [
@@ -178,13 +182,13 @@ AUTHENTICATION_BACKENDS = (
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Europe/Zurich"
 
 USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
@@ -238,6 +242,8 @@ MARKDOWNIFY_WHITELIST_TAGS = [
   'h3',
   'abbr',
   'acronym',
+  'div',
+  'img',
   'b',
   'blockquote',
   'em',
@@ -245,21 +251,40 @@ MARKDOWNIFY_WHITELIST_TAGS = [
   'li',
   'ol',
   'p',
+  'span',
   'strong',
   'ul'
+  'br'
 ]
+
+MARKDOWNIFY_WHITELIST_ATTRS = [
+    'href',
+    'src',
+    'class',
+    'alt',
+    'width',
+    'height',
+    'display'
+]
+
+LOGIN_VIEW = 'login'
 
 # BUZZWORD from env
 CORPORA_FILE = "corpora.json"
 LOAD_CORPORA = True
 LOAD_LAYOUTS = True
 # explorer settings 
-DROP_COLUMNS = {"parse", "text"}
+DROP_COLUMNS = {"text", "parse"}
 PAGE_SIZE = 25
-TABLE_SIZE = (2000, 200)
+TABLE_SIZE = (100, 20)
 ADD_GOVERNOR = False
 MAX_CONC = 999
 MAX_DATASET_ROWS = None
 
 # path to tessdata -- needed to find the models
-TESSDATA_PREFIX = "./tessdata"
+# make sure tessdata is always in repo root
+PWD = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+TESSDATA_PREFIX = os.path.join(PWD, "tessdata")
+
+# this should be set to none, or a corpus slug
+BUZZWORD_SPECIFIC_CORPUS = None

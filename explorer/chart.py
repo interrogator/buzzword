@@ -1,3 +1,4 @@
+import pandas as pd
 import plotly.figure_factory as ff
 import plotly.graph_objects as go
 
@@ -13,12 +14,16 @@ CHART_TYPES = {
 
 
 def _bar_chart(row):
-    return dict(x=list(row.index), y=list(row), type="bar", name=row.name)
+    if row.index.name == "year":
+        index = [f"{y}" for y in row.index]
+    else:
+        index = list(row.index)
+    return dict(x=index, y=list(row), type="bar", name=str(row.name))
 
 
 def _line_chart(row):
     return go.Scatter(
-        x=list(row.index), y=list(row), mode="lines+markers", name=row.name
+        x=list(row.index), y=list(row), mode="lines+markers", name=str(row.name)
     )
 
 
@@ -29,22 +34,29 @@ def _area_chart(row):
         hoverinfo="x+y",
         mode="lines",
         stackgroup="one",
-        name=row.name,
+        name=str(row.name),
     )
 
 
 def _distplot(df):
     data = df.T.values
-    labels = df.columns
+    labels = [str(i) for i in df.columns]
     result = ff.create_distplot(data, labels)
     return result["data"], result["layout"]
 
 
 def _heatmap(df):
-    return [go.Heatmap(z=df.T.values, x=list(df.index), y=list(df.columns))]
+    # todo: better interpolation handling
+    cols = [str(i) for i in df.columns]
+    if df.columns.names and df.columns.names[0] == "year":
+        cols = [f"year: {y}" for y in cols]
+    index = [str(i) for i in df.index.values]
+    if df.index.names and df.index.names[0] == "year":
+        index = [f"year: {y}" for y in index]
+    return [go.Heatmap(z=df.T.values, x=index, y=cols)]
 
 
-def _df_to_figure(df, kind="bar"):
+def _df_to_figure(df, kind="bar", width=1300):
     """
     Helper to generate charts
     """
@@ -65,11 +77,20 @@ def _df_to_figure(df, kind="bar"):
     elif kind.endswith("distplot"):
         datapoints, layout = plotter(df)
     else:
+        if df.index.name == "year":
+            df = df.copy()
+            df.index = pd.to_datetime(df.index, format='%Y')
         datapoints = df.apply(plotter)
 
-    layout["width"] = 1300
+    layout["width"] = width
+    # layout["height"] = 600
+    layout["margin"] = {"t": 40}
 
     if kind.startswith("stacked"):
         layout["barmode"] = "stack"
+
+    if df.index.name == "year":
+        layout["xaxis"] = {"tickformat": "%Y", "tickvals": list(df.index)}
+
 
     return dict(data=datapoints, layout=layout)

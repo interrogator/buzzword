@@ -12,12 +12,20 @@
             Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
         </span>
 
+        <span class="goto" align="right" style="margin-left: 50px">
+            Goto:
+            <form method="GET" align="right" style="display:inline-block;">
+                <input align="right" min="1" max={{ page_obj.paginator.num_pages }} type="number" style="width: 60px;" name="q" value="{{ request.GET.q }}" placeholder={{ page_obj.number }}>
+                <button class="btn btn-primary" type="submit" name="action">Go</button>
+            </form>
+        </span>
+
         {% if page_obj.has_next %}
-            <a align='right' type='button' class='btn btn-primary float-right' href="?page={{ page_obj.paginator.num_pages }}{{ spec }}">last &raquo;</a>
-            <a align='right' type='button' class='btn btn-primary float-right' href="?page={{ page_obj.next_page_number }}{{ spec }}">next</a>
+            <a align='right' type='button' class='btn btn-primary float-right' href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+            <a align='right' type='button' style="margin-right: 3px !important;" class='btn btn-primary float-right' href="?page={{ page_obj.next_page_number }}">next</a>
         {% else %}
             <a align='right' type='button' disabled class='btn btn-primary float-right'>last &raquo;</a>
-            <a align='right' type='button' disabled class='btn btn-primary float-right'>next</a>
+            <a align='right' type='button' style="margin-right: 3px !important;" disabled class='btn btn-primary float-right'>next</a>
         {% endif %}
     </span>
 </div>

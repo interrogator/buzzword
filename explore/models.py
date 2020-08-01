@@ -3,7 +3,7 @@ import json
 
 from buzz.constants import LANGUAGES, AVAILABLE_MODELS
 from django.db import models
-from explorer.parts.strings import _slug_from_name
+from explorer.strings import _slug_from_name
 
 from django.db import IntegrityError
 
@@ -41,7 +41,6 @@ class Corpus(models.Model):
     )
     path = models.TextField()
     desc = models.TextField(default="", blank=True)
-    length = models.BigIntegerField(null=True)
     add_governor = models.BooleanField(null=True)
     disabled = models.BooleanField(default=False)
     date = models.DateField(null=True, blank=True)
@@ -64,7 +63,6 @@ class Corpus(models.Model):
         language = Language.objects.get(short=jsondata.get("language"))
         path = jsondata.get("path")
         desc = jsondata.get("desc", "")
-        length = jsondata.get("length")
         disabled = jsondata.get("disabled", False)
         date = datetime.datetime.strptime(jsondata.get("date", "1900"), "%Y").date()
         load = jsondata.get("load", True)
@@ -92,7 +90,6 @@ class Corpus(models.Model):
             language=language,
             path=path,
             desc=desc,
-            length=length,
             disabled=disabled,
             date=date,
             load=load,

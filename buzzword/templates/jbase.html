@@ -1,33 +1,64 @@
-{% load static %}<!DOCTYPE html>
+{% load static %}
+<!DOCTYPE html>
 <html lang="en-us">
-<head>
-  <title>{% block title %}buzzword{% endblock %}</title>
-  <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
-  <link href="{% static 'plugins/css/ace.min.css' %}" type="text/css" media="all" rel="stylesheet" />
-  <link href="{% static 'plugins/css/semantic.min.css' %}" type="text/css" media="all" rel="stylesheet" />
-  <link href="{% static 'plugins/css/resizable.min.css' %}" type="text/css" media="all" rel="stylesheet" />
-  <link href="{% static 'martor/css/martor.min.css' %}" type="text/css" media="all" rel="stylesheet" />
-  <link rel="stylesheet" href="{% static 'bootstrap.min.css' %}"/>
-  <script type="text/javascript" src="{% static 'jquery.min.js' %}"></script>
-  <script type="text/javascript" src="{% static 'bootstrap.min.js' %}"></script>
-  <link rel="stylesheet" href="{% static 'custom.css' %}"/>
-</head>
-<body>
-{% if specific_nav %} {% include "specific_nav.html" %} {% else %} {% include "nav.html" %} {% endif %}
-{% block content %}{% endblock %}
+  <head>
+    <title>{% block title %}buzzword{% endblock %}</title>
+    {% block header_content %}
+      <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+    <link href="{% static 'plugins/css/ace.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+    <link href="{% static 'plugins/css/semantic.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+      <link href="{% static 'plugins/css/resizable.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+      <link href="{% static 'martor/css/martor.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+      <link rel="stylesheet" href="{% static 'bootstrap.min.css' %}"/>
+      <link rel="stylesheet" href="{% static 'custom.css' %}"/>
+    {% endblock %}
+  </head>
 
-  <script type="text/javascript" src="{% static 'plugins/js/ace.js' %}"></script>
-  <script type="text/javascript" src="{% static 'plugins/js/semantic.min.js' %}"></script>
-  <script type="text/javascript" src="{% static 'plugins/js/mode-markdown.js' %}"></script>
-  <script type="text/javascript" src="{% static 'plugins/js/ext-language_tools.js' %}"></script>
-  <script type="text/javascript" src="{% static 'plugins/js/theme-github.js' %}"></script>
-  <script type="text/javascript" src="{% static 'plugins/js/typo.js' %}"></script>
-  <script type="text/javascript" src="{% static 'plugins/js/spellcheck.js' %}"></script>
-  <script type="text/javascript" src="{% static 'plugins/js/highlight.min.js' %}"></script>
-  <script type="text/javascript" src="{% static 'plugins/js/resizable.min.js' %}"></script>
-  <script type="text/javascript" src="{% static 'plugins/js/emojis.min.js' %}"></script>
-  <script type="text/javascript" src="{% static 'martor/js/martor.min.js' %}"></script>
+  <body style="height: 0%">
+    {% block content %}
 
-  {% block js %}{% endblock %}
-</body>
+      {% if specific_nav %}
+        {% include "specific_nav.html" %}
+      {% else %}
+        {% include "nav.html" %}
+      {% endif %}
+
+    {% endblock %}
+
+    {% block js %}
+      <script type="text/javascript" src="{% static 'jquery.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'bootstrap.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'plugins/js/ace.js' %}"></script>
+      <script type="text/javascript" src="{% static 'plugins/js/semantic.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'plugins/js/mode-markdown.js' %}"></script>
+      <script type="text/javascript" src="{% static 'plugins/js/ext-language_tools.js' %}"></script>
+      <script type="text/javascript" src="{% static 'plugins/js/theme-github.js' %}"></script>
+      <script type="text/javascript" src="{% static 'plugins/js/typo.js' %}"></script>
+      <script type="text/javascript" src="{% static 'plugins/js/spellcheck.js' %}"></script>
+      <script type="text/javascript" src="{% static 'plugins/js/highlight.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'plugins/js/resizable.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'plugins/js/emojis.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'martor/js/martor.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'jquery.bootstrap.modal.forms.js' %}"></script>
+      <script type="text/javascript">
+        // this shows how we would add highlighting to the pdf at particular
+        // coordinates. it could be done when moving from concordance to compare views...
+        // $( document ).ready(function() {
+        //  console.log("doing!");
+        //  var test = window.document.createElement("div");
+        //  test.className = "rectangle";
+        //  test.style.left = "50px";
+        //  test.style.top = "460px";
+        //  test.style.width = "281px"; 
+        //  test.style.height = "69px";
+        //  var element = document.getElementById("pdf-here");
+        //  element.appendChild(test);
+        //  test.style.position = "absolute";
+        //  test.style.backgroundColor = "rgba(243, 247, 9, 0.7)";
+        // });
+      </script>
+    {% endblock %}
+  </body>
+  {% block foot %}
+  {% endblock %}
 </html>

@@ -28,7 +28,7 @@ NAV_HEADER = {
     "fontSize": 32,
     "paddingTop": "12px",
 }
-TSTYLE = {**CELL_MIDDLE_35, **{"width": "25%", "display": "inline-block"}}
+TSTYLE = {**CELL_MIDDLE_35, **{"width": "19%", "display": "inline-block"}}
 MARGIN_5_MONO = {"marginLeft": 5, "marginRight": 5, "fontFamily": "monospace"}
 BOLD_DARK = {"fontWeight": "bold", "color": "#555555"}
 CHART_SUMMARY = {

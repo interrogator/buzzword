@@ -1,9 +1,10 @@
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 
-# from explore.models import Corpus
-from explorer.parts.main import load_layout
-from explorer.parts.strings import _slug_from_name
+from explore.models import Corpus
+from explorer.main import load_layout
+from explorer.helpers import register_callbacks
+from explorer.strings import _slug_from_name
 from .forms import UploadCorpusForm
 
 from django.conf import settings
@@ -30,13 +31,14 @@ def _start_parse_corpus_job(corpus):
     pass
 
 
-
-#@login_required
+@login_required
 def explore(request, slug=None):
+    from explorer.main import app
+    register_callbacks()
     if slug is None:
         slug = settings.BUZZWORD_SPECIFIC_CORPUS
-    app = load_layout(slug)
-    return render(request, "explore/explore.html")
+    context = {"corpus": Corpus.objects.get(slug=slug)}
+    return render(request, "explore/explore.html", context=context)
 
 
 @login_required

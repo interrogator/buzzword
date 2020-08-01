@@ -1,7 +1,7 @@
 import os
 from importlib import import_module
 
-from explorer.parts.main import load_explorer_app
+from explorer.main import load_explorer_app
 from explore.models import Corpus
 from compare.load import load_tif_pdf_plaintext
 from django.apps import apps
@@ -63,5 +63,5 @@ class Command(RunServerCommand):
             load_explorer_app()
             for corpus in Corpus.objects.all():
                 if corpus.pdfs and not corpus.disabled:
+                    os.environ["TESSDATA_PREFIX"] = settings.TESSDATA_PREFIX
                     load_tif_pdf_plaintext(corpus)
-        super().run(**options)
