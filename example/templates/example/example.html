@@ -1,7 +1,9 @@
 {% load static %}
 <html>
     <head>
-        <title>Example investigation</title>
+        {% load plotly_dash%}
+        {% plotly_header %}
+        <title>{{title}}: Example investigation</title>
 
       <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
     <link href="{% static 'plugins/css/ace.min.css' %}" type="text/css" media="all" rel="stylesheet" />
@@ -15,7 +17,13 @@
         <script type="text/javascript" src="{% static 'jquery.bootstrap.modal.forms.js' %}"></script>
     </head>
     <body class="example" style="z-index: 900;">
-        {% include "specific_nav.html" %}
+        {% if specific_nav %}
+            {% include "specific_nav.html" %}
+        {% else %}
+            {% include "nav.html" %}
+        {% endif %}
         <br><br>
+        {%plotly_direct name="example"%}
     </body>
+    {% plotly_footer %}
 </html>

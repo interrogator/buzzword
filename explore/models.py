@@ -51,6 +51,7 @@ class Corpus(models.Model):
     drop_columns = models.TextField(null=True, blank=True)
     parsed = models.BooleanField(default=False)
     pdfs = models.BooleanField(null=True, default=False)
+    example_concordance = models.CharField(null=True, blank=True, max_length=30)
 
     @classmethod
     def from_json(cls, jsondata, corpus_name):
@@ -71,6 +72,7 @@ class Corpus(models.Model):
         initial_query = _string_or_none(jsondata.get("initial_query"))
         initial_table = _string_or_none(jsondata.get("initial_table"))
         drop_columns = _string_or_none(jsondata.get("drop_columns"))
+        example_concordance = _string_or_none(jsondata.get("example_concordance"))
 
         has_error = False
         if not path:
@@ -98,7 +100,8 @@ class Corpus(models.Model):
             initial_table=initial_table,
             parsed=True,  # assuming all files provided this way are already parsed
             pdfs=pdfs,
-            drop_columns=drop_columns
+            drop_columns=drop_columns,
+            example_concordance=example_concordance
         )
         corp.save()
 

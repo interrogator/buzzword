@@ -288,3 +288,4 @@ TESSDATA_PREFIX = os.path.join(PWD, "tessdata")
 
 # this should be set to none, or a corpus slug
 BUZZWORD_SPECIFIC_CORPUS = None
+BUZZWORD_EXAMPLE_CORPUS = None

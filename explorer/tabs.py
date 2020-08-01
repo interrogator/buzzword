@@ -523,8 +523,6 @@ def make_explore_page(corpus, table, conc, slug, spec=False):
     Create every tab, as well as the top rows of stuff, and tab container
 
     Return html.Div
-
-    spec mode: pretend only this corpus exists...
     """
     config = CorpusModel.objects.get(slug=slug)
     slug_div = html.Div(id="slug", title=slug, style={"display": "none"})

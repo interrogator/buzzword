@@ -1,5 +1,6 @@
 # flake8: noqa
 
+
 import json
 import os
 
@@ -9,12 +10,13 @@ import dash_core_components as dcc
 import dash_html_components as html
 
 from django_plotly_dash import DjangoDash
-from dash.dependencies import Input, Output, State
+
 import dash_table
 
 from django.conf import settings
 
 from buzz.constants import SHORT_TO_COL_NAME
+from explore.models import Corpus
 from explorer.strings import _capitalize_first
 from explorer.helpers import _get_corpus
 from explorer.chart import _df_to_figure
@@ -41,13 +43,13 @@ WORDCLASSES = {
 }
 
 
-def _make_layout():
-    path = f"static/{settings.BUZZWORD_SPECIFIC_CORPUS}/example.json"
+def _make_layout(slug):
+    path = f"static/{slug}/example.json"
     with open(path) as fo:
         text = json.load(fo)
 
     try:
-        corpus = _get_corpus(settings.BUZZWORD_SPECIFIC_CORPUS)
+        corpus = _get_corpus(slug)
     # migrate handling
     except TypeError as error:
         print(f"Problem: {str(error)}")
@@ -55,7 +57,7 @@ def _make_layout():
 
     freq_space, table = _freq_space(corpus)
     chart_space = _chart_space(table)
-    conc_space = _concordance_space(corpus)
+    conc_space = _concordance_space(corpus, slug)
 
     freq_text = dcc.Markdown(text["freq"], style={}, className="row")
     freq_img = html.Img(src="/static/swiss-law/freq-toolbar.png", width="110%", className="row",)
@@ -177,11 +179,7 @@ def _freq_space(corpus, wordclass="NOUN"):
         page_action="native",
         fixed_rows={"headers": True, "data": 0},
         style_header=style.BOLD_DARK,
-        style_cell={'width': "16%"},
-        style_cell_conditional=[
-            {'if': {'column_id': 'lemma'},
-             'width': '52%'}
-        ],
+        style_table={"overflowX": "scroll"},
         style_data_conditional=style.STRIPES,
         merge_duplicate_headers=True,
         # export_format="xlsx",
@@ -194,7 +192,7 @@ def _freq_space(corpus, wordclass="NOUN"):
     return freq_space, table
 
 
-def _concordance_space(corpus):
+def _concordance_space(corpus, slug):
     query_space = dcc.Input(
         id="conc-query-string",
         type="text",
@@ -211,7 +209,8 @@ def _concordance_space(corpus):
         [html.Div(i, style=tstyle) for i in (query_space, search)], style={"marginBottom": "5px"}
     )
     style_data = [style.STRIPES[0], style.INDEX[0]] + style.CONC_LMR
-    columns, data = _quick_concordance(corpus, "ordnung")
+    query = Corpus.objects.get(slug=slug).example_concordance
+    columns, data = _quick_concordance(corpus, query)
     rule = "display: inline; white-space: inherit; " + "overflow: inherit; text-overflow: inherit;"
     conc_table = dash_table.DataTable(
             id="example-conc",
@@ -254,10 +253,25 @@ def _concordance_space(corpus):
 
 
 def _quick_freq(corpus, wordclass="NOUN"):
-
+    # todo: pass in initial query...
     df = getattr(corpus.just.wordclass, wordclass).just.word("[A-Za-z]{3,}", regex=True)
-    df = df.table(subcorpora="year", show="l", relative=True).round(2).iloc[:, :50].T
+    if "year" in corpus.columns:
+        subcorpora = "year"
+        #corpus["year"] = corpus["year"].astype(str)
+    elif "speaker" in corpus.columns:
+        subcorpora = "speaker"
+        #corpus["speaker"] = corpus["speaker"].astype(str)
+    else:
+        subcorpora = "file"
+    df = df.table(subcorpora=subcorpora, show="l", relative=True).round(2).iloc[:, :50].T
     df.index.names = ["lemma"]
+
+    # df.index = df.index.astype(object)
+    df.columns = df.columns.astype(object)
+
+    num_cols = len(df.columns)
+    index_width = "55%" if len(df.columns) == 3 else "100px"
+    item_width = "15%" if len(df.columns) == 3 else "30%"
 
     this_df = df.reset_index()
 
@@ -268,7 +282,7 @@ def _quick_freq(corpus, wordclass="NOUN"):
             "deletable": False,
             "hideable": True,
             "presentation": False,
-            "width": "15%" if i else "55%" 
+            "width": item_width if i else index_width 
         } 
         for i, x in enumerate(this_df.columns)
     ]
@@ -277,11 +291,16 @@ def _quick_freq(corpus, wordclass="NOUN"):
 
 def _quick_concordance(corpus, query):
     df = corpus.just.word(query, exact_match=True, case=False)
-    df = df.conc(n=999, window=(80, 80), metadata=["year", "file", "s"])
+    just = ["left", "match", "right", "file", "s"]
+    meta = ["file", "s"]
+    for field in ["speaker", "year"]:
+        if field in df.columns:
+            just.append(field)
+            meta.append(field)
+
+    df = df.conc(n=999, window=(80, 80), metadata=meta)
     df["file"] = df["file"].apply(os.path.basename)
-    just = ["left", "match", "right", "year", "file", "s"]
-    if "speaker" in df.columns:
-        just.append("speaker")
+
     df = df[just]
     columns = [
         {
@@ -297,81 +316,8 @@ def _quick_concordance(corpus, query):
     return columns, data
 
 
-app = DjangoDash(settings.BUZZWORD_SPECIFIC_CORPUS, suppress_callback_exceptions=True)
-app.layout = _make_layout()
-
-
-@app.expanded_callback(
-    [Output("example-conc", "columns"), Output("example-conc", "data")],
-    [Input("do-conc", "n_clicks")],
-    [State("conc-query-string", "value")],
-)
-def _simple_concordance(do_conc, query, **kwargs):
-    if not do_conc:
-        return no_update, no_update
-    try:
-        corpus = _get_corpus(settings.BUZZWORD_SPECIFIC_CORPUS)
-    # migrate handling
-    except TypeError:
-        return [], []
-    columns, data = _quick_concordance(corpus, query.strip())
-    return columns, data
-
-
-@app.expanded_callback(
-    [Output("example-freq", "columns"), Output("example-freq", "data")],
-    [Input("example-wordclass-dropdown", "value")],
-    [],
-)
-def _simple_freq(wordclass, **kwargs):
-    from time import sleep
-    if not wordclass:
-        return no_update
-    sleep(2)
-    try:
-        corpus = _get_corpus(settings.BUZZWORD_SPECIFIC_CORPUS)
-    # migrate handling
-    except TypeError:
-        return [], []
-    _, columns, data = _quick_freq(corpus, wordclass=wordclass)
-    return columns, data
-
-
-@app.expanded_callback(
-    Output("chart-holder-1", "children"),
-    [Input("figure-button-1", "n_clicks")],
-    [
-        State("chart-type-1", "value"),
-        State("chart-top-n-1", "value"),
-        State("chart-transpose-1", "on"),
-        State("example-wordclass-dropdown", "value"),
-    ],
-)
-def _new_chart(
-    n_clicks, chart_type, top_n, transpose, wordclass, **kwargs,
-):
-    """
-    Make new chart by kind. Do it 5 times, once for each chart space
-    """
-    # before anything is loaded, do nothing
-    if n_clicks is None:
-        return no_update
-
-    try:
-        corpus = _get_corpus(settings.BUZZWORD_SPECIFIC_CORPUS)
-    # migrate handling
-    except TypeError:
-        return [], []
-
-    df, _, _ = _quick_freq(corpus, wordclass=wordclass)
-
-    # transpose and cut down items to plot
-    if transpose:
-        df = df.T
-    df = df.iloc[:, :top_n]
-
-    # generate chart
-    figure = _df_to_figure(df, kind=chart_type, width="100%")
-    chart_data = dict(id="chart-1", figure=figure, style=dict(width="100%", height="400px"),)
-    chart = dcc.Graph(**chart_data)
-    return chart
+def make_app(slug):
+    app = DjangoDash("example", suppress_callback_exceptions=True)
+    app.layout = _make_layout(slug)
+    from . import callbacks
+    return app

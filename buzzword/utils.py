@@ -14,7 +14,9 @@ def management_handling():
         "do_ocr",
         "parse_latest_ocr",
         "createsuperuser",
-        "reload"
+        "reload",
+        "load_languages",
+        "load_corpora"
     }
     return any(i in managers for i in sys.argv)
 

@@ -8,11 +8,14 @@
 {% if navbar == "home" %}
 
     <div class="container" style="max-width: 800px; margin-top:150px;">
-    Some introductory text here...
+    buzzword is a platform for investigating language use in large collections of documents.
+    <br><br>
+    Some of the texts have been extracted from PDF data through the process of optical character recognition. Because OCR is not always perfectly accurate, for these resources, you are able to 
+    <br><br>
+    If you have PDFs of your own, you can submit them for automatic OCR. Buzzword will provide a correction interface for your data, and allow you to accept corrections made by others.
     </div>
     <br>
     <br>
-
     <div>
     <!-- Search functionality -->
         <nav class="navbar navbar-light justify-content-center mt-4">
@@ -33,6 +36,9 @@
                 <p class="card-text">{{corpus.name}}</p>
                 <div class="dropdown-divider"></div>
                 <p class="card-text"><small class="text-muted">{{corpus.desc}}</small></p>
+                {% if corpus.pdfs %}
+                    <a href="compare/{{ corpus.slug }}"><button type="button" class="btn btn-outline-primary">Browse/correct</button></a>
+                {% endif %}
                 <a href="explore/{{ corpus.slug }}"><button type="button" class="btn btn-outline-primary">Explore</button></a>
               </div>
             </div>

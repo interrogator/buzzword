@@ -4,7 +4,11 @@
 {% block title %}{{corpus.name}}: compare{% endblock %}
 {% block content %}
 
-{% include "specific_nav.html" %}
+{% if specific_nav %}
+    {% include "specific_nav.html" %}
+{% else %}
+    {% include "nav.html" %}
+{% endif %}
 
 
 {% if messages %}

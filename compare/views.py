@@ -27,9 +27,6 @@ def browse_collection(request, slug=None):
     Use Django's pagination for handling PDFs
     Use martor for the markdown editor
     """
-    # corpus = Corpus.objects.get(slug=slug)
-    # lang = corpus.language.name
-    # handle specific mode
     if not slug:
         slug = settings.BUZZWORD_SPECIFIC_CORPUS
     all_pdfs = PDF.objects.all()
