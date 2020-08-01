@@ -83,7 +83,8 @@ def _get_or_load_corpora(slug=None, force=False):
             corpus = corpus.conllu.load(multiprocess=False)
             corpora[meta["slug"]] = corpus
             try:
-                display = json.loads(corpus["initial_table"])
+                display = meta["initial_table"]
+                assert isinstance(display, dict)
             except:
                 display = dict(show="p", subcorpora="year")
             print(f"* Generating an initial table for {name} using {display}")

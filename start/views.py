@@ -23,9 +23,12 @@ def start(request):
     """
     Load the list-of-corpora style mainpage
     """
-    navbar = request.GET.get("navbar", "home")
+    current_section = request.path.strip("/")
+    go_home = {"login", "logout", "signup", "corpus_settings"}
+    if any(i in current_section for i in go_home) or not current_section:
+        current_section = "home"
     corpora = explore.models.Corpus.objects.filter(disabled=False, load=True)
-    context = {"corpora": corpora, "navbar": navbar}
+    context = {"corpora": corpora, "navbar": current_section}
     return render(request, "start/start.html", context)
 
 

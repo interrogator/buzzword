@@ -37,6 +37,9 @@ def explore(request, slug=None):
     register_callbacks()
     if slug is None:
         slug = settings.BUZZWORD_SPECIFIC_CORPUS
+    else:
+        from start.apps import layouts
+        app.layout = layouts[slug]
     context = {"corpus": Corpus.objects.get(slug=slug)}
     return render(request, "explore/explore.html", context=context)
 
