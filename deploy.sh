@@ -86,22 +86,20 @@ sudo docker container rm $NAME
 
 touch db.sqlite3
 
-#if $CWDMOUNT ; then
-
-# add settings, db and data in as volume
-MOUNT="
-    --mount type=bind,source="$(pwd)"/buzzword/settings.py,target=/buzzword/buzzword/settings.py \
-    --mount type=bind,source="$(pwd)"/db.sqlite3,target=/buzzword/db.sqlite3
-    --mount type=bind,source="$(pwd)"/static/corpora,target=/buzzword/static/corpora
-"
-
-runcmd="sudo docker run -itd -p $PORT:8000
-    $MOUNT
-    -e \"DJANGO_SUPERUSER_PASSWORD=$DJANGO_SUPERUSER_PASSWORD\"
-    --name $NAME
-    $TAG
+if $CWDMOUNT ; then
+    MOUNT="
+        --mount type=bind,source="$(pwd)",target=/buzzword
     "
-$runcmd
+else
+    # add settings, db and data in as volume
+    MOUNT="
+        --mount type=bind,source="$(pwd)"/buzzword/settings.py,target=/buzzword/buzzword/settings.py
+        --mount type=bind,source="$(pwd)"/db.sqlite3,target=/buzzword/db.sqlite3
+        --mount type=bind,source="$(pwd)"/static/corpora,target=/buzzword/static/corpora
+    "
+fi
+
+sudo docker run -itd -p $PORT:8000 $MOUNT -e "DJANGO_SUPERUSER_PASSWORD=$DJANGO_SUPERUSER_PASSWORD" --name $NAME $TAG
 
 # all the commands we need to do to get configured
 sudo docker exec -it $NAME python manage.py migrate
