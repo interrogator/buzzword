@@ -71,11 +71,14 @@ def _get_or_load_corpora(slug=None, force=False):
         initial_concs = dict()
         corpora_file = os.path.abspath(settings.CORPORA_FILE)
         print(f"* Loading corpora, using corpus configuration at: {corpora_file}")
-        
+
         with open(corpora_file) as fo:
             data = json.load(fo)
         for name, meta in data.items():
             if (slug or force) and meta["slug"] != slug:
+                continue
+            if meta["disabled"]:
+                print(f"Skipping disabled: {name}")
                 continue
             corpus = Collection(meta["path"])
             if not corpus.conllu:

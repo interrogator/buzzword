@@ -11,6 +11,7 @@ from pytesseract import Output
 from PIL import Image
 
 from buzz import Collection
+from buzz.constants import LANG_TO_TESSERACT_MODEL
 
 
 def _get_ocr_engine(lang):
@@ -21,10 +22,10 @@ def _get_ocr_engine(lang):
     * make a mapping of language names to tess models
     """
     tools = pyocr.get_available_tools()
-    tool = tools[0]
+    tool = tools[0]    
     # langs = tool.get_available_languages()
     # lang = langs[0]
-    return tool, "deu_frak2"
+    return tool, LANG_TO_TESSERACT_MODEL.get(lang, lang)
 
 
 def load_tif_pdf_plaintext(corpus):
@@ -37,7 +38,7 @@ def load_tif_pdf_plaintext(corpus):
 
     """
     collection = Collection(corpus.path)
-    ocr_engine, lang_chosen = _get_ocr_engine(corpus.language.name)
+    ocr_engine, lang_chosen = _get_ocr_engine(corpus.language.short)
     tot = len(collection.tiff.files)
     for i, tif_file in enumerate(collection.tiff.files):
         tif_path = tif_file.path

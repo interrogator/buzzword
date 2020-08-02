@@ -1,0 +1,173 @@
+{% extends "jbase.html" %}
+{% load static %}
+{% load martortags %}
+{% block title %}{{corpus.name}}: compare{% endblock %}
+{% block content %}
+
+{% if specific_nav %}
+    {% include "specific_nav.html" %}
+{% else %}
+    {% include "nav.html" %}
+{% endif %}
+
+
+{% if messages %}
+  <ul class="messages">
+      {% for message in messages %}
+          <div style="margin-left: -28px; margin-right: 15px;" class="alert alert-dismissible fade show alert-{{ message.tags }}" role="alert">{{ message }}
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+      {% endfor %}
+  </ul>
+{% endif %}
+
+<div style={% if not messages %} "margin-top:200px;" {% endif %}>
+    <div class="container read-container">
+        <div id="epub-area" class="spreads"></div>
+        <div id="epub-path" data-path="{{ epub }}"></div>
+        <a id="prev" href="#prev" class="arrow" style="visibility: visible;">‹</a>
+        <a id="next" href="#next" class="arrow" style="visibility: visible;">›</a>
+    </div>
+</div>
+{% endblock %}
+{% block js %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'epub.css' %}"/>
+<script type="text/javascript" src="{% static 'jszip.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'epub.min.js' %}"></script>
+ <script>
+
+    var params = URLSearchParams && new URLSearchParams(document.location.search.substring(1));
+    var url = params && params.get("url") && decodeURIComponent(params.get("url"));
+    var currentSectionIndex = (params && params.get("loc")) ? params.get("loc") : undefined;
+    var path = document.getElementById("epub-path").dataset.path;
+
+        var book = ePub(path);
+        var rendition = book.renderTo("epub-area", {
+          width: "100%",
+          height: "100%",
+          spread: "always"
+        });
+
+        rendition.display(currentSectionIndex);
+
+        book.ready.then(() => {
+
+          var next = document.getElementById("next");
+
+          next.addEventListener("click", function(e){
+            book.package.metadata.direction === "rtl" ? rendition.prev() : rendition.next();
+            e.preventDefault();
+          }, false);
+
+          var prev = document.getElementById("prev");
+          prev.addEventListener("click", function(e){
+            book.package.metadata.direction === "rtl" ? rendition.next() : rendition.prev();
+            e.preventDefault();
+          }, false);
+
+          var keyListener = function(e){
+
+            // Left Key
+            if ((e.keyCode || e.which) == 37) {
+              book.package.metadata.direction === "rtl" ? rendition.next() : rendition.prev();
+            }
+
+            // Right Key
+            if ((e.keyCode || e.which) == 39) {
+              book.package.metadata.direction === "rtl" ? rendition.prev() : rendition.next();
+            }
+
+          };
+
+          rendition.on("keyup", keyListener);
+          document.addEventListener("keyup", keyListener, false);
+
+        })
+
+        var title = document.getElementById("title");
+
+        rendition.on("rendered", function(section){
+          var current = book.navigation && book.navigation.get(section.href);
+
+          if (current) {
+            var $select = document.getElementById("toc");
+            var $selected = $select.querySelector("option[selected]");
+            if ($selected) {
+              $selected.removeAttribute("selected");
+            }
+
+            var $options = $select.querySelectorAll("option");
+            for (var i = 0; i < $options.length; ++i) {
+              let selected = $options[i].getAttribute("ref") === current.href;
+              if (selected) {
+                $options[i].setAttribute("selected", "");
+              }
+            }
+          }
+
+        });
+
+        rendition.on("relocated", function(location){
+          console.log(location);
+
+          var next = book.package.metadata.direction === "rtl" ?  document.getElementById("prev") : document.getElementById("next");
+          var prev = book.package.metadata.direction === "rtl" ?  document.getElementById("next") : document.getElementById("prev");
+
+          if (location.atEnd) {
+            next.style.visibility = "hidden";
+          } else {
+            next.style.visibility = "visible";
+          }
+
+          if (location.atStart) {
+            prev.style.visibility = "hidden";
+          } else {
+            prev.style.visibility = "visible";
+          }
+
+        });
+
+        rendition.on("layout", function(layout) {
+          let viewer = document.getElementById("epub-area");
+
+          if (layout.spread) {
+            viewer.classList.remove('single');
+          } else {
+            viewer.classList.add('single');
+          }
+        });
+
+        window.addEventListener("unload", function () {
+          console.log("unloading");
+          this.book.destroy();
+        });
+
+        book.loaded.navigation.then(function(toc){
+          var $select = document.getElementById("toc"),
+              docfrag = document.createDocumentFragment();
+
+          toc.forEach(function(chapter) {
+            var option = document.createElement("option");
+            option.textContent = chapter.label;
+            option.setAttribute("ref", chapter.href);
+
+            docfrag.appendChild(option);
+          });
+
+          $select.appendChild(docfrag);
+
+          $select.onchange = function(){
+              var index = $select.selectedIndex,
+                  url = $select.options[index].getAttribute("ref");
+              rendition.display(url);
+              return false;
+          };
+
+        });
+
+  
+      </script>
+{% endblock %}

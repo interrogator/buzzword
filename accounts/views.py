@@ -25,8 +25,8 @@ def logout_view(request):
     return start_specific(request, slug=slug)
 
 
-def login(request, username=False, password=False):
-    slug = settings.BUZZWORD_SPECIFIC_CORPUS
+def login(request, slug=None, username=False, password=False):
+    slug = slug or settings.BUZZWORD_SPECIFIC_CORPUS
     username = username or request.POST.get("username")
     password = password or request.POST.get("password")
     nextpage = request.GET.get("next")
