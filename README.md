@@ -40,3 +40,19 @@ docker run -it -p 8001:8000 name/tag
 ```
 
 *buzzword* is now available at http://localhost:8001
+
+
+## Run with deploy script
+
+```bash
+./deploy.sh
+```
+The deploy script supports a number of parameters:
+- `--port=xx` to set which port (of the docker host) the app should run on 
+- `--branch=name` or `-b=name` pick any branch that exists in git
+- `--no-cache` when this option is present docker build will run without cache (recommended for production)
+- `--corpus=name` or `-c=name` configure app to be in single-corpus mode
+- `--corpuse-file=path` copy a custom corpora.json into the container
+- `--cwdmount` mount the current working directory as `/buzzword` (recommended for dev)
+- `--django-password=pw` or `-d=pw` create super user account with the given password
+
