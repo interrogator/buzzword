@@ -1,6 +1,6 @@
 <br><br>
 
-# **Swiss Digital Law Discovery** (*Sdilaw*):
+# **Swiss Digital Law Discovery** (*Sdilaw*)
 ### *Schweizer kantonale Gesetze online und weiterführende Kontexte*
 
 Im vorliegenden Portal Sdilaw haben Sie eine Datenbank in progress vor sich, welche zum Ziel hat, die kantonalen Gesetzestexte der Schweiz des Zeitraumes 1800-1914 neu digital zu präsentieren. Es handelt sich um ein Digital Humanities- resp. Digital Legal History-Projekt im Zusammenhang mit Recht.

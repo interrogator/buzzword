@@ -1,6 +1,6 @@
 <br><br>
 
-# **Über das Projekt**:
+# **Über das Projekt**
 ### *Impressum/Team*
 
 **Swiss Digital Law Discovery Sdilaw**
@@ -26,13 +26,13 @@ Fragen, Anregungen und Korrekturen jeglicher Art nimmt jederzeit der Projektleit
 
 Die Entwicklung des Portals sowie Präsentation und Langzeitarchivierung der kantonalen Gesetzestexte bezweckt vorerst einmal, im digitalen Angebot eine zeitliche Lücke zu schliessen – gegenüber den bestehenden Angeboten der SSRQ (*Sammlung Schweizerischer Rechtsquellen*, bis 1798) sowie der für das 20. und 21. Jahrhundert bestehenden Online-Angebote. In Zukunft wird der digitale Corpus laufend mit Kodifikationen, weiteren Gesetzesmaterialien sowie relevanten ausländischen Gesetzen ergänzt – *Sdilaw transnational*.
 
-Das Vorprojekt und die Entwicklung des Prototyps wurde unterstützt von der [Rechts-wissenschaftlichen Fakultät RWF der Universität Zürich](https://www.ius.uzh.ch/de.html), wofür wir uns herzlich bedanken.  
+Das Vorprojekt und die Entwicklung des Prototyps wurde unterstützt von der [Rechtswissenschaftlichen Fakultät RWF der Universität Zürich](https://www.ius.uzh.ch/de.html), wofür wir uns herzlich bedanken.  
 
 ### Methoden, Technik
 
 Wie auf der Startseite erwähnt wird neu ein computerlinguistisches Tool ([*spaCy*](https://spacy.io)/[*buzz*](https://buzz.readthedocs.io/en/latest/)) auf Gesetzestexte angewendet. Es handelt sich um ein Open-source-Tool, welches für Browser-basierte Analyse von Texten hergestellt wurde. Für das Framework der Website wurde [Django](https://www.djangoproject.com/) verwendet. Um Korrekturen an den Transkriptionen zu hinterlegen, wird [Martor](https://github.com/agusmakmun/django-markdown-editor) eingesetzt. 
 
-Das erste Sample von drei Gesetzessammlungen des Kantons Basel Stadt aus dem 19. Jahrhundert wurde vom Digitalisierungszentrum der ZB Zürich gescannt und Bilder im Format TIFF hergestellt. Anschliessend werden die Scans einem Transkriptionsprozess unterzogen mithilfe der HTR-Software [Transkribus](https://transkribus.eu/Transkribus/) (mit Einsatz von künstlichen neuronalen Netzen) sowie parallel zum Vergleich mithilfe [Tesseract](https://opensource.google/projects/tesseract). Die Texterkennung wird weiter verfeinert, nicht zuletzt auch durch das Korrektur-Interface, das die Benutzer des Webtools dazu verwenden können.
+Das erste Sample von drei Gesetzessammlungen des Kantons Basel Stadt aus dem 19. Jahrhundert wurde vom Digitalisierungszentrum der ZB Zürich gescannt und Bilder im Format TIFF hergestellt. Anschliessend werden die Scans einem Transkriptionsprozess unterzogen mithilfe der ATR-Software [Transkribus](https://transkribus.eu/Transkribus/) (mit Einsatz von künstlichen neuronalen Netzen) sowie parallel zum Vergleich mithilfe [Tesseract](https://opensource.google/projects/tesseract). Die Texterkennung wird weiter verfeinert, nicht zuletzt auch durch das Korrektur-Interface, das die Benutzer des Webtools dazu verwenden können.
 
 Dann wird der Text computerlinguistisch einem Parsingprozess unterzogen. Dabei wird der Text mittels eines Algorithmus einer automatisierten Analyse der Satzstruktur gemäss natürlicher Sprache ausgesetzt, was auch semantische Erschliessung miteinbezieht. 
 
