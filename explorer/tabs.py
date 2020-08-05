@@ -568,6 +568,7 @@ def make_explore_page(corpus, table, conc, slug, spec=False):
         **style.HORIZONTAL_PAD_5,
         **style.BLOCK_MIDDLE_35,
         **style.NEAR_FRONT,
+        **{"marginLeft": "20px"}
     }
     # remove the paddingTop, which is not needed in explore view
     nav = {k: v for k, v in style.NAV_HEADER.items() if k != "paddingTop"}
@@ -579,8 +580,12 @@ def make_explore_page(corpus, table, conc, slug, spec=False):
         width=38,
         style=style.BLOCK_MIDDLE_35
     )
+    if settings.BUZZWORD_SPECIFIC_CORPUS:
+        title = CorpusModel.objects.get(slug=settings.BUZZWORD_SPECIFIC_CORPUS).name
+    else:
+        title = ["buzzword", img]
     top_bit = [
-        html.A(["buzzword", img], href=mainlink, style=nav),
+        html.A(title, href=mainlink, style=nav),
         # these spaces are used to flash messages to the user if something is wrong
         dcc.ConfirmDialog(id="dialog-search", message=""),
         dcc.ConfirmDialog(id="dialog-table", message=""),

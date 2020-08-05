@@ -18,12 +18,6 @@ def _get_specs_and_corpus(search_from, searches, corpora, slug):
     """
     Get the correct corpus based on search_from
     """
-
-    # if corpus not loaded into corpora, it is an upload. fix now
-    if not corpora:
-        upload = os.path.join("uploads", slug)
-        loaded = Corpus(upload).load()
-        corpora[slug] = loaded
     # if the user wants the corpus, return that
     if not int(search_from):
         return 0, _get_corpus(slug)
@@ -231,10 +225,6 @@ def _get_corpus(slug):
         corpus = corpora[slug]
         return corpus
     raise ValueError(f"CORPUS not found: {slug}")
-    upload = os.path.join("uploads", slug, "conllu")
-    corpus = Corpus(upload).load()
-    corpora[slug] = corpus
-    return corpus
 
 
 def _cast_query(query, col):
@@ -285,6 +275,8 @@ def _special_search(df, col, search_string, skip, multiword):
     try:
         # note, describe inverse is nonfunctional!
         matches = getattr(df, mapped[col])(search_string, inverse=skip, multiword=multiword)
+        if matches is None or not len(matches):
+            return None, "No results found, sorry."
         return matches, None
     except Exception as error:
         msg = f"search error for {col} ({search_string}): {type(error)}: {error}"
@@ -382,10 +374,10 @@ def _correct_page(corpus, page_current, page_size):
     return corpus.iloc[page_current*page_size:(page_current+1)*page_size]
 
 
-def _filter_corpus(corpus, filter, doing_search=False):
+def _filter_corpus(corpus, filters, doing_search=False):
     if doing_search:
         return corpus, False
-    filtering_expressions = filter.split(' && ') if filter is not None else []
+    filtering_expressions = filters.split(' && ') if filters is not None else []
     if filtering_expressions:
         for filter_part in filtering_expressions:
             col_name, operator, filter_value = split_filter_part(filter_part)
