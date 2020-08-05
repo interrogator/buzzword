@@ -71,7 +71,7 @@ def _make_search_name(history, size, searches, lang):
         searchlang = LANGUAGES[("search-default", None)][int(lang)]
         return f"{searchlang} {history} ({size} tokens)"
     #previous, col, skip, search_string, gram, n, n_results, _ = history
-    previous, col, skip, search_string, n, n_results, _ = history  # swisslaw
+    previous, col, skip, search_string, no_use_regex, n, n_results, _ = history  # swisslaw
     gram = 0  # swisslaw
     no = "not " if skip else ""
     col = SHORT_TO_LONG_NAME.get(col, col)

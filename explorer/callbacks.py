@@ -438,30 +438,33 @@ def _new_search(
         )
 
     # on first search, spec is slug name, so it goes here.
-    this_search = [specs, col, skip, search_string]
-
+    this_search = [specs, col, skip, search_string, no_use_regex]  # regex needed
     # have we already done this exact search? compare previous searches for same data
     # if we have done it, we can return that one instead.
     exists = next((i for i in session_search.values() if this_search == list(i)[:5]), False)
     if exists:
         msg = "Table already exists. Switching to that one to save memory."
         df = corpus.iloc[exists[-1]]
+        num_pages = ceil(len(df) / settings.PAGE_SIZE)
+        df, _ = _filter_corpus(df, filters, False)
+        df, _ = _sort_corpus(df, sort_by, False)
+        df = _correct_page(df, page_current, settings.PAGE_SIZE)
         cols, data = _update_conll(df, bool(search_from), drop_govs=conf.add_governor, slug=slug)
         return (
             cols,
             data,
-            search_from,
+            search_from_options,
             exists[-3],
             no_update,
-            False,
+            True,
             msg,
             True,
-            session_search,
-            session_clicks_clear,
-            session_clicks_show,
-            0,
+            no_update,
+            no_update,
+            no_update,
+            n_clicks,
             conll_page,
-            ceil(corpus_size / settings.PAGE_SIZE),
+            num_pages,
         )
 
     # if the query has spaces, we need to prepare for multiword search
@@ -505,10 +508,10 @@ def _new_search(
     # store the search info
     session_search[new_value] = _tuple_or_list(this_search, list)
     # figure out sort, filter, pagination...
+    num_pages = ceil(len(df) / settings.PAGE_SIZE)
     df, _ = _filter_corpus(df, filters, False)
     df, _ = _sort_corpus(df, sort_by, False)
     df = _correct_page(df, page_current, settings.PAGE_SIZE)
-    num_pages = ceil(len(df) / settings.PAGE_SIZE)
     current_cols, current_data = _update_conll(df, True, conf.add_governor, slug=slug)
     name = _make_search_name(this_search, corpus_size, session_search, int(lang))
     new_option = dict(value=new_value, label=name)
