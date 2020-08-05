@@ -14,6 +14,7 @@ from buzz.corpus import Corpus
 from .strings import _capitalize_first, _downloadable_name
 from buzzword.utils import management_handling
 
+
 def _get_specs_and_corpus(search_from, searches, corpora, slug):
     """
     Get the correct corpus based on search_from
