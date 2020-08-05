@@ -298,13 +298,6 @@ searchable cards
   flex-grow: 1;
 }
 
-@media (min-width: 768px) {
-.form-control {
-  width: 500px !important;
-  height: 50px;
-}
-}
-
 .bg-blue {
   background-color: #005EB8;
 }
