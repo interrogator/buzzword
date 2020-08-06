@@ -582,6 +582,8 @@ def make_explore_page(corpus, table, conc, slug, spec=False):
     )
     if settings.BUZZWORD_SPECIFIC_CORPUS:
         title = CorpusModel.objects.get(slug=settings.BUZZWORD_SPECIFIC_CORPUS).name
+        if name.strip() == "Swiss Digital Law Discovery":
+            title = "sdilaw"
     else:
         title = ["buzzword", img]
     top_bit = [
