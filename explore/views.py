@@ -1,11 +1,13 @@
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 
-from explore.models import Corpus
+from explore.models import Corpus, SearchResult
 from explorer.main import load_layout
 from explorer.helpers import register_callbacks
 from explorer.strings import _slug_from_name
 from .forms import UploadCorpusForm
+
+import dash_core_components as dcc
 
 from django.conf import settings
 
@@ -34,12 +36,18 @@ def _start_parse_corpus_job(corpus):
 @login_required
 def explore(request, slug=None):
     from explorer.main import app
-    register_callbacks()
+    userdiv = dcc.Store(id="session-user-id", data=request.user.id)
     if slug is None:
         slug = settings.BUZZWORD_SPECIFIC_CORPUS
     else:
         from start.apps import layouts
         app.layout = layouts[slug]
+
+    # for now, delete old searches
+    to_delete = dict(user=request.user.id, slug=slug)
+    SearchResult.objects.filter(**to_delete).delete()
+    app.layout.children.append(userdiv)
+    register_callbacks()
     context = {"corpus": Corpus.objects.get(slug=slug)}
     return render(request, "explore/explore.html", context=context)
 

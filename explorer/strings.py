@@ -1,6 +1,7 @@
 """
 buzzword explorer: making human-readable strings from data
 """
+import json
 import urllib.parse
 
 from buzz.constants import SHORT_TO_LONG_NAME
@@ -62,21 +63,28 @@ def _format_size(size):
         return f"{size/1000:.2f} kB"
 
 
-def _make_search_name(history, size, searches, lang):
+def _make_search_name(search_result, size, lang):
     """
     Generate a search name from its history
     """
+    from explore.models import SearchResult
     trans = {0: "match", 1: "bigrams", 2: "trigrams"}
-    if isinstance(history, str):
+    if isinstance(search_result, str):
         searchlang = LANGUAGES[("search-default", None)][int(lang)]
-        return f"{searchlang} {history} ({size} tokens)"
-    #previous, col, skip, search_string, gram, n, n_results, _ = history
-    previous, col, skip, search_string, n, n_results, _ = history  # swisslaw
+        return f"{searchlang} {search_result} ({size} tokens)"
+    skip = search_result.inverse
+    search_string = search_result.query
+    n = search_result.idx
+    n_results = len(json.loads(search_result.indices))
     gram = 0  # swisslaw
     no = "not " if skip else ""
-    col = SHORT_TO_LONG_NAME.get(col, col)
+    col = SHORT_TO_LONG_NAME.get(search_result.target, search_result.target)
     relative_corpus = n_results * 100 / size  # list / int
-    prev_total = previous[-2] if isinstance(previous, (tuple, list)) else None
+    parent = getattr(search_result, "parent", None)
+    if parent is None:
+        prev_total = None
+    else:
+        prev_total = parent.indices.count(",") + 1
     rel_last = ""
     if prev_total is not None:
         rel_last = n_results * 100 / prev_total
@@ -85,9 +93,9 @@ def _make_search_name(history, size, searches, lang):
     show = " " if not gram else f"(showing {trans[gram]}) "
     basic = f"{col} {no}matching '{search_string}' {show}{freq}"
     hyphen = ""
-    while previous:
+    while parent is not None:
         hyphen += "──"
-        previous = int(searches[str(previous)][0])
+        parent = parent.parent
     if hyphen:
         basic = f"└{hyphen} " + basic
     return f"({n}) {basic}"

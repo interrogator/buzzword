@@ -6,6 +6,7 @@ from django.db import models
 from explorer.strings import _slug_from_name
 
 from django.db import IntegrityError
+from django.contrib.auth import get_user_model
 
 # get language choices from buzz. we use benepar because SPACY_LANGUAGES
 # contains information about which parser model to use, we don't want that
@@ -109,3 +110,23 @@ class Corpus(models.Model):
         corp.save()
 
         return corp
+
+
+class SearchResult(models.Model):
+    """
+    Model a search result in the explorer interface
+    """
+    class Meta:
+        unique_together = ["slug", "user", "idx"]
+
+    # corpus = models.ForeignKey(Corpus, on_delete=models.SET_NULL)
+    slug = models.SlugField(max_length=255)
+    user = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True)
+    indices = models.TextField()
+    position = models.TextField(null=True)
+    query = models.CharField(max_length=300)
+    regex = models.BooleanField()
+    target = models.CharField(max_length=50)
+    inverse = models.BooleanField()
+    parent = models.ForeignKey("self", on_delete=models.SET_NULL, null=True)
+    idx = models.IntegerField()

@@ -38,7 +38,6 @@ def _make_storage():
     Invisible containers that store session info
     """
     # user storage for searches, tables, and click counts
-    search_store = dcc.Store(id="session-search", data=dict())
     tables_store = dcc.Store(id="session-tables", data=dict())
     click_clear = dcc.Store(id="session-clicks-clear", data=-1)
     click_show = dcc.Store(id="session-clicks-show", data=-1)
@@ -48,7 +47,7 @@ def _make_storage():
     conll_page = dcc.Store(id="session-current-conll-page", data=0)
     conc_page = dcc.Store(id="session-current-conc-page", data=0)
     content = html.Div(id="page-content")
-    stores = [search_store, tables_store, click_clear, click_show, click_search, click_conc, click_table, conll_page, conc_page]
+    stores = [tables_store, click_clear, click_show, click_search, click_conc, click_table, conll_page, conc_page]
     return html.Div(stores + [content])
 
 
@@ -531,7 +530,7 @@ def make_explore_page(corpus, table, conc, slug, spec=False):
     chart = _build_chart_space(table)
     concordance = _build_concordance_space(corpus, conc, config, slug)
     print(f"Corpus length (debug) {len(corpus)}")
-    label = _make_search_name(config.name, len(corpus), dict(), 0)  # 0 == english
+    label = _make_search_name(config.name, len(corpus), 0)  # 0 == english
     search_from = [dict(value=0, label=label)]
     show = html.Button("Show", id="show-this-dataset", style=style.MARGIN_5_MONO)
     show.title = "Show the selected corpus or search result in the Dataset tab"
@@ -627,5 +626,6 @@ def make_explore_page(corpus, table, conc, slug, spec=False):
 
     pad = {"paddingLeft": "10px", "paddingRight": "10px"}
     tab_contents = html.Div(id="tab-contents", children=tab_contents)
-    children = [slug_div, _make_storage(), top_bit, tab_headers, tab_contents]
+    store = _make_storage()
+    children = [slug_div, store, top_bit, tab_headers, tab_contents]
     return html.Div(id="everything", children=children, style=pad)
