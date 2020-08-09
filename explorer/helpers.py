@@ -11,8 +11,9 @@ import pandas as pd
 from buzz.constants import SHORT_TO_COL_NAME, SHORT_TO_LONG_NAME
 from buzz.corpus import Corpus
 
-from .strings import _capitalize_first, _downloadable_name
+from .strings import _capitalize_first, _downloadable_name, _make_search_name
 from buzzword.utils import management_handling
+
 
 def _get_specs_and_corpus(search_from, searches, corpora, slug):
     """
@@ -221,6 +222,28 @@ def _make_csv(table, long_name):
         fo.write(csv_string)
     return fpath
 
+
+def _make_search_from(user, slug, name, size):
+    """
+    Not yet working
+    """
+    from explore.models import SearchResult
+    label = _make_search_name(name, size, 0)
+    out = [dict(value=0, label=label)]
+    this_session = [i for i in SearchResult.objects.filter(user=user, slug=slug)]
+    for i, result in enumerate(this_session, start=1):
+        # size = result.indices.count(",") + 1
+        label = _make_search_name(result, size, 0)
+        out.append(dict(value=i, label=label))
+    return out
+
+
+def _update_search_result_order(options, slug, user):
+    from explore.models import SearchResult
+    for i, item in enumerate(search_from_options):
+        result = SearchResult.objects.get(slug=slug, user=user)
+        result.order = i
+        result.save()
 
 def _get_corpus(slug):
     """

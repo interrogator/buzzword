@@ -41,7 +41,10 @@ def login(request, slug=None, username=False, password=False):
             nextpage = "Analyse"
         error = f"Registration/login required for the {nextpage} page."
         _make_message(request, messages.WARNING, error)
-        corpus = Corpus.objects.get(slug=slug)
+        if slug:
+            corpus = Corpus.objects.get(slug=slug)
+        else:
+            corpus = None
         content = _get_markdown_content(slug, "home")
         context = {"corpus": corpus, "navbar": "home", "content": content}
         specific = "" if not settings.BUZZWORD_SPECIFIC_CORPUS else "-specific"

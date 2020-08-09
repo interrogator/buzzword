@@ -16,22 +16,9 @@ from explore.models import SearchResult
 from django.contrib.auth.models import User
 from django.conf import settings
 from .chart import _df_to_figure
-from .helpers import (
-    _add_links,
-    _cast_query,
-    _get_specs_and_corpus,
-    _special_search,
-    _translate_relative,
-    _tuple_or_list,
-    _update_concordance,
-    _update_conll,
-    _update_frequencies,
-    _make_multiword_query,
-    _correct_page,
-    _filter_corpus,
-    _sort_corpus,
-    _get_corpus
-)
+
+from . import helpers
+
 from .lang import LANGUAGES
 
 from .main import app
@@ -126,7 +113,7 @@ for i in range(1, 6):
 
         if str(table_from) in session_tables:
             this_table = session_tables[str(table_from)]
-            df = FREQUENCY_TABLES[_tuple_or_list(this_table, tuple)]
+            df = FREQUENCY_TABLES[helpers._tuple_or_list(this_table, tuple)]
         else:
             df = initial_tables[slug]
 
@@ -155,8 +142,8 @@ def _filter_view(corpus, page_current, page_size, editable, add_governor, slug):
     Helper to return when just filtering corpus
     """
     filtered_corpus_size = len(corpus)
-    corpus = _correct_page(corpus, page_current, page_size)
-    cols, data = _update_conll(corpus, editable, drop_govs=add_governor, slug=slug)
+    corpus = helpers._correct_page(corpus, page_current, page_size)
+    cols, data = helpers._update_conll(corpus, editable, drop_govs=add_governor, slug=slug)
     return (
         cols,
         data,
@@ -178,8 +165,8 @@ def _sort_view(corpus, page_current, page_size, editable, add_governor, slug):
     """
     Helper to return when just sorting corpus
     """
-    corpus = _correct_page(corpus, page_current, page_size)
-    cols, data = _update_conll(corpus, editable, drop_govs=add_governor, slug=slug)
+    corpus = helpers._correct_page(corpus, page_current, page_size)
+    cols, data = helpers._update_conll(corpus, editable, drop_govs=add_governor, slug=slug)
     return (
         cols,
         data,
@@ -202,8 +189,8 @@ def _pagechange_view(corpus, page_current, page_size, editable, add_governor, sl
     Helper to return when just changing pages
     """
     corpus_size = len(corpus)
-    corpus = _correct_page(corpus, page_current, page_size)
-    cols, data = _update_conll(corpus, editable, drop_govs=add_governor, slug=slug)
+    corpus = helpers._correct_page(corpus, page_current, page_size)
+    cols, data = helpers._update_conll(corpus, editable, drop_govs=add_governor, slug=slug)
     return (
         cols,
         data,
@@ -227,8 +214,8 @@ def _show_dataset_view(corpus, page_current, page_size, editable, add_governor, 
     Helper to return when just showing a different dataset
     """
     corpus_size = len(corpus)
-    corpus = _correct_page(corpus, page_current, page_size)
-    cols, data = _update_conll(corpus, editable, drop_govs=add_governor, slug=slug)
+    corpus = helpers._correct_page(corpus, page_current, page_size)
+    cols, data = helpers._update_conll(corpus, editable, drop_govs=add_governor, slug=slug)
     return (
         cols,
         data,
@@ -258,11 +245,11 @@ def _actual_search(corpus, col, search_string, skip, multiword, no_use_regex):
     """
     # depgrep/tgrep search types
     if col in {"t", "d", "describe"}:
-        df, msg = _special_search(corpus, col, search_string, skip, multiword)
+        df, msg = helpers._special_search(corpus, col, search_string, skip, multiword)
         if msg:
             return None, msg
         return df, None
-    search = _cast_query(search_string, col)
+    search = helpers._cast_query(search_string, col)
     method = "just" if not skip else "skip"
     extra = dict() if no_use_regex else dict(regex=False, exact_match=True)
     # try to do the just/skip search
@@ -347,13 +334,36 @@ def _new_search(
     Validate input, run the search, store data and display things
     """
     # the first callback, before anything is loaded. Just do nothing
-    if n_clicks is None and page_current == conll_page and not sort_by and not filters:
-        return [no_update] * 13
+    user = User.objects.get(id=user_id)
+    conf = CorpusModel.objects.get(slug=slug)
+    corpus = helpers._get_corpus(slug)
+
+    if n_clicks is None \
+            and show_dataset is None \
+            and page_current == conll_page \
+            and not sort_by \
+            and not filters:
+        # problem: cannot remember order properly.
+        search_from = helpers._make_search_from(user, slug, conf.name, len(corpus))
+
+        return [
+            no_update,
+            no_update,
+            search_from,
+            no_update,
+            True if len(search_from) == 1 else False,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update,
+            no_update
+        ]
 
     clearing_history = cleared is not None and cleared > session_clicks_clear
     doing_search = n_clicks is not None and n_clicks > session_clicks_search
-
-    user = User.objects.get(id=user_id)
 
     searching_from = None
     uniq = dict(slug=slug, user=user, idx=search_from)
@@ -374,12 +384,10 @@ def _new_search(
         exists = None
 
     # some constants
-    conf = CorpusModel.objects.get(slug=slug)
     max_row, max_col = settings.TABLE_SIZE
     corpus_size = len(corpora[slug])
     editable = bool(search_from)
     # get the corpus and cut it down based on the parent
-    corpus = _get_corpus(slug)
     if searching_from:
         corpus = corpus.iloc[json.loads(searching_from.indices)]
 
@@ -392,8 +400,8 @@ def _new_search(
         # get the whole corpus and paginate it
         corpus = corpora[slug]
         corpus_size = len(corpus)
-        corpus = _correct_page(corpus, page_current, settings.PAGE_SIZE)
-        cols, data = _update_conll(corpus, False, drop_govs=conf.add_governor, slug=slug)
+        corpus = helpers._correct_page(corpus, page_current, settings.PAGE_SIZE)
+        cols, data = helpers._update_conll(corpus, False, drop_govs=conf.add_governor, slug=slug)
         name = _make_search_name(conf.name, corpus_size, int(lang))
         search_from = [dict(value=0, label=name)]
         # set number of clicks at last moment
@@ -419,12 +427,12 @@ def _new_search(
     sort_page_filter = [page_current, settings.PAGE_SIZE, editable, conf.add_governor, slug]
 
     # do filtering. if anything was done, filtered is true, and return via helper
-    corpus, filtered = _filter_corpus(corpus, filters, doing_search)
+    corpus, filtered = helpers._filter_corpus(corpus, filters, doing_search)
     if filtered and not doing_search:
         return _filter_view(corpus, *sort_page_filter)
 
     # do sorting. if anything was done, corpus_sorted is true
-    corpus, corpus_sorted = _sort_corpus(corpus, sort_by, doing_search)
+    corpus, corpus_sorted = helpers._sort_corpus(corpus, sort_by, doing_search)
     # if just sorting, or if sort was returned to normal (2nd case), return
     # todo, may need to improve this...
     if (corpus_sorted and not doing_search) or (not sort_by and not doing_search):
@@ -463,10 +471,10 @@ def _new_search(
         msg = "Table already exists. Switching to that one to save memory."
         df = corpus.iloc[json.loads(exists.indices)]
         num_pages = ceil(len(df) / settings.PAGE_SIZE)
-        df, _ = _filter_corpus(df, filters, False)
-        df, _ = _sort_corpus(df, sort_by, False)
-        df = _correct_page(df, page_current, settings.PAGE_SIZE)
-        cols, data = _update_conll(df, bool(search_from), drop_govs=conf.add_governor, slug=slug)
+        df, _ = helpers._filter_corpus(df, filters, False)
+        df, _ = helpers._sort_corpus(df, sort_by, False)
+        df = helpers._correct_page(df, page_current, settings.PAGE_SIZE)
+        cols, data = helpers._update_conll(df, bool(search_from), drop_govs=conf.add_governor, slug=slug)
         return (
             cols,
             data,
@@ -486,7 +494,7 @@ def _new_search(
     # if the query has spaces, we need to prepare for multiword search
     multiword = " " in search_string.strip()
     if multiword:
-        search_string, multiword = _make_multiword_query(search_string.strip(), col, no_use_regex)
+        search_string, multiword = helpers._make_multiword_query(search_string.strip(), col, no_use_regex)
         col = "d"
 
     # DO THE ACTUAL SEARCH HERE
@@ -498,7 +506,7 @@ def _new_search(
             no_update,
             no_update,
             no_update,
-            not bool(session_search),
+            True,  # todo: editable
             bool(msg),
             msg,
             bool(search_from), # row deletable
@@ -520,6 +528,13 @@ def _new_search(
     filt = dict(slug=slug, user=user)
     new_value = len(SearchResult.objects.filter(**filt)) + 1
 
+    new_option = dict(value=new_value, label=name)
+    enu = enumerate(search_from_options)
+    index_for_option = next(i for i, s in enu if s["value"] == search_from)
+    search_from_options.insert(index_for_option + 1, new_option)
+    helpers._update_search_result_order(search_from_options, slug, user)
+
+
     this_search = SearchResult(
         slug=slug,
         user=user,
@@ -530,21 +545,18 @@ def _new_search(
         target=col,
         query=search_string,
         regex=not no_use_regex,
-        inverse=skip
+        inverse=skip,
+        name=None,
     )
+    name = _make_search_name(this_search, corpus_size, int(lang))
+    this_search.name = name
     this_search.save()
-
     # figure out sort, filter, pagination...
     num_pages = ceil(len(df) / settings.PAGE_SIZE)
-    df, _ = _filter_corpus(df, filters, False)
-    df, _ = _sort_corpus(df, sort_by, False)
-    df = _correct_page(df, page_current, settings.PAGE_SIZE)
-    current_cols, current_data = _update_conll(df, True, conf.add_governor, slug=slug)
-    name = _make_search_name(this_search, corpus_size, int(lang))
-    new_option = dict(value=new_value, label=name)
-    enu = enumerate(search_from_options)
-    index_for_option = next(i for i, s in enu if s["value"] == search_from)
-    search_from_options.insert(index_for_option + 1, new_option)
+    df, _ = helpers._filter_corpus(df, filters, False)
+    df, _ = helpers._sort_corpus(df, sort_by, False)
+    df = helpers._correct_page(df, page_current, settings.PAGE_SIZE)
+    current_cols, current_data = helpers._update_conll(df, True, conf.add_governor, slug=slug)
 
     return (
         current_cols,
@@ -594,7 +606,6 @@ def _new_search(
         # State("content-table-switch", "on"),
         State("chart-from-1", "options"),
         State("chart-from-1", "value"),
-        State("session-search", "data"),
         State("session-tables", "data"),
         State("session-clicks-table", "data"),
         State("slug", "title"),
@@ -614,7 +625,6 @@ def _new_table(
     # content_table,
     table_from_options,
     nv1,
-    session_search,
     session_tables,
     session_click_table,
     slug,
@@ -631,14 +641,14 @@ def _new_table(
 
     # because no option below can return initial table, rows can now be deleted
     row_deletable = True
-
-    specs, corpus = _get_specs_and_corpus(search_from, session_search, corpora, slug)
+    session_search = None # todo
+    specs, corpus = helpers._get_specs_and_corpus(search_from, session_search, corpora, slug)
 
     # figure out sort, subcorpora,relative and keyness
     sort = sort or "total"
     if subcorpora == "_corpus":
         subcorpora = None
-    relative, keyness = _translate_relative(relkey)
+    relative, keyness = helpers._translate_relative(relkey)
 
     # check if there are any validation problems
     if session_click_table != n_clicks:
@@ -663,7 +673,7 @@ def _new_table(
         # multiindex_columns,
         # content_table,
     ]
-    this_table_tuple = _tuple_or_list(this_table_list, tuple)
+    this_table_tuple = helpers._tuple_or_list(this_table_list, tuple)
 
     # if table already made, use that one
     key = next((k for k, v in session_tables.items() if this_table_list == v), False)
@@ -686,7 +696,7 @@ def _new_table(
         if session_tables:
             # todo: figure this out...use current table instead?
             key, value = list(session_tables.items())[-1]
-            table = FREQUENCY_TABLES[_tuple_or_list(value, tuple)]
+            table = FREQUENCY_TABLES[helpers._tuple_or_list(value, tuple)]
             # todo: more here?
         else:
             table = initial_tables[slug]
@@ -731,7 +741,7 @@ def _new_table(
         max_row, max_col = settings.TABLE_SIZE
         tab = table.iloc[:max_row, :max_col]
         # todo: swisslaw, multi and content
-        cols, data = _update_frequencies(tab, True, False)
+        cols, data = helpers._update_frequencies(tab, True, False)
 
     if not msg and not updating:
         table_name = _make_table_name(this_table_list)
@@ -775,7 +785,6 @@ def _new_table(
     [
         State("show-for-conc", "value"),
         State("search-from", "value"),
-        State("session-search", "data"),
         State("slug", "title"),
         State("session-clicks-conc", "data"),
         State("session-current-conc-page", "data"),
@@ -788,7 +797,6 @@ def _new_conc(
     filter,
     show,
     search_from,
-    session_search,
     slug,
     session_clicks_conc,
     conc_page,
@@ -812,7 +820,8 @@ def _new_conc(
     if not search_from and show == "w":
         conc = initial_concs[slug]
     else:
-        specs, corpus = _get_specs_and_corpus(search_from, session_search, corpora, slug)
+        session_search = None #todo
+        specs, corpus = helpers._get_specs_and_corpus(search_from, session_search, corpora, slug)
         met = ["file", "s", "i"]
         if isinstance(corpus, pd.DataFrame):
             for feat in {"speaker", "year"}:
@@ -820,22 +829,22 @@ def _new_conc(
                     met.append(feat)
 
         conc = corpus.conc(show=show, metadata=met, window=(100, 100), n=settings.MAX_CONC)
-        conc = _add_links(conc, slug=slug, conc=True)
+        conc = helpers._add_links(conc, slug=slug, conc=True)
         conc["file"] = conc["file"].apply(os.path.basename)
         conc["file"] = conc["file"].str.replace(".conllu", "", regex=False)
 
     # if just changing page
     if conc_page != page_current:
         corpus_size = len(conc)
-        conc = _correct_page(conc, page_current, settings.PAGE_SIZE)
-        cols, data = _update_concordance(conc, True)
+        conc = helpers._correct_page(conc, page_current, settings.PAGE_SIZE)
+        cols, data = helpers._update_concordance(conc, True)
         return cols, data, bool(msg), msg, n_clicks, page_current
 
     # yes, these are named corpus, but they are fine on conc as well
-    conc, corpus_sorted = _sort_corpus(conc, sort_by, False)
-    conc, corpus_filtered = _filter_corpus(conc, filter, False)
-    conc = _correct_page(conc, page_current, settings.PAGE_SIZE)
-    cols, data = _update_concordance(conc, deletable=True)
+    conc, corpus_sorted = helpers._sort_corpus(conc, sort_by, False)
+    conc, corpus_filtered = helpers._filter_corpus(conc, filter, False)
+    conc = helpers._correct_page(conc, page_current, settings.PAGE_SIZE)
+    cols, data = helpers._update_concordance(conc, deletable=True)
     return cols, data, bool(msg), msg, n_clicks, page_current
 
 

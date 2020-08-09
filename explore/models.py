@@ -130,3 +130,6 @@ class SearchResult(models.Model):
     inverse = models.BooleanField()
     parent = models.ForeignKey("self", on_delete=models.SET_NULL, null=True)
     idx = models.IntegerField()
+    name = models.CharField(max_length=255, null=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    order = models.IntegerField()
