@@ -98,7 +98,7 @@ MIDDLEWARE = [
 
 
 PLOTLY_DASH = {
-    "serve_locally": False,
+    "serve_locally": True
 }
 
 
