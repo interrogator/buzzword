@@ -3,6 +3,7 @@ buzzword explorer: collection of reusable CSS styles
 """
 
 FRONT = {"position": "relative", "zIndex": "999"}
+VERY_NEAR_FRONT = {"zIndex": "950"}
 NEAR_FRONT = {"position": "relative", "zIndex": "900"}
 VERTICAL_MARGINS = {"marginBottom": 15, "marginTop": 15}
 HORIZONTAL_PAD_5 = {"paddingLeft": 5, "paddingRight": 5}

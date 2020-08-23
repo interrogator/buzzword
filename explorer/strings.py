@@ -29,18 +29,26 @@ def _make_table_name(specs=None, search_from=None, show=None, subcorpora=None, r
 
     multi = False
     cont = False
+
+    subcorpora = json.loads(subcorpora)
+    show = json.loads(show)
+
     if subcorpora is None:
         subcorpora = "corpus"
-    subcorpora = (
-        SHORT_TO_LONG_NAME.get(subcorpora, subcorpora).lower().replace("_", " ")
-    )
+
+    subcorpora = [SHORT_TO_LONG_NAME.get(i, i).lower().replace("_", " ") for i in subcorpora]
     show = [SHORT_TO_LONG_NAME.get(i, i).lower().replace("_", " ") for i in show]
+
     show = "+".join(show)
+    subcorpora = "+".join(subcorpora)
+
     relkey = ", rel. freq." if relative else ", keyness"
     if keyness:
         relkey = f"{relkey} ({keyness})"
     if relative is False and keyness is False:
         relkey = " showing absolute frequencies"
+    if sort is None:
+        sort = "total"
     basic = f"{show} by {subcorpora}{relkey}, sorting by {sort}"
     if len(show) > 1 and multi:
         basic += " (columns split)"

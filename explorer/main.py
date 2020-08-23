@@ -94,6 +94,7 @@ def _get_or_load_corpora(slug=None, force=False):
             print(f"* Generating an initial table for {name} using {display}")
             initial_table = corpus.table(**display)
             initial_table = initial_table.drop("file", axis=1, errors="ignore")
+            initial_table.index = [os.path.basename(i).replace(".conllu", "") for i in initial_table.index]
             initial_tables[meta["slug"]] = initial_table
 
             try:

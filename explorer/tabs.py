@@ -108,7 +108,7 @@ def _build_dataset_space(df, config):
             type="text",
             placeholder="Enter search query...",
             size="60",
-            style=style.MARGIN_5_MONO,
+            style={**style.MARGIN_5_MONO, **{"fontSize": "14px"}},
             className="input-lg form-control"
         ),
         html.Div(
@@ -206,14 +206,14 @@ def _build_frequencies_space(corpus, table, config):
         id="show-for-table",
         options=cols,
         value=[],
-        style={**style.MARGIN_5_MONO, **style.FRONT},
+        style={**style.MARGIN_5_MONO, **style.NEAR_FRONT},
     )
     show_check = html.Div(show_check, style=style.TSTYLE)
     subcorpora_drop = dcc.Dropdown(
         id="subcorpora-for-table",
         options=[dict(value="_corpus", label="Entire corpus")] + cols,
         placeholder="Feature for index",
-        style={**style.MARGIN_5_MONO, **style.FRONT},
+        style={**style.MARGIN_5_MONO, **style.NEAR_FRONT},
     )
     subcorpora_drop = html.Div(subcorpora_drop, style=style.TSTYLE)
     relative_drop = dcc.Dropdown(
@@ -556,7 +556,11 @@ def make_explore_page(corpus, table, conc, slug, spec=False):
     langselect.title = "Select language for the interface"
 
     dropdown = dcc.Dropdown(
-        id="search-from", options=search_from, value=0, disabled=True
+        id="search-from",
+        options=search_from,
+        value=0,
+        disabled=True,
+        style={**style.VERY_NEAR_FRONT, **{"fontSize": "12px"}},
     )
 
     drop_style = {
@@ -564,7 +568,7 @@ def make_explore_page(corpus, table, conc, slug, spec=False):
         "width": "50%",
         **style.HORIZONTAL_PAD_5,
         **style.BLOCK_MIDDLE_35,
-        **style.NEAR_FRONT,
+        **style.VERY_NEAR_FRONT,
     }
     # remove the paddingTop, which is not needed in explore view
     nav = {k: v for k, v in style.NAV_HEADER.items() if k != "paddingTop"}
