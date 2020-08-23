@@ -230,8 +230,8 @@ def _make_search_from(user, slug, name, size):
     from explore.models import SearchResult
     label = _make_search_name(name, size, 0)
     out = [dict(value=0, label=label)]
-    this_session = [i for i in SearchResult.objects.filter(user=user, slug=slug)]
-    for i, result in enumerate(this_session, start=1):
+    this_session = SearchResult.objects.filter(user=user, slug=slug)
+    for i, result in enumerate(this_session.order_by("order")):
         # size = result.indices.count(",") + 1
         label = _make_search_name(result, size, 0)
         out.append(dict(value=i, label=label))
@@ -240,8 +240,11 @@ def _make_search_from(user, slug, name, size):
 
 def _update_search_result_order(options, slug, user):
     from explore.models import SearchResult
-    for i, item in enumerate(search_from_options):
-        result = SearchResult.objects.get(slug=slug, user=user)
+    for i, item in enumerate(options):
+        try:
+            result = SearchResult.objects.get(slug=slug, user=user, idx=int(item["value"]), name=item["label"])
+        except SearchResult.DoesNotExist:  # for the corpus itself?
+            continue
         result.order = i
         result.save()
 

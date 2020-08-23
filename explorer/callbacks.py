@@ -338,20 +338,25 @@ def _new_search(
     conf = CorpusModel.objects.get(slug=slug)
     corpus = helpers._get_corpus(slug)
 
+    clearing_history = cleared is not None and cleared > session_clicks_clear
+    showing_dataset = show_dataset and show_dataset != session_clicks_show
+    doing_search = n_clicks is not None and n_clicks > session_clicks_search
+
     if n_clicks is None \
             and show_dataset is None \
             and page_current == conll_page \
             and not sort_by \
+            and not clearing_history \
             and not filters:
-        # problem: cannot remember order properly.
-        search_from = helpers._make_search_from(user, slug, conf.name, len(corpus))
+        search_from_options = helpers._make_search_from(user, slug, conf.name, len(corpus))
+        print(search_from_options)
 
         return [
             no_update,
             no_update,
+            search_from_options,
             search_from,
-            no_update,
-            True if len(search_from) == 1 else False,
+            True if len(search_from_options) == 1 else False,
             no_update,
             no_update,
             no_update,
@@ -361,9 +366,6 @@ def _new_search(
             no_update,
             no_update
         ]
-
-    clearing_history = cleared is not None and cleared > session_clicks_clear
-    doing_search = n_clicks is not None and n_clicks > session_clicks_search
 
     searching_from = None
     uniq = dict(slug=slug, user=user, idx=search_from)
@@ -396,7 +398,7 @@ def _new_search(
     if clearing_history:
         # remove previous searches
         to_delete = dict(user=user, slug=slug)
-        SearchResult.objects.filter(**to_delete).delete()
+        d = SearchResult.objects.filter(**to_delete).delete()
         # get the whole corpus and paginate it
         corpus = corpora[slug]
         corpus_size = len(corpus)
@@ -435,27 +437,31 @@ def _new_search(
     corpus, corpus_sorted = helpers._sort_corpus(corpus, sort_by, doing_search)
     # if just sorting, or if sort was returned to normal (2nd case), return
     # todo, may need to improve this...
-    if (corpus_sorted and not doing_search) or (not sort_by and not doing_search):
+    if (corpus_sorted and not doing_search and not showing_dataset) or (not sort_by and not doing_search and not showing_dataset):
+        print("SORT VIEW")
         return _sort_view(corpus, *sort_page_filter)
 
     # if changing page, return the correct page data
     if conll_page != page_current:
+        print("PAGE CHANGE VIEW")
         return _pagechange_view(corpus, *sort_page_filter)
 
     # user clicked the show button, show the selected (i.e. search_from) corpus
-    if show_dataset and show_dataset != session_clicks_show:
+    if showing_dataset:
+        print("SHOWING", search_from, show_dataset, search_from_options, corpus.head(5))
         return _show_dataset_view(corpus, *sort_page_filter, show_dataset=show_dataset)
 
     # there's a problem with the search
     # todo: use messaging framework for this, not alert popup
     msg = _search_error(col, search_string)
     if msg:
+        print("SEARCH ERROR VIEW")
         return [
             no_update,
             no_update,
             no_update,
             no_update,
-            False,
+            True if len(search_from_options) == 1 else False,
             True,
             msg,
             False,
@@ -475,12 +481,13 @@ def _new_search(
         df, _ = helpers._sort_corpus(df, sort_by, False)
         df = helpers._correct_page(df, page_current, settings.PAGE_SIZE)
         cols, data = helpers._update_conll(df, bool(search_from), drop_govs=conf.add_governor, slug=slug)
+        print("EXISTS", search_from_options, exists.idx, exists.parent, exists.order)
         return (
             cols,
             data,
-            search_from_options,
-            exists.idx,
             no_update,
+            exists.idx,
+            False,
             True,
             msg,
             True,
@@ -506,7 +513,7 @@ def _new_search(
             no_update,
             no_update,
             no_update,
-            True,  # todo: editable
+            True if len(search_from_options) == 1 else False,
             bool(msg),
             msg,
             bool(search_from), # row deletable
@@ -528,12 +535,8 @@ def _new_search(
     filt = dict(slug=slug, user=user)
     new_value = len(SearchResult.objects.filter(**filt)) + 1
 
-    new_option = dict(value=new_value, label=name)
     enu = enumerate(search_from_options)
-    index_for_option = next(i for i, s in enu if s["value"] == search_from)
-    search_from_options.insert(index_for_option + 1, new_option)
-    helpers._update_search_result_order(search_from_options, slug, user)
-
+    index_for_option = next(i for i, s in enu if s["value"] == search_from) + 1
 
     this_search = SearchResult(
         slug=slug,
@@ -547,10 +550,19 @@ def _new_search(
         regex=not no_use_regex,
         inverse=skip,
         name=None,
+        order=index_for_option
     )
     name = _make_search_name(this_search, corpus_size, int(lang))
     this_search.name = name
     this_search.save()
+
+    new_option = dict(value=new_value, label=name)
+    search_from_options.insert(index_for_option, new_option)
+
+    print("SEARCH FROM OPTIONS", len(search_from_options), search_from_options)
+
+    helpers._update_search_result_order(search_from_options, slug, user)
+
     # figure out sort, filter, pagination...
     num_pages = ceil(len(df) / settings.PAGE_SIZE)
     df, _ = helpers._filter_corpus(df, filters, False)
