@@ -29,18 +29,23 @@
             make sure there is static/ViewerJs, and then:
         <iframe src = "{{ pdf_filepath }}" width='400' height='300' allowfullscreen webkitallowfullscreen></iframe>-->
       <div class="row" style="padding-bottom:10px">
-        <div class="col-sm">
+        {% if sections %}
+          <div class="col-sm-2">
+            {% include "compare-sidebar.html" %}
+          </div>
+        {% endif %}
+        <div class="col-sm{{ coldata }}">
             <div id="pdf-here">
-                <object data={{ pdf_filepath }} type="application/pdf" style="min-height:85vh;min-width:48vw">
+                <object data={{ pdf_filepath }} type="application/pdf" style="min-height:85vh;min-width: {{ colwidth }}">
                     <embed src={{ pdf_filepath }} type="application/pdf" />
                 </object>
                 {% include "comparenav.html" %}
             </div>
         </div>
-        <div class="col-sm">
+        <div class="col-sm{{ coldata }}">
             <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
-                <div style="height:80vh; min-width:42vw; margin-left:-10px;">
+                <div style="height:80vh; min-width:{{ colwidth }}; margin-left:-10px;">
                     {{ form.description }}
                     <div class="float-right" style="margin-top:-10px;">
                         Describe your changes: 

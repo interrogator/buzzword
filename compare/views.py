@@ -13,10 +13,21 @@ from django.contrib.auth.models import User
 
 from .forms import PostForm, SubmitForm
 from .models import PDF, OCRUpdate
-from .utils import markdown_to_buzz_input, store_buzz_raw
+from .utils import markdown_to_buzz_input, store_buzz_raw, _get_sections
 
 from buzzword.utils import _make_message
 from explore.models import Corpus
+
+
+
+def _get_search_results(slug, query):
+    # todo: get just latest!
+    ocrs_to_search = OCRUpdate.objects.filter(slug=slug, accepted=True)
+    results = []
+    for ocr in ocrs_to_search:
+        if query.strip().lower() in ocr.text.lower():
+            results.append(ocr)
+    return results
 
 
 @login_required
@@ -27,17 +38,28 @@ def browse_collection(request, slug=None):
     Use Django's pagination for handling PDFs
     Use martor for the markdown editor
     """
-    if not slug:
-        slug = settings.BUZZWORD_SPECIFIC_CORPUS
-    all_pdfs = PDF.objects.all()
-    paginator = Paginator(all_pdfs, 1)
+    slug = slug or settings.BUZZWORD_SPECIFIC_CORPUS
+    search_string = request.GET.get("search")
     query = request.GET.get('q')
-    if query:
-        page_number = int(query)
+    if search_string:
+        results = _get_search_results(slug, search_string)
+        if results:
+            page_number = results[0].pdf.num + 1
+        else:
+            query = "0"  # ?
+    all_pdfs = PDF.objects.all()
+    if search_string and results:
+        results = [i.pdf.num for i in results]
+        all_pdfs = all_pdfs.filter(num__in=results)
+        per_page = 1
     else:
-        page_number = int(request.GET.get("page", 1))
-    page_obj = paginator.get_page(page_number)
+        page_number = int(query) if query else int(request.GET.get("page", 1))
+        per_page = 1
+    
     pdf = all_pdfs.get(slug=slug, num=page_number - 1)
+    paginator = Paginator(all_pdfs, per_page)
+    
+    page_obj = paginator.get_page(page_number)
     pdf_path = os.path.relpath(pdf.path)
     template = loader.get_template("compare/sidetoside.html")
     # get all the updates for this particular pdf
@@ -58,6 +80,7 @@ def browse_collection(request, slug=None):
     default_commit = f"Update {os.path.splitext(os.path.basename(pdf_path))[0]}"
     form_data = {"description": plaintext, "commit_msg": default_commit}
     form = PostForm(initial=form_data)
+    sections = _get_sections(slug)
     context = {
         "pdf_filepath": "/" + pdf_path.replace(".tif", ".pdf"),
         "form": form,
@@ -65,6 +88,9 @@ def browse_collection(request, slug=None):
         "specific_nav": bool(settings.BUZZWORD_SPECIFIC_CORPUS),
         "corpus": Corpus.objects.get(slug=slug),
         "navbar": "compare",
+        "sections": sections,
+        "colwidth": "48vw" if not sections else "30vw",
+        "coldata": "-5" if sections else ""
     }
     # if the user has tried to update the OCR text
     if request.method == "POST":

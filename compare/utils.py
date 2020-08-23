@@ -1,6 +1,7 @@
 """
 Random utilities this app needs
 """
+import json
 import os
 import re
 import shutil
@@ -225,3 +226,11 @@ def _handle_page_numbers(text, filename):
     if form:
         cut = [form] + cut
     return "\n".join(cut)
+
+
+def _get_sections(slug):
+    sections_path = f"static/corpora/{slug}/sections.json"
+    if not os.path.exists(sections_path):
+        return
+    with open(sections_path, "r") as fo:
+        return json.load(fo)
