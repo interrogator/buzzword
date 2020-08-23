@@ -216,4 +216,5 @@ def load_explorer_app(force=False):
 
 
 app = DjangoDash("buzzword", suppress_callback_exceptions=True)
+
 app.layout = get_layout

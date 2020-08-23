@@ -1,6 +1,7 @@
 """
 buzzword explorer: callbacks
 """
+from datetime import datetime
 import json
 from math import ceil
 import os
@@ -11,7 +12,7 @@ from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
 from explore.models import Corpus as CorpusModel
-from explore.models import SearchResult
+from explore.models import SearchResult, TableResult
 
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -26,15 +27,11 @@ from .strings import _make_search_name, _make_table_name, _search_error, _table_
 
 from . import style
 
-from buzzword.utils import management_handling
+
+from buzzword.utils import management_handling, delete_old_tables
 
 if not management_handling():
-    from start.apps import corpora, initial_tables, initial_concs
-
-# we can't keep tables in dcc.store, they are too big. so we keep all here with
-# a tuple that can identify them (ideally, even dealing with user sessions)
-# todo: improve this
-FREQUENCY_TABLES = dict()
+    from start.apps import corpora, initial_tables, initial_concs, user_tables
 
 
 @app.expanded_callback(
@@ -113,7 +110,7 @@ for i in range(1, 6):
 
         if str(table_from) in session_tables:
             this_table = session_tables[str(table_from)]
-            df = FREQUENCY_TABLES[helpers._tuple_or_list(this_table, tuple)]
+            df = user_tables[helpers._tuple_or_list(this_table, tuple)]
         else:
             df = initial_tables[slug]
 
@@ -134,6 +131,7 @@ def _on_load_callback(n_clicks, **kwargs):
     """
     This gets triggered on load; we use it to fix loading screen
     """
+    delete_old_tables()
     return "loading-non-main", False
 
 
@@ -333,6 +331,7 @@ def _new_search(
 
     Validate input, run the search, store data and display things
     """
+    delete_old_tables()
     # the first callback, before anything is loaded. Just do nothing
     user = User.objects.get(id=user_id)
     conf = CorpusModel.objects.get(slug=slug)
@@ -601,7 +600,6 @@ def _new_search(
         Output("dialog-table", "displayed"),
         Output("dialog-table", "message"),
         Output("freq-table", "row_deletable"),
-        Output("session-tables", "data"),
         Output("session-clicks-table", "data"),
         #Output("freq-table", "style_data_conditional")
     ],
@@ -618,8 +616,8 @@ def _new_search(
         # State("content-table-switch", "on"),
         State("chart-from-1", "options"),
         State("chart-from-1", "value"),
-        State("session-tables", "data"),
         State("session-clicks-table", "data"),
+        State("session-user-id", "data"),
         State("slug", "title"),
     ],
 )
@@ -637,24 +635,33 @@ def _new_table(
     # content_table,
     table_from_options,
     nv1,
-    session_tables,
     session_click_table,
+    user_id,
     slug,
     **kwargs,
 ):
     """
     Callback when a new freq table is generated. Same logic as new_search.
     """
+    delete_old_tables()
+
     # do nothing if not yet loaded
     if n_clicks is None:
         raise PreventUpdate
 
+    user = User.objects.get(id=user_id)
     conf = CorpusModel.objects.get(slug=slug)
 
     # because no option below can return initial table, rows can now be deleted
     row_deletable = True
-    session_search = None # todo
-    specs, corpus = helpers._get_specs_and_corpus(search_from, session_search, corpora, slug)
+
+    # get the corpus we are tabling from
+    corpus = helpers._get_corpus(slug)
+    searching_from = None
+    if search_from:
+        uniq = dict(slug=slug, user=user, idx=search_from)
+        searching_from = SearchResult.objects.get(**uniq)
+        corpus = corpus.iloc[json.loads(searching_from.indices)]
 
     # figure out sort, subcorpora,relative and keyness
     sort = sort or "total"
@@ -662,10 +669,12 @@ def _new_table(
         subcorpora = None
     relative, keyness = helpers._translate_relative(relkey)
 
-    # check if there are any validation problems
+    # are we updating?
+    # if the table making button has been clicked, we are not updating
     if session_click_table != n_clicks:
         updating = False
         session_click_table = n_clicks
+    # check if table dimensions have changed
     elif prev_data is not None:
         # if number of rows has changed
         if len(prev_data) != len(current_data):
@@ -674,48 +683,56 @@ def _new_table(
         if len(prev_data[0]) != len(current_data[0]):
             updating = True
 
+    # find validation errors
     msg = _table_error(show, subcorpora, updating)
-    this_table_list = [
-        specs,
-        list(show),
-        subcorpora,
-        relative,
-        keyness,
-        sort,
-        # multiindex_columns,
-        # content_table,
-    ]
-    this_table_tuple = helpers._tuple_or_list(this_table_list, tuple)
 
-    # if table already made, use that one
-    key = next((k for k, v in session_tables.items() if this_table_list == v), False)
-    idx = key if key is not False else len(session_tables) + 1
+    # construct the model for this table, to check if it exists
+    this_table_data = dict(
+        slug=slug,
+        user=user,
+        produced_from=searching_from,
+        show=json.dumps(list(show)),
+        subcorpora=json.dumps(list(subcorpora)),
+        relative=relative,
+        keyness=keyness
+    )
+
+    # if it exists, get its idx so we can retrieve it from user_tables
+    TableResult.objects.all().delete()
+    try:
+        exists = TableResult.objects.get(**this_table_data)
+        identifier = exists.idx
+    except TableResult.DoesNotExist:
+        # doesn't exist, i.e. must call .table()
+        exists = None
+        identifier = len(TableResult.objects.all()) + 1
+        this_table_data["idx"] = identifier
 
     # if we are updating the table:
     if updating:
         # get the whole table from master dict of them
-        table = FREQUENCY_TABLES[this_table_tuple]
+        table = user_tables[identifier]
         # fix rows and columns
         table = table[[i["id"] for i in current_cols[1:]]]
         table = table.loc[[i["_" + table.index.name] for i in current_data]]
         # store table again with same key
-        FREQUENCY_TABLES[this_table_tuple] = table
-    elif key is not False:
+        user_tables[identifier] = table
+    elif exists and identifier in user_tables:  # tood: second check should not be here
         msg = "Table already exists. Switching to that one to save memory."
-        table = FREQUENCY_TABLES[this_table_tuple]
+        table = user_tables[identifier]
     # if there was a validation problem, juse use last table (?)
     elif msg:
-        if session_tables:
+        # todo: check
+        if user_tables:
             # todo: figure this out...use current table instead?
-            key, value = list(session_tables.items())[-1]
-            table = FREQUENCY_TABLES[helpers._tuple_or_list(value, tuple)]
+            key, value = list(user_tables.items())[-1]
+            table = user_tables[helpers._tuple_or_list(value, tuple)]
             # todo: more here?
         else:
             table = initial_tables[slug]
     else:
         # generate table
-        method = "table"
-        table = getattr(corpus, method)(
+        table = corpus.table(
             show=show,
             subcorpora=subcorpora,
             relative=relative if relative != "corpus" else corpora[slug],
@@ -739,16 +756,18 @@ def _new_table(
             relative = None
 
         # then store the search information in store/freq table spaces
-        session_tables[idx] = this_table_list
-        FREQUENCY_TABLES[this_table_tuple] = table
+        user_tables[identifier] = table
+        tab = TableResult(**this_table_data)
+        tab.save()
 
     if updating:
         cols, data, style_index = no_update, no_update, no_update
     else:
-
         style_index = style.FILE_INDEX
         style_index["if"]["column_id"] = table.index.name
-
+        if table.index.name in table.columns:
+            print(f"Warning, {table.index.name} exists in table!")
+            table.drop(table.index.name, axis=1)
         table = table.reset_index()
         max_row, max_col = settings.TABLE_SIZE
         tab = table.iloc[:max_row, :max_col]
@@ -756,15 +775,15 @@ def _new_table(
         cols, data = helpers._update_frequencies(tab, True, False)
 
     if not msg and not updating:
-        table_name = _make_table_name(this_table_list)
-        option = dict(value=idx, label=table_name)
+        table_name = _make_table_name(search_from=search_from, **this_table_data)
+        option = dict(value=identifier, label=table_name)
         table_from_options.append(option)
 
     return (
         cols,
         data,
         True,
-        idx,
+        identifier,
         table_from_options,
         table_from_options,
         table_from_options,
@@ -773,7 +792,6 @@ def _new_table(
         bool(msg),
         msg,
         row_deletable,
-        session_tables,
         session_click_table,
         #style_index
     )

@@ -256,12 +256,6 @@ def _get_corpus(slug):
     if slug in corpora:
         corpus = corpora[slug]
         return corpus
-    raise ValueError(f"CORPUS not found: {slug}")
-    upload = os.path.join("uploads", slug, "conllu")
-    corpus = Corpus(upload).load()
-    corpora[slug] = corpus
-    return corpus
-
 
 def _cast_query(query, col):
     """

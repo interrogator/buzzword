@@ -133,3 +133,19 @@ class SearchResult(models.Model):
     name = models.CharField(max_length=255, null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     order = models.IntegerField()
+
+class TableResult(models.Model):
+
+    class Meta:
+        unique_together = ["slug", "user", "idx"]
+
+    slug = models.SlugField(max_length=255)
+    user = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True)
+    idx = models.IntegerField()
+    produced_from = models.ForeignKey(SearchResult, on_delete=models.SET_NULL, null=True)
+    show = models.CharField(max_length=300)
+    subcorpora = models.CharField(max_length=300)
+    relative = models.CharField(max_length=20, null=True)
+    keyness = models.CharField(max_length=2, null=True)
+    sort = models.CharField(max_length=10, null=True)
+    timestamp = models.DateTimeField(auto_now_add=True)

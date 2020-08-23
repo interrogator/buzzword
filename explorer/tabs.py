@@ -443,7 +443,7 @@ def _build_chart_space(table, iterate_over=None, width="95vw", no_from_select=Fa
     ]
 
     for chart_num, kind in iterate_over:
-        table_from = [dict(value=0, label=_make_table_name("initial"))]
+        table_from = [dict(value=0, label=_make_table_name())]
         if not no_from_select:
             dropdown = dcc.Dropdown(
                 id=f"chart-from-{chart_num}",

@@ -20,15 +20,13 @@ def _make_description(names, size):
     return desc.format(_format_size(size), len(names), plu, form_names)
 
 
-def _make_table_name(history):
+def _make_table_name(specs=None, search_from=None, show=None, subcorpora=None, relative=None, keyness=None, sort=None, **kwargs):
     """
     Generate a table name from its history
     """
-    if history == "initial":
+    if not show and not subcorpora:
         return "Part of speech tags by filename"
-    # swisslaw disable complex buttons
-    # specs, show, subcorpora, relative, keyness, sort, multi, cont = history
-    specs, show, subcorpora, relative, keyness, sort = history
+
     multi = False
     cont = False
     if subcorpora is None:
@@ -46,9 +44,9 @@ def _make_table_name(history):
     basic = f"{show} by {subcorpora}{relkey}, sorting by {sort}"
     if len(show) > 1 and multi:
         basic += " (columns split)"
-    if not int(specs):
+    if not int(search_from):  # todo: fix
         return basic
-    return f"{basic} -- from search #{specs}"
+    return f"{basic} -- from search #{search_from}"
 
 
 def _format_size(size):
