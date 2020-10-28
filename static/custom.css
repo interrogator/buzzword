@@ -260,3 +260,7 @@ input:invalid {
 .login-password {
   width: 120px !important;
 }
+
+.pagination-detail {
+  display: none !important;
+}

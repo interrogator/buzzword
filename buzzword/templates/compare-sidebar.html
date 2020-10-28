@@ -1,0 +1,45 @@
+{% if sections %}
+  <div class="page-wrapper chiller-theme toggled" style="z-index: 1;">
+    <a id="show-sidebar" class="btn btn-sm btn-dark" href="#" style="margin-top:100px;">
+      <i class="fas fa-bars">>></i>
+    </a>
+    <nav id="sidebar" class="sidebar-wrapper" style="z-index:1;">
+      <div class="sidebar-content">
+        <div class="sidebar-search">
+          <div>
+            <form method="GET">
+              <div class="input-group">
+                <input type="text" class="form-control search-menu" name="search" placeholder="Search...">
+                <div class="input-group-append">
+                  <button class="btn btn-primary btn-sm" type="submit" name="action">Go</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="sidebar-menu">
+          <ul>
+              {% for toplevel, topdata in sections.items %}
+              <a align="left" href="?page={{ topdata.start }}">
+                <li class="header-menu">
+                  <span>{{ toplevel }}</span>
+                  <span class="float-right">{{ topdata.start }} - {{ topdata.end }}</span>
+                </li>
+              </a>
+
+              {% for sublevel, subdata in topdata.chapters.items %}
+              <li class="sidebar-dropdown">
+              <a class="float-right" href="?page={{ subdata.start }}">
+                <span style="display:inline-block; font-size:12px;">{{ sublevel }}</span>
+                <span style="margin-right:-10px !important; display:inline-block; font-size:12px;" class="float-right">{{ subdata.start }} - {{ subdata.end }}</span>
+              </a>
+              </li>
+              {% endfor %}
+            {% endfor %}
+          </ul>
+        </div>
+        <!-- sidebar-menu  -->
+    </div>
+    </nav>
+  </div>
+{% endif %}
