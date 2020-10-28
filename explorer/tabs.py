@@ -500,6 +500,7 @@ def _build_chart_space(table, iterate_over=None, width="95vw", no_from_select=Fa
                 div.title = "Number of entries to display"
             tools.append(div)
         toolbar = html.Div(tools, style=style.VERTICAL_MARGINS, className="chart-toolbar")
+        
         figure = _df_to_figure(table, kind=kind)
         chart_data = dict(
             id=f"chart-{chart_num}",

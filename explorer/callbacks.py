@@ -348,7 +348,7 @@ def _new_search(
             and not clearing_history \
             and not filters:
         search_from_options = helpers._make_search_from(user, slug, conf.name, len(corpus))
-        print(search_from_options)
+        # print(search_from_options)
 
         return [
             no_update,
@@ -480,7 +480,7 @@ def _new_search(
         df, _ = helpers._sort_corpus(df, sort_by, False)
         df = helpers._correct_page(df, page_current, settings.PAGE_SIZE)
         cols, data = helpers._update_conll(df, bool(search_from), drop_govs=conf.add_governor, slug=slug)
-        print("EXISTS", search_from_options, exists.idx, exists.parent, exists.order)
+        # print("EXISTS", search_from_options, exists.idx, exists.parent, exists.order)
         return (
             cols,
             data,
@@ -558,7 +558,7 @@ def _new_search(
     new_option = dict(value=new_value, label=name)
     search_from_options.insert(index_for_option, new_option)
 
-    print("SEARCH FROM OPTIONS", len(search_from_options), search_from_options)
+    # print("SEARCH FROM OPTIONS", len(search_from_options), search_from_options)
 
     helpers._update_search_result_order(search_from_options, slug, user)
 
@@ -712,9 +712,14 @@ def _new_table(
     if updating:
         # get the whole table from master dict of them
         table = user_tables[identifier]
-        # fix rows and columns
+        # fix columns
         table = table[[i["id"] for i in current_cols[1:]]]
-        table = table.loc[[i["_" + table.index.name] for i in current_data]]
+        # fix rows
+        print("Update table")
+        print("current_data", current_data)
+        print("table", table.head(5))
+        correct_rows = [i[table.index.name] for i in current_data]
+        table = table.loc[correct_rows]
         # store table again with same key
         user_tables[identifier] = table
     elif exists and identifier in user_tables:  # tood: second check should not be here
@@ -767,7 +772,7 @@ def _new_table(
         style_index["if"]["column_id"] = table.index.name
         if table.index.name in table.columns:
             print(f"Warning, {table.index.name} exists in table!")
-            table.drop(table.index.name, axis=1)
+            table = table.drop(table.index.name, axis=1)
         table = table.reset_index()
         max_row, max_col = settings.TABLE_SIZE
         tab = table.iloc[:max_row, :max_col]

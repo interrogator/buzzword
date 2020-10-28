@@ -23,37 +23,45 @@
   </ul>
 {% endif %}
 
-<div style={% if not messages %} "margin-top:20px;" {% endif %}>
+<div>
     <div class="container compare-container">
         <!--this is how we'd do a pdf with viewerjs. not doing now, since it doesn't seem to provide many new features, and maybe exposes pagination we need to handle this ourselves.
             make sure there is static/ViewerJs, and then:
         <iframe src = "{{ pdf_filepath }}" width='400' height='300' allowfullscreen webkitallowfullscreen></iframe>-->
-      <div class="row" style="padding-bottom:10px">
+      <div class="row" style="padding-bottom:10px; height:80vh;">
         {% if sections %}
-          <div class="col-sm-2">
+          <div class="col-sm-2 nopad">
             {% include "compare-sidebar.html" %}
           </div>
         {% endif %}
-        <div class="col-sm{{ coldata }}">
+        <div style="margin-top:10px;" class="col-sm{{ coldata }}">
             <div id="pdf-here">
-                <object data={{ pdf_filepath }} type="application/pdf" style="min-height:85vh;min-width: {{ colwidth }}">
+                <object data={{ pdf_filepath }} type="application/pdf" style="min-height:75vh;min-width: {{ colwidth }}">
                     <embed src={{ pdf_filepath }} type="application/pdf" />
                 </object>
-                {% include "comparenav.html" %}
             </div>
         </div>
-        <div class="col-sm{{ coldata }}">
+        <div style="margin-top:10px;" class="col-sm{{ coldata }}">
             <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
-                <div style="height:80vh; min-width:{{ colwidth }}; margin-left:-10px;">
+                <div style="height:70vh; min-width:{{ colwidth }}; margin-left:-10px;">
                     {{ form.description }}
-                    <div class="float-right" style="margin-top:-10px;">
-                        Describe your changes: 
-                        {{ form.commit_msg }}
-                        <button type="submit" class="btn btn-primary">Update</button>
-                    </div>
                 </div>
             </form>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-2">
+        </div>
+        <div class="col-sm-5">
+          {% include "comparenav.html" %}
+        </div>
+        <div class="col-sm-5">
+          <div class="float-right">
+            Describe your changes: 
+            {{ form.commit_msg }}
+            <button type="submit" class="btn btn-primary">Update</button>
+          </div>
         </div>
       </div>
     </div>

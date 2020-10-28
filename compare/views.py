@@ -35,10 +35,15 @@ def browse_collection(request, slug=None):
     """
     Main compare/correct view, showing PDF beside its OCR output
 
-    Use Django's pagination for handling PDFs
-    Use martor for the markdown editor
+    Show PDF and Markdown
+    Potentially produce sections sidebar
+    Handle pagination
+    Handle goto page
+    Handle search query
     """
     slug = slug or settings.BUZZWORD_SPECIFIC_CORPUS
+
+    # todo: clean up the logic below into sections
     search_string = request.GET.get("search")
     query = request.GET.get('q')
     if search_string:
@@ -51,7 +56,7 @@ def browse_collection(request, slug=None):
     if search_string and results:
         results = [i.pdf.num for i in results]
         all_pdfs = all_pdfs.filter(num__in=results)
-        per_page = 1
+        per_page = 1  # if we want to try something like google books, multiple per page
     else:
         page_number = int(query) if query else int(request.GET.get("page", 1))
         per_page = 1
@@ -89,7 +94,7 @@ def browse_collection(request, slug=None):
         "corpus": Corpus.objects.get(slug=slug),
         "navbar": "compare",
         "sections": sections,
-        "colwidth": "48vw" if not sections else "30vw",
+        "colwidth": "48vw" if not sections else "40vw",
         "coldata": "-5" if sections else ""
     }
     # if the user has tried to update the OCR text

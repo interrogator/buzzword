@@ -12,7 +12,7 @@
             Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
         </span>
 
-        <span class="goto" align="right" style="margin-left: 50px">
+        <span class="goto" align="right" style="margin-left: 10px">
             Goto:
             <form method="GET" align="right" style="display:inline-block;">
                 <input align="right" min="1" max={{ page_obj.paginator.num_pages }} type="number" style="width: 60px;" name="q" value="{{ request.GET.q }}" placeholder={{ page_obj.number }}>
