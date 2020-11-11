@@ -139,9 +139,20 @@ def browse_collection(request, slug=None):
 
 def _get_book_and_chapter(pdf, sections):
     for book, info in sections.items():
-        for chapter, subinfo in info["chapters"].items():
+        chapter_names = list(info["chapters"])
+        for i, (chapter, subinfo) in enumerate(info["chapters"].items()):
             # todo: inclusive exclusive?
-            if subinfo["start"] <= pdf.num <= subinfo["end"]:
+            end = subinfo.get("end")
+            if end is None:
+                # if this is the last chapter
+                if i == len(info["chapters"]) - 1:
+                    end = info["end"]
+                else:
+                    # get next chapter name
+                    nxt = info["chapters"][chapter_names[i+1]]
+                    # get either its end or its start-1
+                    end = nxt["start"]-1 if isinstance(nxt, dict) else nxt-1
+            if subinfo["start"] <= pdf.num <= end:
                 return book, chapter
     for book, info in sections.items():
         if pdf.num >= info["start"] <= info["end"]:
