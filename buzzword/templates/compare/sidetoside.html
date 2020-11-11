@@ -20,12 +20,12 @@
 {% endif %}
 
 {% if text_search %}
-<div class="modal modal" id="search-results" tabindex="-1" style="background: #fff; position: unset;">
+<div class="modal modal-click-hide" id="search-results" tabindex="-1" style="background: #fff; position: unset;">
   <form method="post">
     {% csrf_token %}
     <div class="modal-header">
       <h3 class="modal-title">Search results: << {{ search_query }} >> in {{ corpus.name }}</h3>
-      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+      <button type="button" class="close modal-click-hide" data-dismiss="modal" aria-label="Close">
         <span aria-hidden="true">&times;</span>
       </button>
     </div>
@@ -54,7 +54,7 @@
           <td style="max-width: 4vw;"><b>{{ result.match }}</b></td>
           <td style="max-width: 34vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ result.right }}</td>
           <td style="max-width: 8vw;">
-              <a type='button' class='btn btn-primary float-right' href="?page={{ result.page }}">View</a>
+              <a type='button' class='modal-click-hide btn btn-primary float-right' href="?page={{ result.page }}">View</a>
           </td>
         </tr>
         {% endfor %}

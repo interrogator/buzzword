@@ -11,7 +11,9 @@
               <div class="input-group">
                 <input type="text" class="form-control search-menu" name="search" placeholder="Search...">
                 <div class="input-group-append">
-                  <button class="btn btn-primary btn-sm" type="submit" name="action">Go</button>
+                  <a id="do-search" class="btn btn-primary btn-sm" type="submit" name="action">
+                    <button class="btn btn-primary btn-sm" type="submit" name="action">
+                    <span id="search-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="margin-right:10px; {% if not text_search %} display:none; {% endif %}"></span>Go</button> </a>
                 </div>
               </div>
             </form>

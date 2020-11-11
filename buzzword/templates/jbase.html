@@ -54,8 +54,22 @@
       <script type="text/javascript">
         $(window).on('load', function()
         {
-            $('#search-results').modal('show');
+            $('#search-results').modal('show'); 
+
+            $("#do-search").on( "click", function() {
+              $("#search-spinner").show();
+            });
+
+            $('#search-results').on('hide.bs.modal', function () {
+              $("#search-spinner").hide();
+            });
+
+            $(".modal-click-hide").on( "click", function() {
+              $("#search-spinner").hide();
+            });
+
         });
+
         // this shows how we would add highlighting to the pdf at particular
         // coordinates. it could be done when moving from concordance to compare views...
         // $( document ).ready(function() {
