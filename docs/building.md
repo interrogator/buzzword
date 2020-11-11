@@ -47,7 +47,6 @@ Speaker names should be provided in capital letters, using underscores or hyphen
 
 Next, we can begin adding metadata in XML format. XML is much richer and better structured than plain text, allowing a great deal of precision. To add metadata that applies to an entire file, you need to create an XML element `<meta>` on the first line of the file:
 
-
 ```xml
 <meta doc-type="joke" rating=6.50 speaker="NARRATOR"/>
 A lion and a cheetah decide to race. 
@@ -61,52 +60,35 @@ Best practice here is to use lower-cased names and hyphens, and to use quotation
 
 File-level metadata will be applied to every single sentence (and therefore, every token) in the file. Therefore, though we've defined `speaker` both in XML and in script-style, that's no problem: `NARRATOR` will be applied to every line, but overwritten by `CHEETAH` and `LION` where they appear. This means that in general, you can use the file-level metadata to provide overwritable defaults, rather than adding the value to each line.
 
-### Sentence annotation
+### Span annotation
 
-Going one step further, we can add sentence-level metadata using XML elements at the end of lines, in exactly the same format as before.
-
-```xml
-<meta doc-type="joke" rating=6.50 speaker="NARRATOR"/>
-A lion and a cheetah decide to race. <meta move="setup" dialog=false punchline=false some-schema=9 />
-The cheetah crosses the finish line first. <meta move="setup" dialog=false punchline=false />
-CHEETAH: I win! <meta move="middle" dialog=true some-schema=2 />
-LION: You're a cheetah! <meta move="punchline" funny=true dialog=true some-schema=3 />
-CHEETAH: You're lion! <meta move="punchline" funny=true dialog=true some-schema=4 rating=7.8 />
-```
-
-This more fine-grained metadata is great for discourse-analytic work, such as counting frequencies by genre stages of a text (i.e. joke setup vs. punchline).
-
-### Span and token annotation
-
-Finally, to complete our annotations, let's also add some span and token level metadata:
+we can also add metadata to spans of text using XML elements, in a format similar to file-level metadata.
 
 ```xml
 <meta doc-type="joke" rating=6.50 speaker="NARRATOR"/>
-<meta being="animal">A lion</meta> and <meta being="animal">a cheetah</meta> decide to race. 
-<meta move="setup" dialog=false punchline=false some-schema=9 />
-The cheetah crosses the finish line first. <meta move="setup" dialog=false punchline=false />
-CHEETAH: I win! <meta move="middle" dialog=true some-schema=2 />
-LION: You're a <meta play-on="cheater">cheetah</meta>! <meta move="punchline" funny=true dialog=true some-schema=3 />
-CHEETAH: You're <meta play-on="lying">lion</meta>! <meta move="punchline" funny=true dialog=true some-schema=4 rating=7.8 />
+<meta move="setup" dialog=false punchline=false some-schema=9>A lion and a cheetah decide to race.</meta>
+<meta move="setup" dialog=false punchline=false>The cheetah crosses the finish line first.</meta>
+CHEETAH:<meta move="middle" dialog=true some-schema=2>I win!</meta>
+LION:<meta move="punchline" funny=true dialog=true some-schema=3>You're a cheetah!</meta>
+CHEETAH:<meta move="punchline" funny=true dialog=true some-schema=4 rating=7.8>You're lion!</meta>
 ```
 
-So, we've gone a bit overboard here, tagging `a lion` and `a cheetah` spans with a custom `ent-type` annotation, and clarifying the puns in the punchline. Notice that you can enclose multiple tokens inside `<meta>` elements, which is useful for labelling entire nominal and verbal groups, for example.
+Text within a span will be annotated with the metadata tributes inside the XML tag. This more fine-grained metadata is great for discourse-analytic work, such as counting frequencies by genre stages of a text (i.e. joke setup vs. punchline). Note that you should not create nested XML annotations. Instead, wrap each span separately.
 
 ### Summary
 
 Available metadata formats are:
 
 1. File level metadata (XML on the first line)
-2. Sentence level metadata (XML at end of sentences)
-3. Span/token level metadata (XML elements containing one or more tokens)
-4. Speaker names in script style
+2. Span/token level metadata (XML elements containing one or more tokens)
+3. Speaker names in script style
 
 Important things to remember when building your unparsed dataset:
 
-* XML annotations values can be strings, integers, floats and booleans will all be understood by the tool.
-* Metadata is always inherited, from file, to sentence, to span and token level. The `rating` for the whole file will be replaced for the final sentence with `7.8`.
+* XML annotations values can be strings, integers, floats and booleans
+* Metadata is always inherited, from file-level to span-level. In the example above, the `rating` for the whole file will be replaced for the final sentence with `7.8`.
 * If a field is missing in one of the metadata, it will end up with a value of `None` in the parsed corpus.
-* Make sure your metadata names are alphanumeric. Hyphens will be converted to underscores.
+* Make sure your metadata key names are alphanumeric. Hyphens will be converted to underscores.
 
 Finally, make sure that you do not use any of the following names as metadata fields, because these are needed for the attributes created by the parser:
 
