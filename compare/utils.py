@@ -6,6 +6,8 @@ import os
 import re
 import shutil
 
+from collections import defaultdict
+
 from buzz import Collection
 from django.conf import settings
 
@@ -232,5 +234,21 @@ def _get_sections(slug):
     sections_path = f"static/corpora/{slug}/sections.json"
     if not os.path.exists(sections_path):
         return
+    out = dict()
     with open(sections_path, "r") as fo:
-        return json.load(fo)
+        data = json.load(fo)
+    for book, book_data in data.items():
+        out[book] = dict(
+            start=book_data.get("start", 1),
+            end=book_data.get("end"),
+            chapters=dict()
+        )
+        for chapter, pagenums in book_data["chapters"].items():
+            out[book]["chapters"][chapter] = dict()
+            if isinstance(pagenums, dict):
+                out[book]["chapters"][chapter]["start"] = pagenums["start"]
+                out[book]["chapters"][chapter]["end"] = pagenums.get("end")
+            else:
+                out[book]["chapters"][chapter]["start"] = pagenums
+                out[book]["chapters"][chapter]["end"] = None
+    return out

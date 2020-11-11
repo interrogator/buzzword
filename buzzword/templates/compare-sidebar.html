@@ -23,7 +23,11 @@
               <a align="left" href="?page={{ topdata.start }}">
                 <li class="header-menu">
                   <span>{{ toplevel }}</span>
-                  <span class="float-right">{{ topdata.start }} - {{ topdata.end }}</span>
+                  {% if topdata.end %}
+                      <span class="float-right">{{ topdata.start }} - {{ topdata.end }}</span>
+                  {% else %}
+                      <span class="float-right">{{ topdata.start }}</span>
+                  {% endif %}
                 </li>
               </a>
 
@@ -31,7 +35,11 @@
               <li class="sidebar-dropdown">
               <a class="float-right" href="?page={{ subdata.start }}">
                 <span style="display:inline-block; font-size:12px;">{{ sublevel }}</span>
-                <span style="margin-right:-10px !important; display:inline-block; font-size:12px;" class="float-right">{{ subdata.start }} - {{ subdata.end }}</span>
+                {% if subdata.end %}
+                    <span style="margin-right:-10px !important; display:inline-block; font-size:12px;" class="float-right">{{ subdata.start }} - {{ subdata.end }}</span>
+                {% else %}
+                    <span style="margin-right:-10px !important; display:inline-block; font-size:12px;" class="float-right">{{ subdata.start }}</span>
+                {% endif %}
               </a>
               </li>
               {% endfor %}
