@@ -88,11 +88,11 @@
                 {% csrf_token %}
                 <div style="height:70vh; min-width:{{ colwidth }}; margin-left:-10px;">
                     {{ form.description }}
-                    <div class="float-right" style="margin-top:-10px;">
-                        Describe your changes: 
+                    <span class="float-right form-check form-check-inline" style="width: 30vw; margin-top:-10px; margin-right:0;">
+                        <span>Describe your changes:</span>
                         {{ form.commit_msg }}
-                        <button type="submit" class="btn btn-primary">Update</button>
-                    </div>
+                        <button type="submit" style="margin-left: 5px;" class="btn btn-primary">Update</button>
+                    </span>
                 </div>
             </form>
         </div>
