@@ -66,8 +66,8 @@
 }
 
 .ace_editor {
-  max-height: calc(100vh - 85px - 100px);
-  min-height: calc(100vh - 85px - 100px);
+  max-height: calc(100vh - 85px - 100px + 38px);
+  min-height: calc(100vh - 85px - 100px + 38px);
   height: calc(100vh - 85px - 100px);
 }
 
@@ -347,6 +347,14 @@ searchable cards
     transform: scale(2);
     opacity: 0;
   }
+}
+
+.tab-martor-menu .item {
+  display: none !important;
+}
+
+.tab-martor-menu {
+  min-height: 1px !important;
 }
 
 .navbar {
