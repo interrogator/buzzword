@@ -213,7 +213,7 @@ PLOTLY_DASH = {
     # Flag to control location of initial argument storage
     "cache_arguments": True,
     # Flag controlling local serving of assets
-    "serve_locally": False,
+    "serve_locally": True,
 }
 
 

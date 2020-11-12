@@ -13,4 +13,4 @@ class PostForm(forms.ModelForm):
         model = Post
         fields = "__all__"
 
-    commit_msg = forms.CharField(widget=TextInput(attrs={'class': 'form-control'}))
+    commit_msg = forms.CharField(widget=TextInput(attrs={'class': 'form-control', "style": "min-width: 270px;"}))

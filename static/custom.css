@@ -348,9 +348,15 @@ searchable cards
     opacity: 0;
   }
 }
-body {
-  font-size: 0.9rem;
+
+.navbar {
+  font-size: 1.2rem;
 }
+
+.logout {
+  font-size: 1.2rem;
+}
+
 .page-wrapper .sidebar-wrapper,
 .sidebar-wrapper .sidebar-brand > a,
 .sidebar-wrapper .sidebar-dropdown > a:after,
