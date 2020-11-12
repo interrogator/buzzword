@@ -61,6 +61,9 @@ def browse_collection(request, slug=None):
     search_results = None
     if text_search:
         search_results = _text_search(text_search, slug, request.user.username, sections)
+        if not search_results:
+            msg = "No results found, sorry."
+            _make_message(request, messages.WARNING, msg)
     page_obj = paginator.get_page(page_number)
     pdf = all_pdfs.get(slug=slug, num=page_number - 1)
     pdf_path = os.path.relpath(pdf.path)
@@ -170,6 +173,7 @@ def _text_search(query, slug, username, sections):
     corpus = Corpus.objects.get(slug=slug)
     exists = False
     has_not_updated = False  # todo
+    query = query.lower()
     if exists and has_not_updated:
         all_pdfs = exists.pdfs_set.all()
         results = [(pdf, _latest_ocrupdate(pdf, username=username).text) for pdf in all_pdfs]
@@ -178,19 +182,20 @@ def _text_search(query, slug, username, sections):
         results = []
         for pdf in all_pdfs:
             plaintext = _latest_ocrupdate(pdf, username=username).text
-            occurrences = plaintext.count(query)
+            plain_low = plaintext.lower()
+            occurrences = plain_low.count(query)
             if not occurrences:
                 continue
             for i in range(occurrences):
-                index = plaintext.index(query)            
+                index = plain_low.index(query)            
                 title = ""
                 book, chapter = _get_book_and_chapter(pdf, sections)
                 page = pdf.num+1
-                cut_text = plaintext[max(0, index-120):index+120].replace("\n", " ")
-                left, right = cut_text.split(query, 1)
+                left = plaintext[max(0, index-120):index].replace("\n", " ")
+                right = plaintext[index+len(query):index+len(query)+120].replace("\n", " ")
                 line = dict(
                     left=left,
-                    match=query,
+                    match=plaintext[index:index+len(query)],
                     right=right,
                     title=title,
                     page=page,
@@ -198,7 +203,6 @@ def _text_search(query, slug, username, sections):
                     chapter=chapter
                 )
                 results.append(line)
-                plaintext = plaintext.split(query, 1)[-1]
+                plaintext = plaintext[index+len(query):]
+                plain_low = plain_low[index+len(query):]
     return results
-    #paginator = Paginator(all_pdfs, 10)
-    #return paginator.get_page(0)

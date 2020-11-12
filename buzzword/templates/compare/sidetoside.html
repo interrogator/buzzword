@@ -7,18 +7,6 @@
 
 {% include "specific_nav.html" %}
 
-{% if messages %}
-  <ul class="messages">
-      {% for message in messages %}
-          <div style="margin-left: -28px; margin-right: 15px;" class="alert alert-dismissible fade show alert-{{ message.tags }}" role="alert">{{ message }}
-              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-              </button>
-          </div>
-      {% endfor %}
-  </ul>
-{% endif %}
-
 {% if text_search %}
 <div class="modal modal-click-hide" id="search-results" tabindex="-1" style="background: #fff; position: unset;">
   <form method="post">
@@ -68,36 +56,57 @@
 {% endif %}
 
 <div style="overflow: hidden;">
-    <div class="container compare-container">
-      <div class="row">
-        {% if sections %}
-          <div class="col-sm-2 nopad compare-height">
-            {% include "compare-sidebar.html" %}
-          </div>
-        {% endif %}
-        <div style="margin-top:10px;" class="col-sm{{ coldata }}">
-            <div id="pdf-here">
-                <object data={{ pdf_filepath }} type="application/pdf" class="pdf-editor-height" style="min-width: {{ colwidth }}">
-                    <embed src={{ pdf_filepath }} type="application/pdf" />
-                </object>
-                {% include "comparenav.html" %}
-            </div>
+  <div class="container compare-container">
+    <div class="row">
+      {% if sections %}
+        <div class="col-sm-2 nopad compare-height">
+          {% include "compare-sidebar.html" %}
         </div>
-        <div style="margin-top:10px;" class="pdf-editor-height col-sm{{ coldata }}">
-            <form method="POST" enctype="multipart/form-data">
+      {% endif %}
+      <div class="container" style="min-width: 82%; margin-left: 0px; margin-right: 0px; padding-left: 0px; padding-right: 0px;">
+        <div class="row">
+          {% if messages %}
+            <ul class="messages" style="margin-bottom: 0px; margin-left:20px; min-width:100%; padding-right:20px;">
+                {% for message in messages %}
+                    <div style="margin-left: -28px; margin-right: 15px; margin-top: 15px;" class="alert alert-dismissible fade show alert-{{ message.tags }}" role="alert">{{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+        <div class="row">
+          <div class="col-sm-6">
+            <div style="margin-top:10px;" class="col-sm{{ coldata }}">
+                <div id="pdf-here">
+                    <object data={{ pdf_filepath }} type="application/pdf" class="pdf-editor-height" style="min-width: {{ colwidth }}">
+                        <embed src={{ pdf_filepath }} type="application/pdf" />
+                    </object>
+                    {% include "comparenav.html" %}
+                </div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div style="margin-top:10px;" class="pdf-editor-height col-sm{{ coldata }}">
+              <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div style="height:70vh; min-width:{{ colwidth }}; margin-left:-10px;">
-                    {{ form.description }}
-                    <span class="float-right form-check form-check-inline" style="width: 34vw; margin-top:-10px; margin-right:0;">
-                        <span style="width:300px;">Describe your changes:</span>
-                        {{ form.commit_msg }}
-                        <button type="submit" style="margin-left: 5px;" class="btn btn-primary">Update</button>
-                    </span>
+                  {{ form.description }}
+                  <span class="float-right form-check form-check-inline" style="width: 34vw; margin-top:-10px; margin-right:0;">
+                    <span style="width:300px;">Describe your changes:</span>
+                    {{ form.commit_msg }}
+                    <button type="submit" style="margin-left: 5px;" class="btn btn-primary">Update</button>
+                  </span>
                 </div>
-            </form>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
     </div>
+  </div>
 </div>
 {% endblock %}
 
