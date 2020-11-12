@@ -68,7 +68,7 @@ p, ul, ol {
 
 .compare-container {
     max-width: 100vw;
-    max-height: 50vh;
+    max-height: 100%;
 }
 
 .ace_editor {
@@ -377,7 +377,7 @@ body {
 /*----------------page-wrapper----------------*/
 
 .page-wrapper {
-  height: 100vh;
+  height: 100%;
 }
 
 .page-wrapper .theme {
@@ -694,6 +694,10 @@ body {
 .chiller-theme .sidebar-wrapper .sidebar-search,
 .chiller-theme .sidebar-wrapper .sidebar-menu {
     border-top: 1px solid #3a3f48;
+}
+
+.chiller-theme .toc-section {
+  border-top: 1px solid #3a3f48;
 }
 
 .chiller-theme .sidebar-wrapper .sidebar-search input.search-menu,

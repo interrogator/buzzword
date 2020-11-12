@@ -148,6 +148,10 @@ MARTOR_MARKDOWN_EXTENSIONS = [
     # 'martor.extensions.mdx_video',  # to parse embed/iframe video
 ]
 
+MARTOR_ALTERNATIVE_JS_FILE_THEME = "static/plugins/js/semantic.min.js"
+MARTOR_ALTERNATIVE_CSS_FILE_THEME = "static/plugins/css/semantic.min.css"
+MARTOR_ALTERNATIVE_JQUERY_JS_FILE = "static/jquery.min.js"
+
 # CSRF_COOKIE_HTTPONLY = False
 
 # Database
