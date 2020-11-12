@@ -66,8 +66,9 @@
 }
 
 .ace_editor {
-  min-height: 69vh !important;
-  max-height: 69vh !important;   
+  max-height: calc(100vh - 85px - 100px);
+  min-height: calc(100vh - 85px - 100px);
+  height: calc(100vh - 85px - 100px);
 }
 
 #martor-description {
@@ -791,4 +792,10 @@ body {
   max-height: calc(100vh - 85px);
   min-height: calc(100vh - 85px);
   height: calc(100vh - 85px);
+}
+
+.pdf-editor-height {
+  max-height: calc(100vh - 85px - 55px);
+  min-height: calc(100vh - 85px - 55px);
+  height: calc(100vh - 85px - 55px);
 }

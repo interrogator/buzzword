@@ -77,13 +77,13 @@
         {% endif %}
         <div style="margin-top:10px;" class="col-sm{{ coldata }}">
             <div id="pdf-here">
-                <object data={{ pdf_filepath }} type="application/pdf" style="min-height:75vh;min-width: {{ colwidth }}">
+                <object data={{ pdf_filepath }} type="application/pdf" class="pdf-editor-height" style="min-width: {{ colwidth }}">
                     <embed src={{ pdf_filepath }} type="application/pdf" />
                 </object>
                 {% include "comparenav.html" %}
             </div>
         </div>
-        <div style="margin-top:10px;" class="col-sm{{ coldata }}">
+        <div style="margin-top:10px;" class="pdf-editor-height col-sm{{ coldata }}">
             <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div style="height:70vh; min-width:{{ colwidth }}; margin-left:-10px;">
