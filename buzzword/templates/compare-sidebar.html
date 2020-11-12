@@ -24,8 +24,8 @@
               {% for toplevel, topdata in sections.items %}
               <ul class="toc-section">
                 <button style="display:inline-block;" class="d-inline-block btn btn-sm toc-chevron" data-toggle="collapse" aria-expanded="true" data-target="#collapse-{{ topdata.start }}">
-                  <i class="fas fa-chevron-right"></i>
-                  <i class="fas fa-chevron-down"></i>
+                  <i style="color: grey;" class="fas fa-chevron-right"></i>
+                  <i style="color: grey;" class="fas fa-chevron-down"></i>
                 </button>
                 <a align="left" class="d-inline-block" href="?page={{ topdata.start }}">
                   <li class="header-menu d-inline-block">
