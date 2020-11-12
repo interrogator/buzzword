@@ -20,34 +20,41 @@
           </div>
         </div>
         <div class="sidebar-menu">
-          <ul>
+          
               {% for toplevel, topdata in sections.items %}
-              <a align="left" class="toc-section" href="?page={{ topdata.start }}">
-                <li class="header-menu">
-                  <span>{{ toplevel }}</span>
-                  {% if topdata.end %}
-                      <span class="float-right">{{ topdata.start }} - {{ topdata.end }}</span>
-                  {% else %}
-                      <span class="float-right">{{ topdata.start }}</span>
-                  {% endif %}
-                </li>
-              </a>
+              <ul class="toc-section">
+                <button style="display:inline-block;" class="d-inline-block btn btn-sm toc-chevron" data-toggle="collapse" aria-expanded="true" data-target="#collapse-{{ topdata.start }}">
+                  <i class="fas fa-chevron-right"></i>
+                  <i class="fas fa-chevron-down"></i>
+                </button>
+                <a align="left" class="d-inline-block" href="?page={{ topdata.start }}">
+                  <li class="header-menu d-inline-block">
+                    <span style="padding-bottom: 12px;">{{ toplevel }}</span>
+                    {% if topdata.end %}
+                        <span class="float-right" style="margin-right:-10px !important; display:inline-block; font-size:12px; position: absolute; right:10px;">{{ topdata.start }} - {{ topdata.end }}</span>
+                    {% else %}
+                        <span class="float-right" style="margin-right:-10px !important; display:inline-block; font-size:12px; position: absolute; right:10px;">{{ topdata.start }}</span>
+                    {% endif %}
+                  </li>
+                </a>
+                <div id="collapse-{{ topdata.start }}" class="collapse show">
+                  {% for sublevel, subdata in topdata.chapters.items %}
+                  <li class="sidebar-dropdown">
+                  <a class="float-right toc-section" href="?page={{ subdata.start }}">
+                    <span style="display:inline-block; font-size:12px; {% if subdata.end %} width: 80% {% else %} width: 90% {% endif %};">{{ sublevel }}</span>
 
-              {% for sublevel, subdata in topdata.chapters.items %}
-              <li class="sidebar-dropdown">
-              <a class="float-right toc-section" href="?page={{ subdata.start }}">
-                <span style="display:inline-block; font-size:12px; {% if subdata.end %} width: 80% {% else %} width: 90% {% endif %};">{{ sublevel }}</span>
-
-                {% if subdata.end %}
-                    <span style="margin-right:-10px !important; display:inline-block; font-size:12px; position: absolute; bottom: 8px; right:30px;" class="float-right">{{ subdata.start }} - {{ subdata.end }}</span>
-                {% else %}
-                    <span style="margin-right:-10px !important; display:inline-block; font-size:12px; position: absolute; bottom: 8px; right:30px;" class="float-right">{{ subdata.start }}</span>
-                {% endif %}
-              </a>
-              </li>
+                    {% if subdata.end %}
+                        <span style="margin-right:-10px !important; display:inline-block; font-size:12px; position: absolute; bottom: 8px; right:30px;" class="float-right">{{ subdata.start }} - {{ subdata.end }}</span>
+                    {% else %}
+                        <span style="margin-right:-10px !important; display:inline-block; font-size:12px; position: absolute; bottom: 8px; right:30px;" class="float-right">{{ subdata.start }}</span>
+                    {% endif %}
+                  </a>
+                  </li>
+                  {% endfor %}
+              </div>
+              </ul>
               {% endfor %}
-            {% endfor %}
-          </ul>
+          
         </div>
         <!-- sidebar-menu  -->
     </div>

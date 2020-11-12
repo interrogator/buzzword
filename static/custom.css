@@ -8,12 +8,6 @@
     color: blue;
 }
 
-p, ul, ol {
-    padding-bottom: 7px !important;
-    padding-top: 7px !important;
-    margin-bottom: 0rem !important;
-}
-
 @-webkit-keyframes demo {
     0% {
         background-color: #d1f5c1;
@@ -774,4 +768,11 @@ body {
 
 .pagination-detail {
   display: none !important;
+}
+
+.toc-chevron[aria-expanded=true] .fa-chevron-right {
+   display: none;
+}
+.toc-chevron[aria-expanded=false] .fa-chevron-down {
+   display: none;
 }
