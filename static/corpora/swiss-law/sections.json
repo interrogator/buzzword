@@ -1,0 +1,592 @@
+{
+  "Book 1": {
+    "start": 1,
+    "end": 520,
+    "chapters": {
+      "Titelei": {
+        "start": 1,
+        "end": 9
+      },
+      "Vorbericht": {
+        "start": 10,
+        "end": 11
+      },
+      "Inhalt": {
+        "start": 12,
+        "end": 21
+      },
+      "Vermittlungsakte": {
+        "start": 22,
+        "end": 24
+      },
+      "Verfassung des Kantons Basel": {
+        "start": 24,
+        "end": 31
+      },
+      "Bundesakte der neunzehn Schweizerkantone": {
+        "start": 31,
+        "end": 47
+      },
+      "Kundmachung": {
+        "start": 48,
+        "end": 49
+      },
+      "Publikation der provisorischen Regierungskommission, vom 21 Merz 1803": {
+        "start": 50,
+        "end": 61
+      },
+      "Publikation der provisorischen Regierungskommission, vom 23 Merz 1803": {
+        "start": 62,
+        "end": 62
+      },
+      "Publikation und Verfügung der provisorischen Regierungskommission, vom 23 Merz 1803": {
+        "start": 63,
+        "end": 65
+      },
+      "Erste Publikation der Burgermeißter und Räthe": {
+        "start": 66,
+        "end": 68
+      },
+      "Ordnung des kleinen Raths": {
+        "start": 69,
+        "end": 86
+      },
+      "Ordnung des großen Raths": {
+        "start": 87,
+        "end": 93
+      },
+      "Organisation der beiden Civilgerichte in der Stadt Basel": {
+        "start": 94,
+        "end": 94
+      },
+      "Organisation der Civilgerichte auf der Landschaft": {
+        "start": 94,
+        "end": 100
+      },
+      "Organisation der Chegerichts": {
+        "start": 100,
+        "end": 101
+      },
+      "Organisation des Waisengerichts": {
+        "start": 101,
+        "end": 102
+      },
+      "Widerherstellung der Gescheide": {
+        "start": 102,
+        "end": 102
+      },
+      "Einrichtung der Kantonsbehörden": {
+        "start": 103,
+        "end": 108
+      },
+      "Aufstellung der Distriktbehörden": {
+        "start": 109,
+        "end": 111
+      },
+      "Einrichtung der Richterlichen Behörden": {
+        "start": 112,
+        "end": 117
+      },
+      "Ordnung des Appellationsgericht": {
+        "start": 118,
+        "end": 126
+      },
+      "Rekurs und Revision der Urtheilen": {
+        "start": 126,
+        "end": 129
+      },
+      "Einrichtung der Gemeindebehörden": {
+        "start": 130,
+        "end": 145
+      },
+      "Pflichten und Befugnisse der Gemeinderäthe": {
+        "start": 145,
+        "end": 148
+      },
+      "in Betreff der Holzfrevel und vorgehenden Unordnungen": {
+        "start": 148,
+        "end": 150
+      },
+      "Handhabung der Polizen in den Wirthshäusern": {
+        "start": 151,
+        "end": 153
+      },
+      "keine englische Waaren in Frankreich einzuführen": {
+        "start": 154,
+        "end": 154
+      },
+      "Käufe liegender Güter und Häuser von Fremden": {
+        "start": 155,
+        "end": 155
+      },
+      "Wirthschaften in der Stadt und auf der Landschaft": {
+        "start": 156,
+        "end": 157
+      },
+      "Vereinbringen fremde Schneider und Schuhmacherarbeit": {
+        "start": 158,
+        "end": 158
+      },
+      "Organisation der Waldkomission": {
+        "start": 159,
+        "end": 159
+      },
+      "Berrichtung der Bezirkschreiber": {
+        "start": 160,
+        "end": 162
+      },
+      "Hausieren der Krämer und Juden": {
+        "start": 163,
+        "end": 166
+      },
+      "Verkauf des Leders": {
+        "start": 167,
+        "end": 167
+      },
+      "Organisation der Bortkammer in Basel": {
+        "start": 168,
+        "end": 168
+      },
+      "Wegen Abschaffung der Stempelabgabe": {
+        "start": 168,
+        "end": 168
+      },
+      "Verschiedenen Zugrechte": {
+        "start": 169,
+        "end": 169
+      },
+      "Hereinbringen, Handel und VerKauf von fremder Rübler Waare": {
+        "start": 170,
+        "end": 171
+      },
+      "Ertheilung von Aufenthaltskarten für Fremde": {
+        "start": 171,
+        "end": 174
+      },
+      "Bezahlung der Handänderungsgebühren": {
+        "start": 174,
+        "end": 174
+      },
+      "Widerherstellung der Notariatskommission": {
+        "start": 175,
+        "end": 175
+      },
+      "Verordnung wegen dem schnellen Reiten und Fahren": {
+        "start": 176,
+        "end": 177
+      },
+      "Einfuhr, Kauf und Verkauf des fremden Salzes": {
+        "start": 178,
+        "end": 178
+      },
+      "Verkauf des Fleisches, oder Mezgerordnung": {
+        "start": 179,
+        "end": 182
+      },
+      "Zugrechte der Gemeinde Bürger": {
+        "start": 183,
+        "end": 183
+      },
+      "Wiederherstellung des Consistorii der Universität": {
+        "start": 184,
+        "end": 184
+      },
+      "Vesorgung der Kanten auf der Handschaft": {
+        "start": 184,
+        "end": 185
+      },
+      "Aufbrachen übernommener Einfuhr von englischen Manufakturwaaren": {
+        "start": 186,
+        "end": 186
+      },
+      "Kantbewilligungen": {
+        "start": 186,
+        "end": 187
+      },
+      "Bezug der Handänderungsgebühren": {
+        "start": 188,
+        "end": 189
+      },
+      "Berichtigung; Bezug der Handänderungsgebühren": {
+        "start": 190,
+        "end": 190
+      },
+      "Anfehung des Salzausmägens": {
+        "start": 191,
+        "end": 191
+      },
+      "Hereinbringen und Verkauf fremder Schreinerwaare": {
+        "start": 192,
+        "end": 192
+      },
+      "Verordnung wegen Einfuhrung eines allgemeinen Wegs- und Brüdengelds": {
+        "start": 193,
+        "end": 198
+      },
+      "Erläutterung der Verordnung wegen Einfuhrung eines allgemeinen Wegs- und Brüdengelds": {
+        "start": 198,
+        "end": 198
+      },
+      "Wiederherstellung der Zünfte und der Gesellschaften": {
+        "start": 198,
+        "end": 205
+      },
+      "Hereinbringen in die Stadt von ganz Steinen und Holzes": {
+        "start": 206,
+        "end": 206
+      },
+      "Ertheilung der Bürgerrechte": {
+        "start": 207,
+        "end": 211
+      },
+      "über die dem Kantmeißter gebührenden Procente ben Fallimentskanten": {
+        "start": 212,
+        "end": 212
+      },
+      "Weinsverkauf im kleinen": {
+        "start": 213,
+        "end": 224
+      },
+      "eine Abgabe von fünf Baßen von allem in den Kanton eingehenden Wien und Bier": {
+        "start": 225,
+        "end": 228
+      },
+      "verbotenen Jagdzeiten": {
+        "start": 229,
+        "end": 229
+      },
+      "Rückständigen Handänderungsgebühren": {
+        "start": 229,
+        "end": 230
+      },
+      "Auswanderer aus dem Kanton": {
+        "start": 231,
+        "end": 233
+      },
+      "Entrichtung des Vfundzolls von dem im Stadtbezirk verhandlten Vieh": {
+        "start": 234,
+        "end": 235
+      },
+      "Haftnachtsbeleuftigungen": {
+        "start": 236,
+        "end": 237
+      },
+      "Kornhausordnung für die Stadt Basel": {
+        "start": 238,
+        "end": 243
+      },
+      "Bezug des Weggelds unter den Thoren der kleinen Stadt": {
+        "start": 244,
+        "end": 244
+      },
+      "Wiederherstellung der C.Gesellschaften in den Vorstädten": {
+        "start": 245,
+        "end": 249
+      },
+      "Verkauf des Fleisches, in einem Nothfall geschlachtet": {
+        "start": 250,
+        "end": 250
+      },
+      "Hunden im Distrikt Basel zu nehmenden Zeichen": {
+        "start": 251,
+        "end": 253
+      },
+      "Verkauf von fremdem Wein": {
+        "start": 254,
+        "end": 255
+      },
+      "Hunden auf der Landschaft": {
+        "start": 256,
+        "end": 257
+      },
+      "Gescheide auf der Landschaft": {
+        "start": 258,
+        "end": 262
+      },
+      "Verkauf des Brods": {
+        "start": 263,
+        "end": 268
+      },
+      "Entrichtung des in der Weinordnung bestimmten Umgelds": {
+        "start": 269,
+        "end": 270
+      },
+      "Loskauf der Vodenzinse": {
+        "start": 271,
+        "end": 274
+      },
+      "Loskauf der Zehnten": {
+        "start": 275,
+        "end": 282
+      },
+      "Organisation der Miliz im Kanton Basel": {
+        "start": 283,
+        "end": 287
+      },
+      "Veränderungsgebühr den Vergantung gemeinschaftlicher Erbsgüter": {
+        "start": 288,
+        "end": 268
+      },
+      "Fischweiden im Kanton": {
+        "start": 288,
+        "end": 289
+      },
+      "Unbefugtem Eintrag in den Beruf der Ehirurgen": {
+        "start": 290,
+        "end": 290
+      },
+      "Stadtbürger, welche ihre Cheweiber in das Gemeindsbürgerrecht einzukaufen unterlassen haben": {
+        "start": 291,
+        "end": 291
+      },
+      "Eintrag in den Beruf der Verükenmacher": {
+        "start": 292,
+        "end": 292
+      },
+      "Lotterien, Frenschiessen, Würfel- und Regelspielen": {
+        "start": 293,
+        "end": 294
+      },
+      "Bezug der Handänderungsgebühr den Käufen und Erbschaften": {
+        "start": 295,
+        "end": 299
+      },
+      "Verkauf von fremder Schuhmacher Arbeit": {
+        "start": 300,
+        "end": 300
+      },
+      "in Betreff der vier verinigten Handwerker": {
+        "start": 301,
+        "end": 302
+      },
+      "verschiedene Sicherheits Anstalten den Nachtziet": {
+        "start": 303,
+        "end": 303
+      },
+      "Schliessungszeit der Stadtthore": {
+        "start": 304,
+        "end": 305
+      },
+      "Verwiesenen sowohl aus dem hiesigen Kanton als aus gesamter Eidgenossenschaft": {
+        "start": 305,
+        "end": 305
+      },
+      "Verordnung für die Amtleute": {
+        "start": 306,
+        "end": 311
+      },
+      "Civilgerichte und die Gerichtsämter der Stadt Basel": {
+        "start": 312,
+        "end": 328
+      },
+      "Errichtung einer Standeskompagnie": {
+        "start": 329,
+        "end": 331
+      },
+      "Hereinbringung des Brennholzes ab der Landschaft": {
+        "start": 332,
+        "end": 332
+      },
+      "Lederhandel in der Stadt": {
+        "start": 333,
+        "end": 333
+      },
+      "einigen Abänderungen der Organisation der Standeskompagnie": {
+        "start": 333,
+        "end": 334
+      },
+      "Logierung von fremden": {
+        "start": 334,
+        "end": 335
+      },
+      "Polizenordnung wegen Reinhaltung der Strassen": {
+        "start": 336,
+        "end": 337
+      },
+      "Wirths- Wein- Bierhäuser, zu welchen Zeiten geschlossen sein sollen": {
+        "start": 338,
+        "end": 339
+      },
+      "Abgaben vom Handels- und Gewerbsstand, Kapitalisten und Beamten 1804": {
+        "start": 339,
+        "end": 342
+      },
+      "Gemeindsräthe die Todesfälle anzeigen sollen": {
+        "start": 343,
+        "end": 344
+      },
+      "das Weingeben den Ganten verboten sein soll": {
+        "start": 344,
+        "end": 345
+      },
+      "Bällen und Tanzpartheien in der Stadt": {
+        "start": 345,
+        "end": 347
+      },
+      "Militärdisciplingeseß für das erste Bataillon des Stadtregiments": {
+        "start": 348,
+        "end": 353
+      },
+      "in Betreff der Dorfwachen im Kanton": {
+        "start": 354,
+        "end": 355
+      },
+      "Erlangung des Gemeindsbürgerrechts": {
+        "start": 356,
+        "end": 359
+      },
+      "Reiten und Fahren durch die Stadt": {
+        "start": 360,
+        "end": 361
+      },
+      "Handel und Haustieren mit Rägeln": {
+        "start": 362,
+        "end": 362
+      },
+      "fremden Scheidmünzen": {
+        "start": 363,
+        "end": 364
+      },
+      "wie sich Kantonsbürger zu Erhaltung des Gemeindsbürgerrecht an einem andern als ihrem Geburtsort zu benehmen haben": {
+        "start": 364,
+        "end": 366
+      },
+      "gegen die Einfuhr, Kauf und Verkauf des fremden Salzes": {
+        "start": 367,
+        "end": 367
+      },
+      "Feuerordnung der Stadt Basel": {
+        "start": 368,
+        "end": 381
+      },
+      "Beschädigung der Stadtmauern": {
+        "start": 382,
+        "end": 383
+      },
+      "Behandlung und Unterhaltung der Landstrassen im Kanton": {
+        "start": 383,
+        "end": 385
+      },
+      "Aufnahm von fremden Einwohnern für Hauseigenthümer": {
+        "start": 385,
+        "end": 387
+      },
+      "Kours der neuen französischen Gold- und Silbermünzen": {
+        "start": 388,
+        "end": 388
+      },
+      "Publikation, wodurch das Weiden und Strassen auf den Wiesenallmenten verboten wird": {
+        "start": 389,
+        "end": 390
+      },
+      "Zollverschlagung des Mehlumgelds": {
+        "start": 391,
+        "end": 391
+      },
+      "Dekret wegen dem Fischen und der Jagd": {
+        "start": 392,
+        "end": 392
+      },
+      "verbannten Waldungen, und Verbot zu Weiden oder zu Holzen": {
+        "start": 393,
+        "end": 394
+      },
+      "Ankauf von Uniformen, Pferden von Deserteurs": {
+        "start": 395,
+        "end": 395
+      },
+      "Auffangen der Hunde ohne Zeichen": {
+        "start": 396,
+        "end": 396
+      },
+      "Entrichtung des fremden Vfundzolls": {
+        "start": 397,
+        "end": 398
+      },
+      "Erneuerung eines E.kleinen Kantonsraths": {
+        "start": 399,
+        "end": 400
+      },
+      "Holzmarktsordnung": {
+        "start": 401,
+        "end": 404
+      },
+      "zehnten Pfenning von fremden Maurer und Zimmerleuten, auf der Landschaft": {
+        "start": 404,
+        "end": 406
+      },
+      "Erläuterung des sechsten Artikels des Gefeßes vom 13 Merz 1805": {
+        "start": 406,
+        "end": 407
+      },
+      "verbotenem Türkauf, der in die Stadt gebrachten Rauchwaaren": {
+        "start": 408,
+        "end": 408
+      },
+      "Entrichtung des Pfundzolls vom verhandelten Vieh": {
+        "start": 409,
+        "end": 411
+      },
+      "Gassenbettel in der Stadt": {
+        "start": 411,
+        "end": 414
+      },
+      "Reiten und Fahren an den Sonntagen": {
+        "start": 415,
+        "end": 415
+      },
+      "Regelspielen": {
+        "start": 416,
+        "end": 416
+      },
+      "zuleichten Gold und Silbermünzen": {
+        "start": 417,
+        "end": 418
+      },
+      "verblichenen Scheidmünzen": {
+        "start": 419,
+        "end": 419
+      },
+      "Ausstockung der Reben": {
+        "start": 420,
+        "end": 420
+      },
+      "wegen den sich in dem hiesigen Kanton aufhaltenden französischen Bürgern": {
+        "start": 421,
+        "end": 421
+      },
+      "Inhaltsregister": {
+        "start": 422,
+        "end": 440
+      }
+    }
+  },
+  "Book 2 title": {
+    "start": 521,
+    "end": 1028,
+    "chapters": {
+      "Index": {
+        "start": 1,
+        "end": 17
+      },
+      "Introduction": {
+        "start": 18,
+        "end": 20
+      }
+    }
+  },
+  "Book 3 title...": {
+    "start": 1029,
+    "end": 1439,
+    "chapters": {
+      "Index": {
+        "start": 1,
+        "end": 17
+      },
+      "Introduction": {
+        "start": 18,
+        "end": 20
+      }
+    }
+  }
+}
