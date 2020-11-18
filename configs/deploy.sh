@@ -3,7 +3,7 @@
 # deployment script to run on server for buzzword swisslaw
 
 # Run it like this. Container name will be buzzword_[BRANCH_NAME]
-# ./configs/swiss-law-deploy.sh [DJANGO PASSWORD] [BRANCH_NAME]
+# ./configs/deploy.sh [DJANGO PASSWORD] [BRANCH_NAME]
 
 if [ "$#" -ne 2 ]; then
     echo "exactly 2 params needed: deploy.sh [DJANGO_PASSWORD] [BRANCH_NAME]"
