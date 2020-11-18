@@ -30,10 +30,6 @@ ARG CORPUS_FILE
 RUN if [ -n "$CORPUS" ] ; then echo "BUZZWORD_SPECIFIC_CORPUS = '$CORPUS'" >> buzzword/settings.py ; fi
 RUN if [ -n "$CORPUS_FILE" ] ; then cp $CORPUS_FILE corpora.json ; else cp corpora.json.example corpora.json ; fi
 
-#RUN \
-#    cp configs/swiss-law.json corpora.json && \
-#    echo "BUZZWORD_SPECIFIC_CORPUS = 'swiss-law'" >> buzzword/settings.py
-
 RUN chown www-data:www-data . && \
     chmod 777 . && \
     touch db.sqlite3 && \

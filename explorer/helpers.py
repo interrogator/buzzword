@@ -225,7 +225,7 @@ def _get_corpus(slug):
     if slug in corpora:
         corpus = corpora[slug]
         return corpus
-    raise ValueError(f"CORPUS not found: {slug}")
+    raise ValueError(f"Corpus not found: {slug}")
 
 
 def _cast_query(query, col):

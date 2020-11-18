@@ -45,5 +45,13 @@
         });
       });
     </script>
+    <script type="text/javascript">
+    $(document).keypress(function(e){
+        if (e.which == 13){
+            $("#signup-button").click();
+        }
+    });
+    </script>
+
   {% endblock footer %}
 </html>

@@ -2,9 +2,6 @@
 
 # deployment script to run on server for buzzword swisslaw
 
-# Run it like this. Container name will be buzzword_[BRANCH_NAME]
-# ./deploy.sh [DJANGO PASSWORD] [BRANCH_NAME]
-
 # Parse command-line options
 
 # Option strings
