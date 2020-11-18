@@ -12,7 +12,7 @@
   <form method="post">
     {% csrf_token %}
     <div class="modal-header">
-      <h3 class="modal-title">Search results: << {{ search_query }} >> in {{ corpus.name }}</h3>
+      <h3 class="modal-title">Search results: << {{ search_query }} >> in {{ corpus.name }} ({{ text_search_found }} found)</h3>
       <button type="button" class="close modal-click-hide" data-dismiss="modal" aria-label="Close">
         <span aria-hidden="true">&times;</span>
       </button>

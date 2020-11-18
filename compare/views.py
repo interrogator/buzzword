@@ -58,9 +58,9 @@ def browse_collection(request, slug=None):
         page_number = int(request.GET.get("page", 1))
     sections = _get_sections(slug)
     text_search = request.GET.get("search")
-    search_results = None
+    search_results, num_found = None, None
     if text_search:
-        search_results = _text_search(text_search, slug, request.user.username, sections)
+        search_results, num_found = _text_search(text_search, slug, request.user.username, sections)
         if not search_results:
             msg = "No results found, sorry."
             _make_message(request, messages.WARNING, msg)
@@ -73,6 +73,9 @@ def browse_collection(request, slug=None):
     default_commit = f"Update {os.path.splitext(os.path.basename(pdf_path))[0]}"
     form_data = {"description": plaintext, "commit_msg": default_commit}
     form = PostForm(initial=form_data)
+
+    if num_found == settings.MAX_RAW_TEXT_SEARCH:
+        num_found = f"{num_found}+"
     
     context = {
         "pdf_filepath": "/" + pdf_path.replace(".tif", ".pdf"),
@@ -82,6 +85,7 @@ def browse_collection(request, slug=None):
         "corpus": Corpus.objects.get(slug=slug),
         "navbar": "compare",
         "text_search": search_results,
+        "text_search_found": num_found,
         "sections": sections,
         "colwidth": "48vw" if not sections else "40vw",
         "coldata": "-5" if sections else "",
@@ -174,6 +178,7 @@ def _text_search(query, slug, username, sections):
     exists = False
     has_not_updated = False  # todo
     query = query.lower()
+    found = 0
     if exists and has_not_updated:
         all_pdfs = exists.pdfs_set.all()
         results = [(pdf, _latest_ocrupdate(pdf, username=username).text) for pdf in all_pdfs]
@@ -181,12 +186,16 @@ def _text_search(query, slug, username, sections):
         all_pdfs = PDF.objects.filter(slug=slug)
         results = []
         for pdf in all_pdfs:
+            if found >= settings.MAX_RAW_TEXT_SEARCH:
+                break
             plaintext = _latest_ocrupdate(pdf, username=username).text
             plain_low = plaintext.lower()
             occurrences = plain_low.count(query)
             if not occurrences:
                 continue
             for i in range(occurrences):
+                if found >= settings.MAX_RAW_TEXT_SEARCH:
+                    break
                 index = plain_low.index(query)            
                 title = ""
                 book, chapter = _get_book_and_chapter(pdf, sections)
@@ -203,6 +212,7 @@ def _text_search(query, slug, username, sections):
                     chapter=chapter
                 )
                 results.append(line)
+                found += 1
                 plaintext = plaintext[index+len(query):]
                 plain_low = plain_low[index+len(query):]
-    return results
+    return results, found
