@@ -1,0 +1,9 @@
+version: '3'
+
+services:
+    buzzword:
+        image: buzzword:latest
+        ports:
+            - "8001:8000"
+        volumes:
+            - "static:/buzzword/static"

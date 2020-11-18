@@ -3,7 +3,7 @@
     "slug": "swiss-law",
     "language": "de",
     "path": "static/corpora/swiss-law",
-    "desc": "Swiss legal texts",
+    "desc": "Swiss historical legal texts",
     "drop_columns": ["text", "parse", "ent_id", "ent_iob"],
     "disabled": false,
     "date": "1809",
