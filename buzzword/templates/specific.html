@@ -15,7 +15,7 @@
     {% include "specific_nav.html" %}
 
     {% if messages %}
-        <ul class="messages">
+        <ul class="messages" style="margin-top:10px;">
             {% for message in messages %}
                 <div style="margin-left: -28px; margin-right: 15px;" class="alert alert-dismissible fade show alert-{{ message.tags }}" role="alert">{{ message }}
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">

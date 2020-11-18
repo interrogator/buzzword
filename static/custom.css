@@ -357,12 +357,16 @@ searchable cards
   }
 }
 
-.tab-martor-menu .item {
+.tab-martor-menu div a {
   display: none !important;
 }
 
-.tab-martor-menu {
-  min-height: 1px !important;
+.tab-martor-menu div div {
+  display: none !important;
+}
+
+.main-martor .expand-editor {
+  display: none !important;
 }
 
 .navbar {

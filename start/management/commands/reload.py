@@ -48,7 +48,7 @@ class Command(RunServerCommand):
         )
 
         print("Flushing database!")
-        connection.ops.execute_sql_flush(database, sql_list)
+        connection.ops.execute_sql_flush(sql_list)
         if sql_list and not inhibit_post_migrate:
             # Emit the post migrate signal. This allows individual applications to
             # respond as if the database had been migrated from scratch.
