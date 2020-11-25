@@ -283,7 +283,7 @@ TABLE_SIZE = (100, 20)
 ADD_GOVERNOR = False
 MAX_CONC = 999
 MAX_DATASET_ROWS = None
-MAX_RAW_TEXT_SEARCH = 9
+MAX_RAW_TEXT_SEARCH = 99
 
 # path to tessdata -- needed to find the models
 # make sure tessdata is always in repo root

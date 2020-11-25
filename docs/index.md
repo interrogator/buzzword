@@ -4,4 +4,5 @@
 - [Building corpora](building.md)
 - [Writing depgrep queries](depgrep.md)
 - [Running your own buzzword](run.md)
+- [Development guide](dev.md)
 - [About](about.md)

@@ -248,7 +248,10 @@ def _build_frequencies_space(corpus, table, config):
     sort_drop = html.Div(sort_drop, style=style.TSTYLE)
     max_row, max_col = settings.TABLE_SIZE
     print(f"Making {max_row}x{max_col} table for {config.name} ...")
-    table = table.iloc[:100, :100]
+    if max_row:
+        table = table.iloc[:max_row]
+    if max_col:
+        table = table.iloc[:,:max_col]
 
     style_index = style.FILE_INDEX
     style_index["if"]["column_id"] = "year"
@@ -373,8 +376,6 @@ def _build_concordance_space(df, conc, config, slug):
     conc_space = html.Div(toolbar, style=style.VERTICAL_MARGINS)
 
     num_conc = len(conc)
-    max_row, max_col = settings.TABLE_SIZE
-    max_conc = settings.MAX_CONC
     conc = conc.iloc[:settings.PAGE_SIZE]
 
     columns = [
